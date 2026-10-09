@@ -1,5 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
+$appUrl = env('APP_URL', 'http://localhost');
+
+if (! is_string($appUrl) || $appUrl === '') {
+    throw new InvalidArgumentException('APP_URL must be a non-empty URL string.');
+}
+
 return [
 
     /*
@@ -41,7 +49,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'url' => sprintf('%s/storage', rtrim($appUrl, '/')),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

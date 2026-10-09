@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#eee6ff">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', __('Наша пара'))</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body>
+    <a class="skip-link" href="#main-content">{{ __('Перейти к содержимому') }}</a>
+    <div class="app-shell">
+        <header class="app-header">
+            <a class="brand" href="{{ route('home') }}"><span aria-hidden="true">♥</span> {{ __('Наша пара') }}</a>
+            <span class="pill">{{ __('Начало истории') }}</span>
+        </header>
+        <main id="main-content" tabindex="-1">@yield('content')</main>
+        @yield('navigation')
+    </div>
+</body>
+</html>

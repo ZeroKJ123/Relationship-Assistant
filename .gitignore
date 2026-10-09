@@ -39,3 +39,6 @@ secrets.*.yaml
 
 # Local product description and evolving plan
 /PRODUCT_PLAN.md
+
+/.ai-factory/
+/.playwright-cli/
