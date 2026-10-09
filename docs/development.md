@@ -47,6 +47,17 @@ docker stop homeassist-couples-test
 
 Команды `duties:check-overdue` и `hearts:check-balances` описаны вместе с расписанием и ограничениями в [делах и сердечках](hearts-and-duties.md). Просрочки требуют работающего scheduler в окружении с применёнными миграциями; сверка журнала сообщает ошибку без молчаливого исправления.
 
+## Настройки, резерв и каталоги
+
+`EconomySettingsTest`, `ServicePaymentsTest` и `CatalogsTest` проверяют административные права, версии и конфликты, согласование цены, защищённый резерв, списание только после проверки, взаимную отмену, снимки каталогов, приватность и повтор отправки. `EconomyPaymentConcurrencyTest` проверяет независимые процессы: конкурирующие версии настроек, два заказа на один баланс, штраф одновременно со списанием, отмену одновременно с проверкой. Все проверки используют те же защищённые SQLite/MariaDB-среды.
+
+```sh
+php artisan test --compact tests/Feature/EconomySettingsTest.php tests/Feature/ServicePaymentsTest.php tests/Feature/CatalogsTest.php
+vendor/bin/pest --configuration=phpunit.mariadb.xml tests/Integration/EconomyPaymentConcurrencyTest.php
+```
+
+Начальное заполнение, границы реализации и обратный порядок миграций описаны в [экономике и каталогах](economy-and-catalogs.md).
+
 ## Laravel Boost
 
 Boost установлен как dev-зависимость; инструкции обновляются командой `APP_ENV=local php artisan boost:install --guidelines --no-interaction`. После обновления перечитайте AGENTS.md и CodeStyle.md. CodeStyle имеет приоритет над общими указаниями Boost, включая обязательный Pint --test. Пользовательские правила Git и проверки перед push сохранены.

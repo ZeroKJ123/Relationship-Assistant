@@ -10,10 +10,12 @@ final class EconomyRules
 {
     public const MAXIMUM_SETTING = 1000;
 
+    public function __construct(private readonly EconomySettingsStore $store) {}
+
     public function get(string $key): int
     {
-        $value = config(sprintf('economy.%s', $key));
-        if (! is_int($value) || $value < 0 || $value > self::MAXIMUM_SETTING) {
+        $value = $this->store->read()[$key] ?? null;
+        if (! is_int($value) || $value < 0 || ($key !== 'version' && $value > self::MAXIMUM_SETTING)) {
             throw new LogicException(sprintf('Invalid economy setting: %s', $key));
         }
         if ($key === 'version' && $value === 0) {

@@ -15,8 +15,10 @@ use App\Models\PartnerRequest;
 use App\Models\RequestCondition;
 use App\Models\RequestEvent;
 use App\Models\User;
+use App\Services\Catalogs\RequestCatalog;
 use App\Services\Duties\CreateAcceptedDuties;
 use App\Services\Hearts\Ledger;
+use App\Services\Hearts\ServicePayments;
 use App\Services\Requests\RequestContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +26,7 @@ use Illuminate\Support\Facades\Validator;
 
 final class RespondToRequest
 {
-    public function __construct(private readonly RequestContext $context, private readonly CreateAcceptedDuties $duties, private readonly Ledger $ledger) {}
+    public function __construct(private readonly RequestContext $context, private readonly CreateAcceptedDuties $duties, private readonly Ledger $ledger, private readonly ServicePayments $payments, private readonly RequestCatalog $catalog) {}
 
     public function execute(User $actor, Couple $couple, PartnerRequest $request, RequestResponseData $data): void
     {
@@ -40,6 +42,7 @@ final class RespondToRequest
             $current->version++;
             $current->save();
             if ($current->status === RequestStatus::Accepted) {
+                $this->payments->reserve($current);
                 $this->duties->execute($current);
             }
             if ($current->status === RequestStatus::Declined && $current->decline_penalty > 0) {
@@ -97,7 +100,8 @@ final class RespondToRequest
             $this->context->deny('expired_deadline', requestId: $request->id);
         }
         Validator::make(['type' => $data->conditionType?->value, 'description' => $data->description, 'due_at' => $data->dueAt], ['type' => ['required'], 'description' => ['required', 'string', 'max:2000'], 'due_at' => ['required', 'date', 'after:now']])->validate();
-        (new RequestCondition)->forceFill(['partner_request_id' => $request->id, 'proposed_by_id' => $actor->id, 'version' => $request->version + 1, 'type' => $data->conditionType, 'description' => $data->description, 'due_at' => $data->dueAt?->utc()])->save();
+        $snapshot = $this->catalog->conditionSnapshot($actor, $data);
+        (new RequestCondition)->forceFill(['partner_request_id' => $request->id, 'proposed_by_id' => $actor->id, 'version' => $request->version + 1, 'type' => $snapshot['type'], 'description' => $snapshot['description'], 'method_kind' => $snapshot['method_kind'], 'method_name' => $snapshot['method_name'], 'sushi_size' => $snapshot['sushi_size'], 'due_at' => $data->dueAt?->utc()])->save();
         $request->status = RequestStatus::Conditional;
     }
 }

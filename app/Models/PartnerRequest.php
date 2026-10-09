@@ -15,6 +15,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * @property ?int $request_template_id
+ * @property ?int $expense_category_id
+ * @property ?string $template_name
+ * @property ?string $category_name
+ * @property int $heart_price
+ * @property ?int $cancellation_proposed_by_id
  * @property int $id
  * @property int $couple_id
  * @property int $author_id
@@ -79,6 +85,6 @@ final class PartnerRequest extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['couple_id' => 'integer', 'author_id' => 'integer', 'recipient_id' => 'integer', 'type' => RequestType::class, 'due_at' => 'immutable_datetime', 'is_very_wanted' => 'boolean', 'refusal_tariff_version' => 'integer', 'refusal_tariff' => 'integer', 'decline_penalty' => 'integer', 'decline_reason' => DeclineReason::class, 'status' => RequestStatus::class, 'version' => 'integer', 'accepted_at' => 'immutable_datetime'];
+        return ['request_template_id' => 'integer', 'expense_category_id' => 'integer', 'heart_price' => 'integer', 'cancellation_proposed_by_id' => 'integer', 'couple_id' => 'integer', 'author_id' => 'integer', 'recipient_id' => 'integer', 'type' => RequestType::class, 'due_at' => 'immutable_datetime', 'is_very_wanted' => 'boolean', 'refusal_tariff_version' => 'integer', 'refusal_tariff' => 'integer', 'decline_penalty' => 'integer', 'decline_reason' => DeclineReason::class, 'status' => RequestStatus::class, 'version' => 'integer', 'accepted_at' => 'immutable_datetime'];
     }
 }

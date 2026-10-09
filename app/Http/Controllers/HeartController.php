@@ -9,12 +9,14 @@ use App\Http\Requests\AdjustHeartsRequest;
 use App\Models\Couple;
 use App\Models\CoupleMember;
 use App\Models\User;
+use App\Services\Hearts\AvailableBalance;
 use App\Services\Hearts\EconomyRules;
 use App\Services\Hearts\Ledger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 final class HeartController extends Controller
@@ -23,16 +25,20 @@ final class HeartController extends Controller
 
     private const DEFAULT_TIMEZONE = 'Europe/Minsk';
 
-    public function __construct(private readonly Ledger $ledger, private readonly AdjustPartnerHearts $adjust, private readonly EconomyRules $rules) {}
+    public function __construct(private readonly Ledger $ledger, private readonly AdjustPartnerHearts $adjust, private readonly EconomyRules $rules, private readonly AvailableBalance $available) {}
 
     public function index(Request $request): View
     {
         $actor = $request->user();
         abort_unless($actor instanceof User, Response::HTTP_UNAUTHORIZED);
-        $wallet = $this->ledger->getWallet($actor);
+        [$wallet, $reserved] = DB::transaction(function () use ($actor): array {
+            $wallet = $this->ledger->lockWallet($actor);
+
+            return [$wallet, $this->available->reserved($wallet)];
+        }, attempts: 3);
         $couple = Couple::query()->whereIn('id', CoupleMember::query()->select('couple_id')->where('active_user_id', $actor->id))->first();
 
-        return view('hearts.index', ['wallet' => $wallet, 'history' => $wallet->transactions()->latest('id')->paginate(self::PAGE_SIZE), 'couple' => $couple, 'timezone' => $couple === null ? self::DEFAULT_TIMEZONE : $couple->timezone, 'operationKey' => Str::uuid()->toString(), 'maximum' => max($this->rules->get('manual_thanks_daily'), $this->rules->get('manual_deduction_daily')), 'thanksDaily' => $this->rules->get('manual_thanks_daily'), 'thanksWeekly' => $this->rules->get('manual_thanks_weekly'), 'deductionDaily' => $this->rules->get('manual_deduction_daily'), 'deductionWeekly' => $this->rules->get('manual_deduction_weekly')]);
+        return view('hearts.index', ['reserved' => $reserved, 'available' => $wallet->balance - $reserved, 'wallet' => $wallet, 'history' => $wallet->transactions()->latest('id')->paginate(self::PAGE_SIZE), 'couple' => $couple, 'timezone' => $couple === null ? self::DEFAULT_TIMEZONE : $couple->timezone, 'operationKey' => Str::uuid()->toString(), 'maximum' => max($this->rules->get('manual_thanks_daily'), $this->rules->get('manual_deduction_daily')), 'thanksDaily' => $this->rules->get('manual_thanks_daily'), 'thanksWeekly' => $this->rules->get('manual_thanks_weekly'), 'deductionDaily' => $this->rules->get('manual_deduction_daily'), 'deductionWeekly' => $this->rules->get('manual_deduction_weekly')]);
     }
 
     public function store(AdjustHeartsRequest $request, Couple $couple): RedirectResponse

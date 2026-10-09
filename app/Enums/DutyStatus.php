@@ -6,6 +6,8 @@ namespace App\Enums;
 
 enum DutyStatus: string
 {
+    case Cancelled = 'cancelled';
+
     case Pending = 'pending';
     case Reported = 'reported';
     case Confirmed = 'confirmed';
@@ -15,6 +17,7 @@ enum DutyStatus: string
     public function label(): string
     {
         return match ($this) {
+            self::Cancelled => 'Отменено',
             self::Pending => 'Нужно выполнить',
             self::Reported => 'Ждём проверки',
             self::Confirmed => 'Выполнение подтверждено',

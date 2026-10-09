@@ -7,13 +7,14 @@ namespace App\Services\Requests;
 use App\Models\Couple;
 use App\Models\PartnerRequest;
 use App\Models\User;
+use App\Services\Hearts\AvailableBalance;
 use App\Services\Hearts\Ledger;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
 final class VeryWantedRequests
 {
-    public function __construct(private readonly RequestContext $context, private readonly Ledger $ledger) {}
+    public function __construct(private readonly RequestContext $context, private readonly Ledger $ledger, private readonly AvailableBalance $available) {}
 
     public function requireAvailability(User $actor, Couple $couple): void
     {
@@ -22,7 +23,7 @@ final class VeryWantedRequests
             $this->context->deny('missing_weekly_agreement', coupleId: $couple->id);
         }
         $wallet = $this->ledger->lockWallet($actor);
-        if ($wallet->balance < 0) {
+        if ($this->available->get($wallet) < 0) {
             $this->context->deny('negative_balance', coupleId: $couple->id);
         }
         $week = CarbonImmutable::now($couple->timezone)->startOfWeek(CarbonInterface::MONDAY);

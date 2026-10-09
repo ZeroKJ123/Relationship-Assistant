@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Admin\UpdateEconomySettings;
 use App\Actions\Couples\EndCouple;
 use App\Actions\Duties\CheckOverdueDuty;
 use App\Actions\Duties\ReportDuty;
@@ -9,6 +10,7 @@ use App\Actions\Duties\VerifyDuty;
 use App\Actions\Requests\CreatePartnerRequest;
 use App\Actions\Requests\ResolveCondition;
 use App\Actions\Requests\RespondToRequest;
+use App\Data\Admin\EconomySettingsData;
 use App\Data\Requests\NewRequestData;
 use App\Data\Requests\RequestResponseData;
 use App\Enums\ConditionType;
@@ -20,6 +22,7 @@ use App\Enums\RequestType;
 use App\Models\Duty;
 use App\Models\DutyConfirmation;
 use App\Models\User;
+use App\Services\Hearts\EconomySettingsStore;
 use App\Services\Hearts\Ledger;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -133,13 +136,15 @@ it('rejects stale buttons and keeps duty history private after the couple ends',
 
 it('freezes execution tariffs at acceptance and never rewards monetary payment', function (RequestType $type, int $balance): void {
     $s = DutyScenario::create($type);
-    config(['economy.version' => 2, 'economy.reward' => 10, 'economy.false_report_penalty' => 20]);
+    $settings = app(EconomySettingsStore::class)->initialize()->settings;
+    $settings['reward'] = 10;
+    app(UpdateEconomySettings::class)->execute(User::factory()->create(['is_admin' => true]), new EconomySettingsData(1, $settings));
     expect($s->duty->reward)->toBe(5);
     expect($s->duty->tariff_version)->toBe(1);
     app(ReportDuty::class)->execute($s->pair->second, $s->pair->couple, $s->duty, version: 0, isDone: true);
     app(VerifyDuty::class)->execute($s->pair->first, $s->pair->couple, $s->duty, version: 1, isConfirmed: true);
     expect(app(Ledger::class)->getWallet($s->pair->second)->balance)->toBe($balance);
-})->with([[RequestType::Service, 25], [RequestType::Money, 20]]);
+})->with([[RequestType::Service, 25], [RequestType::Money, 20], [RequestType::Gift, 20]]);
 
 it('provides a reported duty factory fixture that can be verified through the real action', function (): void {
     $confirmation = DutyConfirmation::factory()->create();

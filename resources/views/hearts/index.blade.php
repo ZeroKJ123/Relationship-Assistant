@@ -3,6 +3,7 @@
 @section('content')
 <x-card class="start-card form-stack">
     <h1>{{ __('Мои сердечки') }}</h1><p class="form-title">♥ {{ $wallet->balance }}</p>
+    <p>{{ __('Свободно: :available · В резерве: :reserved', ['available'=>$available,'reserved'=>$reserved]) }}</p>
     <p>{{ __('Баланс личный и сохраняется при смене пары. Все изменения видны в истории.') }}</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div role="alert">@foreach($errors->all() as $error)<p class="field-error">{{ $error }}</p>@endforeach</div>@endif

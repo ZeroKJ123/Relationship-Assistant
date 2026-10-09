@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions\Duties;
 
+use App\Enums\DutyKind;
 use App\Enums\DutyStatus;
 use App\Models\Couple;
 use App\Models\Duty;
+use App\Models\PartnerRequest;
 use App\Models\User;
 use App\Services\Duties\DutyContext;
 use App\Services\Hearts\ApplyDutyEconomy;
+use App\Services\Hearts\ServicePayments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 final class VerifyDuty
 {
-    public function __construct(private readonly DutyContext $context, private readonly ApplyDutyEconomy $economy) {}
+    public function __construct(private readonly DutyContext $context, private readonly ApplyDutyEconomy $economy, private readonly ServicePayments $payments) {}
 
     public function execute(User $actor, Couple $couple, Duty $duty, int $version, bool $isConfirmed): void
     {
@@ -34,10 +37,14 @@ final class VerifyDuty
             $current->version++;
             $current->save();
             if ($isConfirmed) {
+                $this->payments->settle($current);
                 $this->economy->reward($current);
             }
             if (! $isConfirmed) {
                 $this->economy->falseReport($current);
+                if ($current->kind === DutyKind::Service) {
+                    $this->payments->release(PartnerRequest::query()->findOrFail($current->partner_request_id));
+                }
             }
             $this->context->record($current, $actor, 'verify', $isConfirmed);
         }, attempts: 3);

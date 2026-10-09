@@ -174,6 +174,7 @@ Before relying on a package's API, confirm its installed version:
 | Accounts | docs/accounts.md | Регистрация и миграции профиля |
 | Couples | docs/couples.md | Пары, приглашения и согласование недельного лимита |
 | Requests | docs/requests.md | Просьбы, версии условий, ответы и снимки тарифа |
+| Economy and catalogs | docs/economy-and-catalogs.md | Версии настроек, резерв цены услуги и стартовые каталоги |
 | Hearts and duties | docs/hearts-and-duties.md | Отметки и проверки, личный журнал, награды, штрафы и ограничения |
 
 ## Project entry points
@@ -191,7 +192,10 @@ Before relying on a package's API, confirm its installed version:
 - `tests/Support/ConcurrentOperations.php`: общий протокол гонок в изолированной MariaDB.
 
 - `app/Actions/Requests/`, `routes/requests.php`: просьбы, ответы и отдельное принятие условия.
-- `config/economy.php`: начальная версия тарифа; административные настройки ещё не реализованы.
+- `config/economy.php`: начальные правила; после первого сохранения действуют версии из `EconomySettingsStore`.
+- `app/Actions/Admin/`, `routes/admin.php`: редактор экономики и аудит версий.
+- `app/Services/Hearts/ServicePayments.php`: резерв, списание и освобождение согласованной цены.
+- `app/Services/Catalogs/`, `database/seeders/CatalogSeeder.php`, `routes/catalogs.php`: общие каталоги, снимки и личные способы.
 - `app/Actions/Duties/`, `app/Services/Duties/`, `routes/duties.php`: отдельное выполнение и проверка обязанностей.
 - `app/Services/Hearts/`, `app/Actions/Hearts/`: журнал, сверка и ручные операции только действующим партнёром.
 - `app/Console/Commands/`, `routes/console.php`: проверка просрочек и сверка балансов; scheduler нужно запускать отдельно.

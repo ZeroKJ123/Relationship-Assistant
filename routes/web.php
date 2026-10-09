@@ -16,3 +16,7 @@ require sprintf('%s/agreements.php', __DIR__);
 require sprintf('%s/requests.php', __DIR__);
 
 require sprintf('%s/duties.php', __DIR__);
+
+require sprintf('%s/admin.php', __DIR__);
+
+require sprintf('%s/catalogs.php', __DIR__);

@@ -10,7 +10,7 @@
     <p>{{ __('Срок: :date', ['date'=>$duty->due_at->setTimezone($duty->timezone)->format('d.m.Y H:i')]) }}</p>
     @if($duty->reported_at)<p>{{ __('Выполнение отмечено: :date', ['date'=>$duty->reported_at->setTimezone($duty->timezone)->format('d.m.Y H:i')]) }}</p>@endif
     @if($duty->reviewed_at)<p>{{ __('Проверено: :date', ['date'=>$duty->reviewed_at->setTimezone($duty->timezone)->format('d.m.Y H:i')]) }}</p>@endif
-    @if($duty->is_reward_eligible)<p>{{ __('Награда после проверки: до :amount сердечек с учётом лимитов.', ['amount'=>$duty->reward]) }}</p>@else<p>{{ __('Денежная оплата не приносит награду за дело.') }}</p>@endif
+    @if($duty->is_reward_eligible)<p>{{ __('Награда после проверки: до :amount сердечек с учётом лимитов.', ['amount'=>$duty->reward]) }}</p>@else<p>{{ __('Денежная оплата и покупка подарка не приносят награду за дело.') }}</p>@endif
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @if($errors->any())<div role="alert">@foreach($errors->all() as $error)<p class="field-error">{{ $error }}</p>@endforeach</div>@endif
     @if($duty->status === \App\Enums\DutyStatus::Reported)<p>{{ __('Своевременная отметка не штрафуется, пока ждёт проверки.') }}</p>@endif

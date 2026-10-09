@@ -1,0 +1,161 @@
+<?php
+
+declare(strict_types=1);
+use App\Actions\Couples\EndCouple;
+use App\Actions\Duties\ReportDuty;
+use App\Actions\Duties\VerifyDuty;
+use App\Actions\Requests\CancelPartnerRequest;
+use App\Actions\Requests\CreatePartnerRequest;
+use App\Actions\Requests\ResolveCondition;
+use App\Actions\Requests\RespondToRequest;
+use App\Data\Requests\NewRequestData;
+use App\Data\Requests\RequestResponseData;
+use App\Enums\ConditionType;
+use App\Enums\DeclineReason;
+use App\Enums\DutyKind;
+use App\Enums\DutyStatus;
+use App\Enums\HeartOperationType;
+use App\Enums\RequestResponse;
+use App\Enums\RequestStatus;
+use App\Enums\RequestType;
+use App\Enums\ReservationStatus;
+use App\Models\HeartReservation;
+use App\Models\PartnerRequest;
+use App\Models\User;
+use App\Services\Hearts\AvailableBalance;
+use App\Services\Hearts\Ledger;
+use Carbon\CarbonImmutable;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Tests\Support\AgreementScenario;
+
+uses(RefreshDatabase::class);
+beforeEach(function (): void {
+    $this->withoutVite();
+});
+it('reserves only on mutual acceptance and burns the price once after verification without paying the executor', function (): void {
+    $pair = AgreementScenario::create();
+    $data = new NewRequestData(type: RequestType::Service, description: 'Массаж', dueAt: CarbonImmutable::now()->addDays(3), operationKey: Str::uuid()->toString(), heartPrice: 15);
+    $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, $data);
+    expect(HeartReservation::query()->count())->toBe(0);
+    expect(fn () => app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Массаж', dueAt: $data->dueAt, operationKey: $data->operationKey, heartPrice: 16)))->toThrow(ValidationException::class);
+    app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(RequestResponse::Agree, 0));
+    app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(RequestResponse::Agree, 0));
+    $wallet = app(Ledger::class)->getWallet($pair->first);
+    expect($wallet->balance)->toBe(20);
+    expect(app(AvailableBalance::class)->get($wallet))->toBe(5);
+    $duty = $request->duties()->sole();
+    app(ReportDuty::class)->execute($pair->second, $pair->couple, $duty, version: 0, isDone: true);
+    expect(app(Ledger::class)->getWallet($pair->first)->balance)->toBe(20);
+    app(VerifyDuty::class)->execute($pair->first, $pair->couple, $duty, version: 1, isConfirmed: true);
+    app(VerifyDuty::class)->execute($pair->first, $pair->couple, $duty, version: 1, isConfirmed: true);
+    expect(app(Ledger::class)->getWallet($pair->first)->balance)->toBe(5);
+    expect(app(Ledger::class)->getWallet($pair->second)->balance)->toBe(25);
+    expect(HeartReservation::query()->sole()->status)->toBe(ReservationStatus::Settled);
+    expect($wallet->transactions()->where('type', HeartOperationType::ServicePayment)->count())->toBe(1);
+    app(Ledger::class)->reconcile($pair->first);
+    $this->asUser($pair->first)->get(route('hearts.index'))->assertOk()->assertSee('Свободно: 5');
+});
+it('rechecks available balance at acceptance and rolls back an unaffordable agreement', function (): void {
+    $pair = AgreementScenario::create();
+    $create = app(CreatePartnerRequest::class);
+    $first = $create->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Первое', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: 15));
+    $second = $create->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Второе', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: 15));
+    app(RespondToRequest::class)->execute($pair->second, $pair->couple, $first, new RequestResponseData(RequestResponse::Agree, 0));
+    expect(fn () => app(RespondToRequest::class)->execute($pair->second, $pair->couple, $second, new RequestResponseData(RequestResponse::Agree, 0)))->toThrow(ValidationException::class);
+    expect($second->refresh()->status)->toBe(RequestStatus::Pending);
+    expect($second->duties()->count())->toBe(0);
+    expect(HeartReservation::query()->count())->toBe(1);
+    expect(fn () => $create->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Третье', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: 6)))->toThrow(ValidationException::class);
+});
+it('protects an existing reservation when a penalty makes the free balance negative', function (): void {
+    $pair = AgreementScenario::create();
+    $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Услуга', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: 15));
+    app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(RequestResponse::Agree, 0));
+    app(Ledger::class)->apply($pair->first, -30, HeartOperationType::FalseReportPenalty, 'test:penalty-during-reservation');
+    $wallet = app(Ledger::class)->getWallet($pair->first);
+    expect($wallet->balance)->toBe(-10);
+    expect(app(AvailableBalance::class)->reserved($wallet))->toBe(15);
+    expect(app(AvailableBalance::class)->get($wallet))->toBe(-25);
+    $duty = $request->duties()->sole();
+    app(ReportDuty::class)->execute($pair->second, $pair->couple, $duty, version: 0, isDone: true);
+    app(VerifyDuty::class)->execute($pair->first, $pair->couple, $duty, version: 1, isConfirmed: true);
+    expect(app(Ledger::class)->getWallet($pair->first)->balance)->toBe(-25);
+    expect(HeartReservation::query()->sole()->status)->toBe(ReservationStatus::Settled);
+    expect(fn () => app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Новая', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: 1)))->toThrow(ValidationException::class);
+});
+it('releases a disputed service reservation without charging the payer', function (): void {
+    $pair = AgreementScenario::create();
+    $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Услуга', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: 15));
+    app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(RequestResponse::Agree, 0));
+    $duty = $request->duties()->sole();
+    app(ReportDuty::class)->execute($pair->second, $pair->couple, $duty, version: 0, isDone: true);
+    app(VerifyDuty::class)->execute($pair->first, $pair->couple, $duty, version: 1, isConfirmed: false);
+    expect(HeartReservation::query()->sole()->status)->toBe(ReservationStatus::Released);
+    expect(app(Ledger::class)->getWallet($pair->first)->balance)->toBe(20);
+    expect(app(Ledger::class)->getWallet($pair->second)->balance)->toBe(5);
+});
+it('requires both cancellation consents for an accepted service and keeps the reservation until then', function (): void {
+    $pair = AgreementScenario::create();
+    $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Услуга', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: 15));
+    app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(RequestResponse::Agree, 0));
+    $route = route('requests.cancel', [$pair->couple, $request]);
+    $this->asUser($pair->first)->post($route, ['expected_version' => 1])->assertSessionHasErrors('confirmation');
+    $this->post($route, ['expected_version' => 1, 'confirmation' => 1])->assertRedirect();
+    $this->post($route, ['expected_version' => 1, 'confirmation' => 1])->assertRedirect();
+    expect($request->refresh()->status)->toBe(RequestStatus::Accepted);
+    expect(HeartReservation::query()->sole()->status)->toBe(ReservationStatus::Held);
+    expect(fn () => app(CancelPartnerRequest::class)->execute($pair->first, $pair->couple, $request, 2))->toThrow(ValidationException::class);
+    $outsider = User::factory()->create(['is_admin' => true]);
+    $this->asUser($outsider)->post($route, ['expected_version' => 2, 'confirmation' => 1])->assertForbidden();
+    $this->asUser($pair->second)->post($route, ['expected_version' => 2, 'confirmation' => 1])->assertRedirect();
+    $this->post($route, ['expected_version' => 2, 'confirmation' => 1])->assertRedirect();
+    expect($request->refresh()->status)->toBe(RequestStatus::Cancelled);
+    expect($request->duties()->sole()->status)->toBe(DutyStatus::Cancelled);
+    expect(HeartReservation::query()->sole()->status)->toBe(ReservationStatus::Released);
+    expect(app(Ledger::class)->getWallet($pair->first)->balance)->toBe(20);
+});
+it('reserves a paid request only after the author accepts its reciprocal condition and releases on couple exit', function (): void {
+    $pair = AgreementScenario::create();
+    $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Услуга', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: 15));
+    app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(response: RequestResponse::Conditional, expectedVersion: 0, conditionType: ConditionType::Action, description: 'Другое дело', dueAt: CarbonImmutable::now()->addDays(3)));
+    expect(HeartReservation::query()->count())->toBe(0);
+    app(ResolveCondition::class)->execute($pair->first, $pair->couple, $request, 1);
+    expect(HeartReservation::query()->count())->toBe(1);
+    app(EndCouple::class)->execute($pair->second, $pair->couple);
+    expect(HeartReservation::query()->sole()->status)->toBe(ReservationStatus::Released);
+    expect(app(AvailableBalance::class)->get(app(Ledger::class)->getWallet($pair->first)))->toBe(20);
+});
+it('rolls a reserved agreement back atomically and never reserves a rejected request', function (): void {
+    $pair = AgreementScenario::create();
+    $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Услуга', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: 15));
+    expect(fn () => DB::transaction(function () use ($pair, $request): void {
+        app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(RequestResponse::Agree, 0));
+        throw new RuntimeException('Rollback');
+    }))->toThrow(RuntimeException::class);
+    expect(HeartReservation::query()->count())->toBe(0);
+    expect($request->refresh()->status)->toBe(RequestStatus::Pending);
+    app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(RequestResponse::Decline, 0, DeclineReason::Ordinary));
+    expect(HeartReservation::query()->count())->toBe(0);
+});
+
+it('rejects an invalid service price before creating a request', function (int $price, RequestType $type): void {
+    $pair = AgreementScenario::create();
+    expect(fn () => app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(type: $type, description: 'Цена', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: $price)))->toThrow(ValidationException::class);
+    expect(PartnerRequest::query()->where('couple_id', $pair->couple->id)->count())->toBe(0);
+})->with([[-1, RequestType::Service], [1001, RequestType::Service], [1, RequestType::Food]]);
+it('allows a price equal to the free balance and does not settle the service when verifying its condition', function (): void {
+    $pair = AgreementScenario::create();
+    $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(type: RequestType::Service, description: 'Услуга', dueAt: CarbonImmutable::now()->addDays(3), heartPrice: 20));
+    app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(response: RequestResponse::Conditional, expectedVersion: 0, conditionType: ConditionType::Action, description: 'Встречное дело', dueAt: CarbonImmutable::now()->addDays(3)));
+    app(ResolveCondition::class)->execute($pair->first, $pair->couple, $request, 1);
+    expect(app(AvailableBalance::class)->get(app(Ledger::class)->getWallet($pair->first)))->toBe(0);
+    $condition = $request->duties()->where('kind', DutyKind::Condition)->sole();
+    app(ReportDuty::class)->execute($pair->first, $pair->couple, $condition, version: 0, isDone: true);
+    app(VerifyDuty::class)->execute($pair->second, $pair->couple, $condition, version: 1, isConfirmed: true);
+    expect(HeartReservation::query()->sole()->status)->toBe(ReservationStatus::Held);
+    expect(app(Ledger::class)->getWallet($pair->first)->balance)->toBe(25);
+    expect(fn () => app(CancelPartnerRequest::class)->execute($pair->first, $pair->couple, $request, 2))->toThrow(ValidationException::class);
+});

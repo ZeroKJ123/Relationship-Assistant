@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Admin\UpdateEconomySettings;
 use App\Actions\Couples\Agreements\AcceptProposal;
 use App\Actions\Couples\Agreements\ProposeWeeklyLimit;
 use App\Actions\Couples\Agreements\SubmitAnswer;
@@ -10,9 +11,11 @@ use App\Actions\Duties\CheckOverdueDuty;
 use App\Actions\Duties\ReportDuty;
 use App\Actions\Duties\VerifyDuty;
 use App\Actions\Hearts\AdjustPartnerHearts;
+use App\Actions\Requests\CancelPartnerRequest;
 use App\Actions\Requests\CreatePartnerRequest;
 use App\Actions\Requests\ResolveCondition;
 use App\Actions\Requests\RespondToRequest;
+use App\Data\Admin\EconomySettingsData;
 use App\Data\Couples\WeeklyLimitData;
 use App\Data\Hearts\AdjustmentData;
 use App\Data\Requests\NewRequestData;
@@ -27,6 +30,7 @@ use App\Models\Couple;
 use App\Models\Duty;
 use App\Models\PartnerRequest;
 use App\Models\User;
+use App\Services\Hearts\EconomySettingsStore;
 use App\Services\Hearts\Ledger;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -61,6 +65,8 @@ while (! file_exists($barrier)) {
 }
 try {
     match ($operation) {
+        'economy_edit' => $app->make(UpdateEconomySettings::class)->execute($actor, new EconomySettingsData($value, array_replace($app->make(EconomySettingsStore::class)->initialize()->settings, ['reward' => $limit]))),
+        'request_cancel' => $app->make(CancelPartnerRequest::class)->execute($actor, $couple, PartnerRequest::query()->findOrFail($value), $limit),
         'duty_report', 'duty_report_late' => $app->make(ReportDuty::class)->execute($actor, $couple, Duty::query()->findOrFail($value), version: $limit, isDone: true),
         'duty_verify' => $app->make(VerifyDuty::class)->execute($actor, $couple, Duty::query()->findOrFail($value), version: $limit, isConfirmed: true),
         'duty_dispute' => $app->make(VerifyDuty::class)->execute($actor, $couple, Duty::query()->findOrFail($value), version: $limit, isConfirmed: false),

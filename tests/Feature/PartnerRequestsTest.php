@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Actions\Admin\UpdateEconomySettings;
 use App\Actions\Couples\Agreements\AcceptProposal;
 use App\Actions\Couples\EndCouple;
 use App\Actions\Requests\CreatePartnerRequest;
 use App\Actions\Requests\ResolveCondition;
 use App\Actions\Requests\RespondToRequest;
+use App\Data\Admin\EconomySettingsData;
 use App\Data\Requests\NewRequestData;
 use App\Data\Requests\RequestResponseData;
 use App\Enums\ConditionType;
@@ -16,6 +18,7 @@ use App\Enums\RequestStatus;
 use App\Enums\RequestType;
 use App\Models\PartnerRequest;
 use App\Models\User;
+use App\Services\Hearts\EconomySettingsStore;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -115,7 +118,9 @@ it('freezes the refusal tariff and exempts lack of food money even for very want
     $request = app(CreatePartnerRequest::class)->execute($scenario->first, $scenario->couple, new NewRequestData(type: RequestType::Food, description: 'Суп', dueAt: CarbonImmutable::tomorrow(), isVeryWanted: true));
     expect($request->refusal_tariff)->toBe(15);
     expect($request->refusal_tariff_version)->toBe(1);
-    config(['economy.version' => 2, 'economy.refusal_tariff' => 20]);
+    $settings = app(EconomySettingsStore::class)->initialize()->settings;
+    $settings['refusal_tariff'] = 20;
+    app(UpdateEconomySettings::class)->execute(User::factory()->create(['is_admin' => true]), new EconomySettingsData(1, $settings));
     app(RespondToRequest::class)->execute($scenario->second, $scenario->couple, $request, new RequestResponseData(RequestResponse::Decline, 0, $reason));
     app(RespondToRequest::class)->execute($scenario->second, $scenario->couple, $request, new RequestResponseData(RequestResponse::Decline, 0, $reason));
     expect($request->refresh()->decline_penalty)->toBe($penalty);

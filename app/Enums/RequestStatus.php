@@ -6,6 +6,8 @@ namespace App\Enums;
 
 enum RequestStatus: string
 {
+    case Cancelled = 'cancelled';
+
     case Pending = 'pending';
     case Conditional = 'conditional';
     case Accepted = 'accepted';
@@ -14,6 +16,7 @@ enum RequestStatus: string
     public function label(): string
     {
         return match ($this) {
+            self::Cancelled => 'Отменено',
             self::Pending => 'Ждём ответа',
             self::Conditional => 'Ждём принятия условия',
             self::Accepted => 'Договорились',

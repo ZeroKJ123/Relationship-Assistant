@@ -6,10 +6,15 @@ namespace App\Models;
 
 use App\Enums\ConditionType;
 use Carbon\CarbonImmutable;
+use Database\Factories\RequestConditionFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property ?string $method_kind
+ * @property ?string $method_name
+ * @property ?string $sushi_size
  * @property int $id
  * @property int $partner_request_id
  * @property int $proposed_by_id
@@ -21,6 +26,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class RequestCondition extends Model
 {
+    /** @use HasFactory<RequestConditionFactory> */
+    use HasFactory;
+
     /** @return BelongsTo<PartnerRequest, $this> */
     public function partnerRequest(): BelongsTo
     {

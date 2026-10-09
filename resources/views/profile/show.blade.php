@@ -29,4 +29,5 @@
     @if($pendingInvitationUrl)<p class="form-footer"><a href="{{ $pendingInvitationUrl }}">{{ __('Продолжить принятие приглашения') }}</a></p>@endif
     <form method="post" action="{{ route('logout') }}" class="form-footer">@csrf<x-button type="submit" variant="quiet">{{ __('Выйти') }}</x-button></form>
 </x-card>
+@can('manage-system-settings')<a class="button button--quiet section-space" href="{{ route('admin.economy.index') }}">{{ __('Экономика приложения') }}</a>@endcan
 @endsection

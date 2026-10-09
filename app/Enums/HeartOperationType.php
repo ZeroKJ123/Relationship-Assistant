@@ -6,6 +6,8 @@ namespace App\Enums;
 
 enum HeartOperationType: string
 {
+    case ServicePayment = 'service_payment';
+
     case StartingBonus = 'starting_bonus';
     case Reward = 'reward';
     case RefusalPenalty = 'refusal_penalty';
@@ -17,6 +19,7 @@ enum HeartOperationType: string
     public function label(): string
     {
         return match ($this) {
+            self::ServicePayment => 'Оплата услуги сердечками',
             self::StartingBonus => 'Стартовые сердечки',
             self::Reward => 'Подтверждённое выполнение',
             self::RefusalPenalty => 'Отказ от «Очень хочу»',

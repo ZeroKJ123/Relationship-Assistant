@@ -8,19 +8,23 @@
 @foreach($errors->all() as $error)<p class="field-error">{{ $error }}</p>
 @endforeach</div>
 @endif
+<form method="get" action="{{ route('requests.create',$couple) }}" class="form-stack section-space"><div class="field"><label for="template_choice">{{ __('Шаблон просьбы') }}</label><select id="template_choice" name="request_template_id"><option value="">{{ __('Без шаблона') }}</option>@foreach($templates as $template)<option value="{{ $template->id }}" @selected((string)old('request_template_id',$preset?->id) === (string)$template->id)>{{ __($template->category->name) }} · {{ __($template->name) }}</option>@endforeach</select></div><x-button type="submit" variant="quiet">{{ __('Применить шаблон') }}</x-button></form><p>{{ __('Шаблон заполняет вид и описание. Затем уточните детали и обязательный срок.') }}</p>
 <form method="post" action="{{ route('requests.store',$couple) }}" class="form-stack" data-submit-lock>
 @csrf
 <input type="hidden" name="operation_key" value="{{ old('operation_key',$operationKey) }}">
 <div class="field">
 <label for="type">{{ __('О чём просьба') }}</label>
 <select id="type" name="type">
-@foreach($types as $type)<option value="{{ $type->value }}" @selected(old('type') === $type->value)>{{ __($type->label()) }}</option>
+@foreach($types as $type)<option value="{{ $type->value }}" @selected(old('type',$preset?->type->value) === $type->value)>{{ __($type->label()) }}</option>
 @endforeach</select>
 </div>
 <div class="field">
 <label for="description">{{ __('Что нужно сделать') }}</label>
-<textarea id="description" name="description" required maxlength="2000" rows="4">{{ old('description') }}</textarea>
+<textarea id="description" name="description" required maxlength="2000" rows="4">{{ old('description',$preset?->name) }}</textarea>
 </div>
+<input type="hidden" name="request_template_id" value="{{ old('request_template_id',$preset?->id) }}">
+<div class="field"><label for="expense_category_id">{{ __('Категория расходов — если нужна') }}</label><select id="expense_category_id" name="expense_category_id"><option value="">{{ __('Без категории расходов') }}</option>@foreach($expenses as $category)<option value="{{ $category->id }}" @selected((string)old('expense_category_id') === (string)$category->id)>{{ __($category->name) }}</option>@endforeach</select></div>
+<x-field name="heart_price" :label="__('Цена услуги в сердечках')" type="number" :value="old('heart_price',0)" min="0" max="1000" step="1" required /><p>{{ __('Для услуги можно согласовать цену; 0 — бесплатно. Резерв появится после согласия, списание — после проверки. Другие виды просьб пока бесплатны.') }}</p>
 <x-field name="due_at" :label="__('Выполнить до')" type="datetime-local" :value="old('due_at','')" required />
 <label class="confirmation-check"><input type="checkbox" name="is_very_wanted" value="1" @checked(old('is_very_wanted'))>{{ __('Очень хочу') }}</label>
 <p>{{ __('Для «Очень хочу» нужны согласованный недельный лимит и баланс без минуса. Обычный отказ партнёра уменьшает его сердечки; отсутствие денег на продукты — без штрафа.') }}</p>
