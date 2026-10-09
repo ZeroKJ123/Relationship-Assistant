@@ -1,4 +1,4 @@
-# Sail Starter
+# Home-Assist
 
 Основа приложения: PHP 8.4, Laravel 13, MariaDB 11.4, Blade, Tailwind CSS 4 и Vite 8. Локальная среда запускается через Laravel Sail.
 
