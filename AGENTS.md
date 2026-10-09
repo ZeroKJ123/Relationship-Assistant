@@ -173,6 +173,7 @@ Before relying on a package's API, confirm its installed version:
 | Interface | docs/interface.md | Компоненты и доступность |
 | Accounts | docs/accounts.md | Регистрация и миграции профиля |
 | Couples | docs/couples.md | Пары, приглашения и согласование недельного лимита |
+| Requests | docs/requests.md | Просьбы, версии условий, ответы и снимки тарифа |
 
 ## Project entry points
 
@@ -187,3 +188,6 @@ Before relying on a package's API, confirm its installed version:
 
 - `app/Actions/Couples/Agreements/`, `routes/agreements.php`: версии недельного лимита и подтверждения.
 - `tests/Support/ConcurrentOperations.php`: общий протокол гонок в изолированной MariaDB.
+
+- `app/Actions/Requests/`, `routes/requests.php`: просьбы, ответы и отдельное принятие условия.
+- `config/economy.php`: начальная версия тарифа; административные настройки ещё не реализованы.

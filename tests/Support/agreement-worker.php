@@ -6,10 +6,21 @@ use App\Actions\Couples\Agreements\AcceptProposal;
 use App\Actions\Couples\Agreements\ProposeWeeklyLimit;
 use App\Actions\Couples\Agreements\SubmitAnswer;
 use App\Actions\Couples\EndCouple;
+use App\Actions\Requests\CreatePartnerRequest;
+use App\Actions\Requests\ResolveCondition;
+use App\Actions\Requests\RespondToRequest;
 use App\Data\Couples\WeeklyLimitData;
+use App\Data\Requests\NewRequestData;
+use App\Data\Requests\RequestResponseData;
+use App\Enums\ConditionType;
+use App\Enums\DeclineReason;
+use App\Enums\RequestResponse;
+use App\Enums\RequestType;
 use App\Models\AgreementProposal;
 use App\Models\Couple;
+use App\Models\PartnerRequest;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Validation\ValidationException;
@@ -38,6 +49,11 @@ while (! file_exists($barrier)) {
 }
 try {
     match ($operation) {
+        'request_create' => $app->make(CreatePartnerRequest::class)->execute($actor, $couple, new NewRequestData(type: RequestType::Service, description: 'Test request', dueAt: CarbonImmutable::tomorrow(), operationKey: sprintf('00000000-0000-4000-8000-%012d', $value))),
+        'request_agree' => $app->make(RespondToRequest::class)->execute($actor, $couple, PartnerRequest::query()->findOrFail($value), new RequestResponseData(RequestResponse::Agree, $limit)),
+        'request_decline' => $app->make(RespondToRequest::class)->execute($actor, $couple, PartnerRequest::query()->findOrFail($value), new RequestResponseData(RequestResponse::Decline, $limit, DeclineReason::Ordinary)),
+        'request_condition' => $app->make(RespondToRequest::class)->execute($actor, $couple, PartnerRequest::query()->findOrFail($value), new RequestResponseData(response: RequestResponse::Conditional, expectedVersion: $limit, reason: null, conditionType: ConditionType::Action, description: 'Test condition', dueAt: CarbonImmutable::tomorrow())),
+        'request_accept_condition' => $app->make(ResolveCondition::class)->execute($actor, $couple, PartnerRequest::query()->findOrFail($value), $limit),
         'accept' => $app->make(AcceptProposal::class)->execute($actor, $couple, AgreementProposal::query()->findOrFail($value)),
         'answer' => $app->make(SubmitAnswer::class)->execute($actor, $couple, new WeeklyLimitData($limit, $value)),
         'propose' => $app->make(ProposeWeeklyLimit::class)->execute($actor, $couple, new WeeklyLimitData($limit, $value)),

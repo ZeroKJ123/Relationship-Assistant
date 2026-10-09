@@ -75,3 +75,5 @@ p { color: var(--color-muted); }
 
 .confirmation-check { display: flex; align-items: flex-start; gap: .8rem; }
 .confirmation-check input { width: 1.4rem; height: 1.4rem; margin-top: .2rem; flex-shrink: 0; accent-color: var(--color-violet); }
+
+.request-description { white-space: pre-wrap; overflow-wrap: anywhere; }
