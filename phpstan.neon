@@ -12,5 +12,6 @@ parameters:
         - routes
         - lang
         - tests/TestCase.php
+        - tests/MariaDbTestCase.php
         - tests/Support
     tmpDir: storage/framework/cache/phpstan

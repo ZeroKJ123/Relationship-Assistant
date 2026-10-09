@@ -23,3 +23,30 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+
+  mariadb:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_DATABASE: homeassist_couples_testing
+          MARIADB_USER: homeassist_test
+          MARIADB_PASSWORD: test_only_password
+          MARIADB_RANDOM_ROOT_PASSWORD: 'yes'
+        ports:
+          - 33071:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_mysql
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - run: vendor/bin/pest --configuration=phpunit.mariadb.xml

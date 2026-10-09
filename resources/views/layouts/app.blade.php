@@ -13,7 +13,7 @@
     <div class="app-shell">
         <header class="app-header">
             <a class="brand" href="{{ route('home') }}"><span aria-hidden="true">♥</span> {{ __('Наша пара') }}</a>
-            <span class="pill">{{ __('Начало истории') }}</span>
+            @auth<a class="pill" href="{{ route('couples.index') }}">{{ __('Мои пары') }}</a>@else<span class="pill">{{ __('Начало истории') }}</span>@endauth
         </header>
         <main id="main-content" tabindex="-1">@yield('content')</main>
         @yield('navigation')

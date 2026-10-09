@@ -72,3 +72,6 @@ p { color: var(--color-muted); }
 .field select, .field textarea { width: 100%; border: 1px solid #9884b5; border-radius: 1rem; padding: .7rem 1rem; font: inherit; background: white; }
 .confirmation-actions { display: flex; gap: .8rem; flex-wrap: wrap; }
 .recovery-card { margin-top: 1.2rem; }.recovery-codes { padding: 0; margin: 1rem 0 0; list-style: none; }.recovery-codes code { font-size: .8rem; overflow-wrap: anywhere; }
+
+.confirmation-check { display: flex; align-items: flex-start; gap: .8rem; }
+.confirmation-check input { width: 1.4rem; height: 1.4rem; margin-top: .2rem; flex-shrink: 0; accent-color: var(--color-violet); }

@@ -25,7 +25,8 @@
         </div>
         <x-button type="submit">{{ __('Сохранить профиль') }}</x-button>
     </form>
-    <p class="form-footer">{{ __('Создание пары и Telegram появятся на следующих этапах.') }}</p>
+    <p class="form-footer"><a href="{{ route('couples.index') }}">{{ __('Мои пары') }}</a></p>
+    @if($pendingInvitationUrl)<p class="form-footer"><a href="{{ $pendingInvitationUrl }}">{{ __('Продолжить принятие приглашения') }}</a></p>@endif
     <form method="post" action="{{ route('logout') }}" class="form-footer">@csrf<x-button type="submit" variant="quiet">{{ __('Выйти') }}</x-button></form>
 </x-card>
 @endsection

@@ -26,7 +26,20 @@ php artisan test --compact
 php artisan test --compact --filter=TestEnvironment
 ```
 
-Сценарии используют Pest `it()`. Тесты изоляции проверяют отказ для постоянной базы, нетестового окружения и URL подключения. Сценарии интерфейса проверяют русский язык, экранирование личных данных и доступные поля. Рабочая MariaDB не используется. Для операций блокировок и гонок потребуется отдельная MariaDB-среда; SQLite не подтверждает корректность таких операций.
+Сценарии используют Pest `it()`. Тесты изоляции проверяют отказ для постоянной базы, нетестового окружения и URL подключения. Сценарии интерфейса проверяют русский язык, экранирование личных данных и доступные поля. Рабочая MariaDB не используется. Для пар и приглашений добавлена отдельная MariaDB-среда: SQLite не подтверждает корректность блокировок и гонок.
+
+## Конкурентные операции в MariaDB
+
+Используйте отдельный одноразовый контейнер, без рабочих томов:
+
+```sh
+docker run --rm -d --name homeassist-couples-test --tmpfs /var/lib/mysql:rw,size=512m -p 127.0.0.1:33071:3306 -e MARIADB_DATABASE=homeassist_couples_testing -e MARIADB_USER=homeassist_test -e MARIADB_PASSWORD=test_only_password -e MARIADB_RANDOM_ROOT_PASSWORD=yes mariadb:11.4
+docker exec homeassist-couples-test healthcheck.sh --connect --innodb_initialized
+vendor/bin/pest --configuration=phpunit.mariadb.xml
+docker stop homeassist-couples-test
+```
+
+Ключ и пароль здесь предназначены только для одноразовой тестовой базы. Проверка окружения до миграций требует testing, отсутствия кеша конфигурации и DB_URL, хост 127.0.0.1, порт 33071, имя homeassist_couples_testing и пользователя homeassist_test. Другие подключения удаляются из тестового приложения. Эти тесты пересоздают только выделенную тестовую схему; не подключайте к этому контейнеру рабочие данные. PHP-процессы синхронизируются стартовым барьером; адаптация вывода Pao отключена только в дочернем протоколе, проверки остаются включены.
 
 ## Laravel Boost
 

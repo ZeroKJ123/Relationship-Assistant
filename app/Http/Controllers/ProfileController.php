@@ -28,7 +28,10 @@ final class ProfileController extends Controller
         $encryptedCodes = $request->session()->get('recovery_codes');
         $codes = is_string($encryptedCodes) ? explode("\n", Crypt::decryptString($encryptedCodes)) : [];
 
-        return view('profile.show', ['user' => $user, 'recoveryCodes' => $codes]);
+        $intended = $request->session()->get('url.intended');
+        $invitationUrl = is_string($intended) && str_starts_with($intended, sprintf('%s/', url('invitations'))) ? $intended : null;
+
+        return view('profile.show', ['user' => $user, 'recoveryCodes' => $codes, 'pendingInvitationUrl' => $invitationUrl]);
     }
 
     public function update(UpdateProfileRequest $request): RedirectResponse

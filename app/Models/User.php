@@ -10,6 +10,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -38,6 +39,12 @@ final class User extends Authenticatable
     public function telegramAccount(): HasOne
     {
         return $this->hasOne(TelegramAccount::class);
+    }
+
+    /** @return HasMany<CoupleMember, $this> */
+    public function coupleMemberships(): HasMany
+    {
+        return $this->hasMany(CoupleMember::class);
     }
 
     /** @return array<string, string> */

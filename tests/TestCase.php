@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Http;
@@ -15,6 +16,14 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         Http::preventStrayRequests();
+    }
+
+    public function asUser(User $user): static
+    {
+        // A new browser session when a scenario switches to another participant.
+        $this->flushSession();
+
+        return $this->actingAs($user);
     }
 
     public function createApplication(): Application

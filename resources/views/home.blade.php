@@ -25,13 +25,13 @@
     <x-card id="first-step" class="section-space start-card" aria-labelledby="start-title">
         <x-status>{{ __('Приложение в разработке') }}</x-status>
         <h2 id="start-title">{{ __('У вашей истории будет свой дом') }}</h2>
-        <p>{{ __('Мы готовим личное пространство для вашей пары. Регистрация уже доступна. Совместные действия появятся на следующих этапах.') }}</p>
+        <p>{{ __('Мы готовим личное пространство для вашей пары. Регистрация и создание пары уже доступны. Совместные действия появятся на следующих этапах.') }}</p>
         <div class="confirmation-actions">
             @auth<a class="button button--primary" href="{{ route('profile.show') }}">{{ __('Мой профиль') }}</a>
             @else<a class="button button--primary" href="{{ route('register') }}">{{ __('Создать аккаунт') }}</a><a class="button button--quiet" href="{{ route('login') }}">{{ __('Войти') }}</a>@endauth
         </div>
         <x-button variant="quiet" data-open-dialog="about-dialog">{{ __('Как это будет работать') }}</x-button>
-        <noscript><p>{{ __('Создайте аккаунт, пригласите партнёра и согласуйте общие правила. Эти возможности ещё разрабатываются.') }}</p></noscript>
+        <noscript><p>{{ __('Создайте аккаунт, пригласите партнёра и согласуйте общие правила. Совместные дела появятся на следующих этапах.') }}</p></noscript>
     </x-card>
 
     <x-dialog id="about-dialog" :title="__('Вместе — с самого начала')">
