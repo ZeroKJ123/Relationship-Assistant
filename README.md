@@ -1,1 +1,77 @@
 # Home-Assist
+
+Основа приложения: PHP 8.4, Laravel 13, MariaDB 11.4, Blade, Tailwind CSS 4 и Vite 8. Локальная среда запускается через Laravel Sail.
+
+## Адреса
+
+- Приложение: http://localhost:8086
+- MariaDB с компьютера: `127.0.0.1:33070`
+- Vite при разработке: http://localhost:5176
+
+База: `sail_starter`, пользователь: `sail`, локальный пароль: `password`. Из контейнера Laravel база доступна по `mariadb:3306`. Все опубликованные порты доступны только на этом компьютере.
+
+## Обычный запуск
+
+Запустите Docker Desktop, затем из папки проекта:
+
+```sh
+./vendor/bin/sail up -d
+```
+
+Собранный интерфейс уже доступен без запуска Vite. Для автоматического обновления интерфейса во время разработки:
+
+```sh
+./vendor/bin/sail npm run dev
+```
+
+Vite работает до завершения команды. После завершения браузер снова использует собранные ресурсы. После изменений пересоберите их:
+
+```sh
+./vendor/bin/sail npm run build
+```
+
+Остановить только этот проект, сохранив базу:
+
+```sh
+./vendor/bin/sail stop
+```
+
+## Первая установка на другом компьютере
+
+Нужны Docker Desktop и Composer с PHP 8.4+ для установки зависимостей.
+
+```sh
+composer install
+cp .env.example .env
+php artisan key:generate
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail npm ci
+./vendor/bin/sail npm run build
+```
+
+В Linux задайте `WWWUSER` и `WWWGROUP` в `.env` по результатам `id -u` и `id -g`. При необходимости измените `APP_PORT`, `APP_URL`, `FORWARD_DB_PORT` и `VITE_PORT` перед запуском. Пример `.env.example` не содержит ключ приложения: при первой установке он генерируется отдельно.
+
+## Работа с проектом
+
+- Маршруты страниц: `routes/web.php`.
+- Шаблоны: `resources/views/`.
+- Стили и JavaScript: `resources/css/app.css`, `resources/js/app.js`.
+- Модели: `app/Models/`.
+- Изменения схемы базы: `database/migrations/`.
+- Начальные миграции создают пользователей, сессии, кэш и очередь заданий. Регистрация и вход пока не реализованы.
+- По умолчанию сессии, кэш и очередь используют MariaDB. Почта записывается в локальный журнал. Для обработки очереди запускайте `./vendor/bin/sail artisan queue:work`.
+
+```sh
+./vendor/bin/sail artisan test
+./vendor/bin/sail bin pint --test
+./vendor/bin/sail logs
+```
+
+Тесты используют отдельную SQLite в памяти; рабочая MariaDB при этом не меняется.
+
+## Изоляция
+
+Имя Compose-проекта — `sail_starter`. У него свои контейнеры, сеть, образ приложения `sail-starter-8.4/app` и том `sail_starter_sail-mariadb`. Окружение работает в фоне и автоматически запускается после перезапуска Docker, если вы не остановили его вручную. Данные сохраняются в отдельном Docker-томе.
+
+`work/` содержит временные файлы установки и не нужен для работы приложения. Зависимости зафиксированы в `composer.lock` и `package-lock.json`. Файл `.env` исключён из Git. Эта конфигурация предназначена для локальной разработки.
