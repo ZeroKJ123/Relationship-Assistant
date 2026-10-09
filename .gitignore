@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+secrets.yaml
+secrets.*.yaml
+*.db
+*.db-shm
+*.db-wal
+*.log
