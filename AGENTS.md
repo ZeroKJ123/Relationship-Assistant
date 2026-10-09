@@ -14,6 +14,14 @@ This workspace is connected to https://github.com/ZeroKJ123/Home-Assist.git.
 
 The location and connection details of the running Home Assistant instance have not yet been supplied. Do not assume that this workspace is its live configuration directory. Obtain those details before changing or deploying live configuration.
 
+## Mandatory CodeStyle
+
+- Read [CodeStyle.md](CodeStyle.md) before any application implementation, fix, or refactor; it is the mandatory project standard for human developers and AI agents.
+- Every implementation task must follow its architecture, naming, typing, testing, performance, and diagnostics rules. The development plan must reference it and include the applicable quality checks.
+- Do not silently bypass rules or weaken checks. Record conflicts and resolve them before the affected change; exceptions require an explicit reason and owner agreement.
+- Preserve this section when installing or regenerating Laravel Boost guidance. Read CodeStyle again after generated instructions change.
+- Planning and documentation changes do not authorize application implementation or deployment.
+
 <laravel-boost-guidelines>
 # Laravel Application
 
