@@ -20,6 +20,11 @@ use Illuminate\Validation\ValidationException;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function (): void {
+    // View behavior is independent of generated Vite files; CI builds assets separately.
+    $this->withoutVite();
+});
+
 it('requires authentication for private couple pages', function (): void {
     $this->get(route('couples.index'))->assertRedirect(route('login'));
     $this->get(route('couples.create'))->assertRedirect(route('login'));
