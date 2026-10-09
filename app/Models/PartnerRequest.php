@@ -8,6 +8,8 @@ use App\Enums\DeclineReason;
 use App\Enums\RequestStatus;
 use App\Enums\RequestType;
 use Carbon\CarbonImmutable;
+use Database\Factories\PartnerRequestFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -35,6 +37,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 final class PartnerRequest extends Model
 {
+    /** @use HasFactory<PartnerRequestFactory> */
+    use HasFactory;
+
     /** @return BelongsTo<Couple, $this> */
     public function couple(): BelongsTo
     {
@@ -63,6 +68,12 @@ final class PartnerRequest extends Model
     public function events(): HasMany
     {
         return $this->hasMany(RequestEvent::class);
+    }
+
+    /** @return HasMany<Duty, $this> */
+    public function duties(): HasMany
+    {
+        return $this->hasMany(Duty::class);
     }
 
     /** @return array<string, string> */

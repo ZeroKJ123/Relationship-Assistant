@@ -22,7 +22,7 @@ final class StorePartnerRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
-        return ['operation_key' => ['required', 'uuid'], 'type' => ['required', Rule::enum(RequestType::class)], 'description' => ['required', 'string', 'max:2000'], 'due_at' => ['required', 'date_format:Y-m-d\TH:i'], 'is_very_wanted' => ['prohibited']];
+        return ['operation_key' => ['required', 'uuid'], 'type' => ['required', Rule::enum(RequestType::class)], 'description' => ['required', 'string', 'max:2000'], 'due_at' => ['required', 'date_format:Y-m-d\TH:i'], 'is_very_wanted' => ['sometimes', 'boolean']];
     }
 
     public function getData(Couple $couple): NewRequestData
@@ -32,6 +32,6 @@ final class StorePartnerRequest extends FormRequest
             throw ValidationException::withMessages(['due_at' => __('Укажите срок просьбы.')]);
         }
 
-        return new NewRequestData(type: RequestType::from($this->string('type')->toString()), description: $this->string('description')->trim()->toString(), dueAt: $dueAt, operationKey: $this->string('operation_key')->toString());
+        return new NewRequestData(type: RequestType::from($this->string('type')->toString()), description: $this->string('description')->trim()->toString(), dueAt: $dueAt, isVeryWanted: $this->boolean('is_very_wanted'), operationKey: $this->string('operation_key')->toString());
     }
 }

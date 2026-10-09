@@ -11,6 +11,7 @@ use App\Models\PartnerRequest;
 use App\Models\User;
 use App\Services\Requests\RefusalTariff;
 use App\Services\Requests\RequestContext;
+use App\Services\Requests\VeryWantedRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -18,28 +19,29 @@ use Illuminate\Support\Str;
 
 final class CreatePartnerRequest
 {
-    public function __construct(private readonly RequestContext $context, private readonly RefusalTariff $tariff) {}
+    public function __construct(private readonly RequestContext $context, private readonly RefusalTariff $tariff, private readonly VeryWantedRequests $veryWanted) {}
 
     public function execute(User $actor, Couple $couple, NewRequestData $data): PartnerRequest
     {
         Log::debug('request.creation_started', ['actor_id' => $actor->id, 'couple_id' => $couple->id]);
+        $dueAt = $data->dueAt->setMicrosecond(0);
         $operationKey = $data->operationKey ?? Str::uuid()->toString();
-        Validator::make(['operation_key' => $operationKey, 'description' => $data->description, 'due_at' => $data->dueAt], ['operation_key' => ['required', 'uuid'], 'description' => ['required', 'string', 'max:2000'], 'due_at' => ['required', 'date', 'after:now']])->validate();
-        [$request, $event] = DB::transaction(function () use ($actor, $couple, $data, $operationKey): array {
+        Validator::make(['operation_key' => $operationKey, 'description' => $data->description, 'due_at' => $dueAt], ['operation_key' => ['required', 'uuid'], 'description' => ['required', 'string', 'max:2000'], 'due_at' => ['required', 'date', 'after:now']])->validate();
+        [$request, $event] = DB::transaction(function () use ($actor, $couple, $data, $operationKey, $dueAt): array {
             $current = $this->context->lockCouple($actor, $couple);
             $existing = PartnerRequest::query()->where('author_id', $actor->id)->where('operation_key', $operationKey)->lockForUpdate()->first();
             if ($existing !== null) {
-                if ($existing->couple_id !== $current->id || $existing->type !== $data->type || $existing->description !== $data->description || ! $existing->due_at->equalTo($data->dueAt) || $existing->is_very_wanted !== $data->isVeryWanted) {
+                if ($existing->couple_id !== $current->id || $existing->type !== $data->type || $existing->description !== $data->description || ! $existing->due_at->equalTo($dueAt) || $existing->is_very_wanted !== $data->isVeryWanted) {
                     $this->context->deny('changed_creation_payload', coupleId: $current->id);
                 }
 
                 return [$existing, null];
             }
-            if (! $data->dueAt->isFuture()) {
+            if (! $dueAt->isFuture()) {
                 $this->context->deny('expired_deadline', coupleId: $current->id);
             }
-            if ($data->isVeryWanted && $current->agreement()->lockForUpdate()->first()?->active_weekly_limit === null) {
-                $this->context->deny('missing_weekly_agreement', coupleId: $current->id);
+            if ($data->isVeryWanted) {
+                $this->veryWanted->requireAvailability($actor, $current);
             }
             $recipient = $current->members()->where('user_id', '!=', $actor->id)->lockForUpdate()->sole();
             $request = new PartnerRequest;
@@ -50,7 +52,7 @@ final class CreatePartnerRequest
                 'recipient_id' => $recipient->user_id,
                 'type' => $data->type,
                 'description' => $data->description,
-                'due_at' => $data->dueAt->utc(),
+                'due_at' => $dueAt->utc(),
                 'is_very_wanted' => $data->isVeryWanted,
                 'refusal_tariff_version' => $this->tariff->getVersion(),
                 'refusal_tariff' => $data->isVeryWanted ? $this->tariff->getAmount() : 0,
@@ -59,7 +61,7 @@ final class CreatePartnerRequest
             ])->save();
 
             return [$request, $this->context->record($actor, $request, 'created')];
-        });
+        }, attempts: 3);
         if ($event !== null) {
             $this->context->logEvent($event);
         }

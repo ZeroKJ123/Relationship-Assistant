@@ -22,7 +22,9 @@
 <textarea id="description" name="description" required maxlength="2000" rows="4">{{ old('description') }}</textarea>
 </div>
 <x-field name="due_at" :label="__('Выполнить до')" type="datetime-local" :value="old('due_at','')" required />
-<p>{{ __('Отметка «Очень хочу» появится после настройки баланса и недельных ограничений.') }}</p>
+<label class="confirmation-check"><input type="checkbox" name="is_very_wanted" value="1" @checked(old('is_very_wanted'))>{{ __('Очень хочу') }}</label>
+<p>{{ __('Для «Очень хочу» нужны согласованный недельный лимит и баланс без минуса. Обычный отказ партнёра уменьшает его сердечки; отсутствие денег на продукты — без штрафа.') }}</p>
+<a href="{{ route('agreements.show',$couple) }}">{{ __('Наш недельный лимит') }}</a>
 <x-button type="submit">{{ __('Отправить просьбу') }}</x-button>
 </form>
 </x-card>

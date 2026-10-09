@@ -17,7 +17,7 @@
 @if($partnerRequest->decline_penalty === 0)<p>{{ __('Штраф за отказ: 0 сердечек.') }}</p>
 @endif
 @endif
-@if($partnerRequest->status === \App\Enums\RequestStatus::Accepted)<p>{{ __('Договорились. Выполнение просьбы и условия нужно будет подтвердить отдельно.') }}</p>
+@if($partnerRequest->status === \App\Enums\RequestStatus::Accepted)<p>{{ __('Договорились. Дела созданы; выполнение просьбы и условия подтверждается отдельно.') }}</p>
 @endif
 </x-card>
 @if($currentCondition)<x-card class="section-space form-stack">
@@ -91,6 +91,9 @@
 <h2>{{ __('История условий') }}</h2>
 @foreach($conditions as $condition)<p>{{ __('Вариант :version', ['version'=>$condition->version]) }}: {{ $condition->description }}</p>
 @endforeach</x-card>
+@endif
+@if($partnerRequest->status === \App\Enums\RequestStatus::Accepted)
+<a class="button button--primary section-space" href="{{ route('duties.index',$couple) }}">{{ __('Перейти к выполнению') }}</a>
 @endif
 {{ $conditions->links() }}<a class="button button--quiet section-space" href="{{ route('requests.index',$couple) }}">{{ __('Все просьбы') }}</a>
 @endsection

@@ -174,6 +174,7 @@ Before relying on a package's API, confirm its installed version:
 | Accounts | docs/accounts.md | Регистрация и миграции профиля |
 | Couples | docs/couples.md | Пары, приглашения и согласование недельного лимита |
 | Requests | docs/requests.md | Просьбы, версии условий, ответы и снимки тарифа |
+| Hearts and duties | docs/hearts-and-duties.md | Отметки и проверки, личный журнал, награды, штрафы и ограничения |
 
 ## Project entry points
 
@@ -191,3 +192,6 @@ Before relying on a package's API, confirm its installed version:
 
 - `app/Actions/Requests/`, `routes/requests.php`: просьбы, ответы и отдельное принятие условия.
 - `config/economy.php`: начальная версия тарифа; административные настройки ещё не реализованы.
+- `app/Actions/Duties/`, `app/Services/Duties/`, `routes/duties.php`: отдельное выполнение и проверка обязанностей.
+- `app/Services/Hearts/`, `app/Actions/Hearts/`: журнал, сверка и ручные операции только действующим партнёром.
+- `app/Console/Commands/`, `routes/console.php`: проверка просрочек и сверка балансов; scheduler нужно запускать отдельно.

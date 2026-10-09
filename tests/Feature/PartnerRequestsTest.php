@@ -46,10 +46,10 @@ it('creates a private typed request using the couple timezone and ignores inject
 
 it('requires a deadline and rejects malformed dates and premature economy flags', function (array $changes, string $field): void {
     $scenario = AgreementScenario::create();
-    $payload = array_replace(['operation_key' => Str::uuid()->toString(), 'type' => 'food', 'description' => 'Суп', 'due_at' => CarbonImmutable::tomorrow()->format('Y-m-d\TH:i')], $changes);
+    $payload = array_replace(['operation_key' => Str::uuid()->toString(), 'type' => 'food', 'description' => 'Суп', 'due_at' => CarbonImmutable::now()->addDays(2)->format('Y-m-d\TH:i')], $changes);
     $this->asUser($scenario->first)->post(route('requests.store', $scenario->couple), $payload)->assertSessionHasErrors($field);
     expect(PartnerRequest::query()->count())->toBe(0);
-})->with([[['due_at' => null], 'due_at'], [['due_at' => '2020-01-01T12:00'], 'due_at'], [['due_at' => '2027-02-31T12:00'], 'due_at'], [['type' => 'unknown'], 'type'], [['is_very_wanted' => true], 'is_very_wanted'], [['description' => ['bad']], 'description']]);
+})->with([[['due_at' => null], 'due_at'], [['due_at' => '2020-01-01T12:00'], 'due_at'], [['due_at' => '2027-02-31T12:00'], 'due_at'], [['type' => 'unknown'], 'type'], [['is_very_wanted' => true], 'partner_request'], [['description' => ['bad']], 'description']]);
 
 it('accepts only the recipient response and makes its repeated acceptance idempotent', function (): void {
     $scenario = AgreementScenario::create();

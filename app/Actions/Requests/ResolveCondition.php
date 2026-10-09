@@ -9,13 +9,14 @@ use App\Models\Couple;
 use App\Models\PartnerRequest;
 use App\Models\RequestEvent;
 use App\Models\User;
+use App\Services\Duties\CreateAcceptedDuties;
 use App\Services\Requests\RequestContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 final class ResolveCondition
 {
-    public function __construct(private readonly RequestContext $context) {}
+    public function __construct(private readonly RequestContext $context, private readonly CreateAcceptedDuties $duties) {}
 
     public function execute(User $actor, Couple $couple, PartnerRequest $request, int $version, bool $isAccepted = true): void
     {
@@ -44,8 +45,10 @@ final class ResolveCondition
             $condition->forceFill(['accepted_at' => now()])->save();
             $current->forceFill(['status' => RequestStatus::Accepted, 'accepted_at' => now(), 'version' => $current->version + 1])->save();
 
+            $this->duties->execute($current);
+
             return $this->context->record($actor, $current, 'condition_accepted');
-        });
+        }, attempts: 3);
         if ($event !== null) {
             $this->context->logEvent($event);
         }

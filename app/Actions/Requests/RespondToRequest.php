@@ -6,6 +6,7 @@ namespace App\Actions\Requests;
 
 use App\Data\Requests\RequestResponseData;
 use App\Enums\DeclineReason;
+use App\Enums\HeartOperationType;
 use App\Enums\RequestResponse;
 use App\Enums\RequestStatus;
 use App\Enums\RequestType;
@@ -14,6 +15,8 @@ use App\Models\PartnerRequest;
 use App\Models\RequestCondition;
 use App\Models\RequestEvent;
 use App\Models\User;
+use App\Services\Duties\CreateAcceptedDuties;
+use App\Services\Hearts\Ledger;
 use App\Services\Requests\RequestContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +24,7 @@ use Illuminate\Support\Facades\Validator;
 
 final class RespondToRequest
 {
-    public function __construct(private readonly RequestContext $context) {}
+    public function __construct(private readonly RequestContext $context, private readonly CreateAcceptedDuties $duties, private readonly Ledger $ledger) {}
 
     public function execute(User $actor, Couple $couple, PartnerRequest $request, RequestResponseData $data): void
     {
@@ -36,9 +39,15 @@ final class RespondToRequest
             $this->applyResponse($actor, $current, $data);
             $current->version++;
             $current->save();
+            if ($current->status === RequestStatus::Accepted) {
+                $this->duties->execute($current);
+            }
+            if ($current->status === RequestStatus::Declined && $current->decline_penalty > 0) {
+                $this->ledger->apply($actor, -$current->decline_penalty, HeartOperationType::RefusalPenalty, sprintf('request:%d:refusal', $current->id), coupleId: $current->couple_id, actorId: $actor->id);
+            }
 
             return $this->context->record($actor, $current, $data->response->value);
-        });
+        }, attempts: 3);
         if ($event !== null) {
             $this->context->logEvent($event);
         }
