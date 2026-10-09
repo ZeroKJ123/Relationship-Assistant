@@ -172,6 +172,7 @@ Before relying on a package's API, confirm its installed version:
 | Development | docs/development.md | Проверки и изоляция тестов |
 | Interface | docs/interface.md | Компоненты и доступность |
 | Accounts | docs/accounts.md | Регистрация и миграции профиля |
+| Couples | docs/couples.md | Пары, приглашения и согласование недельного лимита |
 
 ## Project entry points
 
@@ -183,3 +184,6 @@ Before relying on a package's API, confirm its installed version:
 - `app/Actions/Auth/`, `app/Data/Auth/`, `routes/auth.php`: аккаунты и восстановление.
 - `app/Actions/Profiles/`, `app/Policies/UserPolicy.php`: собственность профиля.
 - `lang/ru/validation.php`: русские сообщения проверки ввода.
+
+- `app/Actions/Couples/Agreements/`, `routes/agreements.php`: версии недельного лимита и подтверждения.
+- `tests/Support/ConcurrentOperations.php`: общий протокол гонок в изолированной MariaDB.

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int $id
@@ -39,6 +40,12 @@ final class Couple extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(CoupleInvitation::class);
+    }
+
+    /** @return HasOne<CoupleAgreement, $this> */
+    public function agreement(): HasOne
+    {
+        return $this->hasOne(CoupleAgreement::class);
     }
 
     /** @return array<string, string> */

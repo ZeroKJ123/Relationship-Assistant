@@ -33,6 +33,7 @@
     <x-card class="section-space"><h2>{{ __('История сохранена') }}</h2><p>{{ __('Пара завершена. История доступна только её прежним участникам. Новые совместные действия закрыты.') }}</p></x-card>
 @endif
 <div class="confirmation-actions section-space">
+    <a class="button button--primary" href="{{ route('agreements.show', $couple) }}">{{ __('Наши договорённости') }}</a>
     <a class="button button--quiet" href="{{ route('couples.index') }}">{{ __('Все мои пары') }}</a>
     @can('update', $couple)<a class="button button--danger" href="{{ route('couples.end', $couple) }}">{{ __('Завершить пару') }}</a>@endcan
 </div>
