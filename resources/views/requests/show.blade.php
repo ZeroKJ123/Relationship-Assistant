@@ -9,6 +9,7 @@
 @if($partnerRequest->category_name)<p>{{ __('Категория: :name', ['name'=>$partnerRequest->category_name]) }}</p>@endif
 @if($partnerRequest->template_name)<p>{{ __('Шаблон: :name', ['name'=>$partnerRequest->template_name]) }}</p>@endif
 <p class="request-description">{{ $partnerRequest->description }}</p>
+@if($partnerRequest->rating)<x-card tone="pink"><h2>{{ __('Оценка поступка: :score из 5', ['score'=>$partnerRequest->rating]) }}</h2>@if($partnerRequest->rating_comment)<p class="request-description">{{ $partnerRequest->rating_comment }}</p>@endif</x-card>@endif
 <x-social-invitation :request="$partnerRequest" :timezone="$couple->timezone" />
 @if($partnerRequest->dish_snapshot)<x-product-photo :src="!empty($partnerRequest->dish_snapshot['photo_path']) ? route('photos.requests',$partnerRequest) : null" :alt="$partnerRequest->dish_snapshot['title'] ?? ''" symbol="♨" /><p>{{ $partnerRequest->dish_snapshot['title'] }} · {{ $partnerRequest->dish_kind->label() }}</p><p>{{ $partnerRequest->dish_snapshot['ingredients'] }}</p><p>{{ __('Продукты ≈ :amount :currency · порций: :portions',['amount'=>$partnerRequest->dish_snapshot['estimate'],'currency'=>$partnerRequest->dish_snapshot['currency'],'portions'=>$partnerRequest->dish_snapshot['portions']]) }}</p>@endif
 @if($partnerRequest->moneyRequest)<p class="price-chip">{{ $partnerRequest->moneyRequest->amount }} {{ $partnerRequest->moneyRequest->currency->value }}</p><p>{{ __('Оплата отмечается плательщиком; поступление отдельно подтверждает получатель. Денежные переводы не дают награду.') }}</p>@if($partnerRequest->status === \App\Enums\RequestStatus::Accepted)<h2>{{ __('Реквизиты получателя') }}</h2><p class="request-description">{{ $partnerRequest->moneyRequest->payment_details_snapshot }}</p>@endif @endif
@@ -52,6 +53,9 @@
 @if($partnerRequest->status === \App\Enums\RequestStatus::Pending)
 <x-card class="section-space">
 <h2>{{ __('Ваш ответ') }}</h2>
+@if($partnerRequest->type === \App\Enums\RequestType::Rating)
+<form method="post" action="{{ route('requests.rating',[$couple,$partnerRequest]) }}" class="form-stack" data-submit-lock>@csrf<input type="hidden" name="expected_version" value="{{ $partnerRequest->version }}"><x-field name="rating" type="number" :label="__('Оценка поступка от 1 до 5')" min="1" max="5" step="1" required /><div class="field"><label for="comment">{{ __('Комментарий — по желанию') }}</label><textarea id="comment" name="comment" maxlength="1000">{{ old('comment') }}</textarea></div><label class="confirmation-check"><input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю оценку') }}</label><x-button type="submit">{{ __('Отправить оценку') }}</x-button></form>
+@endif
 <form method="post" action="{{ route('requests.responses.store',[$couple,$partnerRequest]) }}" class="form-stack" data-submit-lock>
 @csrf<input type="hidden" name="expected_version" value="{{ $partnerRequest->version }}">
 <fieldset class="response-reasons"><legend>{{ __('Причина при отказе') }}</legend><label class="choice-chip"><input type="radio" name="reason" value="ordinary" checked>{{ __('Не могу согласиться') }}</label>
@@ -59,13 +63,13 @@
 <label class="confirmation-check">
 <input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю выбранный ответ') }}</label>
 <div class="confirmation-actions">
-<x-button type="submit" name="response" value="agree">{{ __('Согласиться') }}</x-button>
+@if($partnerRequest->type !== \App\Enums\RequestType::Rating)<x-button type="submit" name="response" value="agree">{{ __('Согласиться') }}</x-button>@endif
 <x-button type="submit" name="response" value="decline" variant="quiet">{{ __('Отказать') }}</x-button>
 </div>
 </form>
 </x-card>
 @endif
-@if(!$partnerRequest->moneyRequest && in_array($partnerRequest->status,[\App\Enums\RequestStatus::Pending,\App\Enums\RequestStatus::Conditional],true))
+@if($partnerRequest->type !== \App\Enums\RequestType::Rating && !$partnerRequest->moneyRequest && in_array($partnerRequest->status,[\App\Enums\RequestStatus::Pending,\App\Enums\RequestStatus::Conditional],true))
 <section class="section-space condition-section" data-condition-section data-condition-errors="{{ $errors->any() && old('response') === 'conditional' ? 'true' : 'false' }}">
     <x-button variant="quiet" hidden data-condition-open aria-expanded="false" aria-controls="condition-sheet">{{ __('С условием') }}</x-button>
     <div class="card form-stack" id="condition-sheet" data-condition-sheet>
@@ -80,11 +84,11 @@
 @foreach($conditions as $condition)<p>{{ __('Вариант :version', ['version'=>$condition->version]) }}: {{ $condition->description }}</p>
 @endforeach</x-card>
 @endif
-@if($partnerRequest->status === \App\Enums\RequestStatus::Accepted)
+@if($partnerRequest->type !== \App\Enums\RequestType::Rating && $partnerRequest->status === \App\Enums\RequestStatus::Accepted)
 <a class="button button--primary section-space" href="{{ route('duties.index',$couple) }}">{{ __('Перейти к выполнению') }}</a>
 @endif
 {{ $conditions->links() }}<a class="button button--quiet section-space" href="{{ route('requests.index',$couple) }}">{{ __('Все просьбы') }}</a>
-@if($couple->status === \App\Enums\CoupleStatus::Active && in_array($partnerRequest->status,[\App\Enums\RequestStatus::Pending,\App\Enums\RequestStatus::Conditional,\App\Enums\RequestStatus::Accepted],true))
+@if($partnerRequest->rating === null && $couple->status === \App\Enums\CoupleStatus::Active && in_array($partnerRequest->status,[\App\Enums\RequestStatus::Pending,\App\Enums\RequestStatus::Conditional,\App\Enums\RequestStatus::Accepted],true))
 @if($partnerRequest->status === \App\Enums\RequestStatus::Accepted || auth()->id() === $partnerRequest->author_id)
 <x-card class="section-space"><h2>{{ __('Отмена просьбы') }}</h2><p>{{ __('До согласия автор может отменить просьбу. После принятия нужны оба согласия; завершённое дело не отменяется. Резерв освобождается без возврата уже применённых наград и штрафов.') }}</p>
 @if($partnerRequest->cancellation_proposed_by_id)<p>{{ __('Один участник предложил отмену. Второй может подтвердить её; до этого просьба действует.') }}</p>@endif

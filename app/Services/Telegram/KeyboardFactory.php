@@ -62,7 +62,7 @@ final class KeyboardFactory
         $request = PartnerRequest::query()->whereKey($event->partner_request_id)->where('couple_id', $delivery->couple_id)->lockForUpdate()->firstOrFail();
         $operations = [];
         if ($request->status === RequestStatus::Pending && $account->user_id === $request->recipient_id) {
-            $operations = [TelegramOperation::Agree, TelegramOperation::Decline];
+            $operations = $request->type === RequestType::Rating ? [TelegramOperation::Decline] : [TelegramOperation::Agree, TelegramOperation::Decline];
             if ($request->type === RequestType::Food) {
                 $operations[] = TelegramOperation::NoFoodMoney;
             }
@@ -71,9 +71,6 @@ final class KeyboardFactory
             $operations = [TelegramOperation::AcceptCondition, TelegramOperation::DeclineCondition];
         }
         $rows = array_map(fn (TelegramOperation $operation): array => [$this->createButton($account, $delivery->couple_id, 'request', $request->id, $request->version, $operation)], $operations);
-        if ($request->status === RequestStatus::Pending && $account->user_id === $request->recipient_id && $request->type !== RequestType::Money) {
-            $rows[] = [['text' => __('Предложить условие в приложении'), 'url' => route('requests.show', [$request->couple_id, $request->id])]];
-        }
         foreach ($request->duties()->with(['partnerRequest', 'requestCondition'])->lockForUpdate()->get() as $duty) {
             $rows = [...$rows, ...$this->getDutyRows($duty, $account)];
         }

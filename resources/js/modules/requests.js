@@ -5,7 +5,7 @@ export function initializeRequests(root) {
         if (!type || !method) return;
         form.querySelector('[data-condition-choices]').hidden = false;
         form.querySelector('[data-native-condition-type]').hidden = true;
-        const kinds = { money: 'money', wishlist: 'gift', kisses: 'kisses', action: 'action', sushi: 'custom', custom: 'custom' };
+        const kinds = { money: 'money', wishlist: 'gift', kisses: 'kisses', action: 'action', sushi: 'custom', custom: 'custom', fuel: 'custom' };
         function updateFields(clear) {
             const kind = method.selectedOptions[0]?.dataset.kind;
             const active = kind === 'sushi' ? 'sushi' : type.value;
@@ -74,7 +74,19 @@ export function initializeRequests(root) {
     root.querySelectorAll('[data-request-editor]').forEach((form) => {
         const type = form.elements.namedItem('type');
         if (!type || type.type === 'hidden') return;
+        function updateRatingFields() {
+            const isRating = type.value === 'rating';
+            ['heart_price', 'is_very_wanted'].forEach((name) => {
+                const field = form.elements.namedItem(name);
+                if (!field) return;
+                field.disabled = isRating;
+                if (isRating && field.type === 'checkbox') field.checked = false;
+                if (isRating && field.type !== 'checkbox') field.value = '0';
+            });
+        }
+        updateRatingFields();
         type.addEventListener('change', () => {
+            updateRatingFields();
             const preset = form.elements.namedItem('request_template_id');
             if (preset) preset.value = '';
         });

@@ -4,11 +4,12 @@
 <x-card tone="pink" class="start-card">
     <x-status>{{ __($couple->status->label()) }}</x-status>
     <h1 class="form-title">@foreach($couple->members as $member){{ $member->user?->name }}@unless($loop->last) {{ __('и') }} @endunless @endforeach</h1>
-    <p>{{ __('Вместе с :date · дней вместе: :days', ['date' => $couple->started_on->format('d.m.Y'), 'days' => $daysTogether]) }}</p>
+    <p>{{ __('Вместе с :date · дней вместе: :days', ['date' => $couple->started_on->format('d.m.Y'), 'days' => $daysTogether]) }} ({{ $durationTogether }})</p>@if($couple->married_on)<p>{{ __('Свадьба: :date', ['date'=>$couple->married_on->format('d.m.Y')]) }}</p>@endif
     <p>{{ __('Часовой пояс: :zone', ['zone' => $couple->timezone]) }}</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @error('invitation')<p class="field-error" role="alert">{{ $message }}</p>@enderror
     @error('couple')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+    <x-form-feedback />
 </x-card>
 @if($couple->status === \App\Enums\CoupleStatus::Pending)
     <x-card class="section-space form-stack">
@@ -45,4 +46,7 @@
     <a class="button button--quiet" href="{{ route('couples.index') }}">{{ __('Все мои пары') }}</a>
     @can('update', $couple)<a class="button button--danger" href="{{ route('couples.end', $couple) }}">{{ __('Завершить пару') }}</a>@endcan
 </div>
+@if($couple->status === \App\Enums\CoupleStatus::Active)
+<x-card class="section-space"><h2>{{ __('Даты нашей истории') }}</h2><p>{{ $daysTogether }} {{ __('дней') }} ({{ $durationTogether }})</p><form method="post" action="{{ route('couples.dates',$couple) }}" class="form-stack" data-submit-lock>@csrf @method('patch')<input type="hidden" name="expected_version" value="{{ $couple->dates_version }}"><x-field name="started_on" type="date" :label="__('Начало отношений')" :value="old('started_on',$couple->started_on->toDateString())" required /><x-field name="married_on" type="date" :label="__('Дата свадьбы — если поженились')" :value="old('married_on',$couple->married_on?->toDateString())" /><p>{{ __('Если пока не поженились, оставьте дату свадьбы пустой.') }}</p><x-button type="submit">{{ __('Сохранить даты') }}</x-button></form></x-card>
+@endif
 @endsection

@@ -26,10 +26,13 @@ final class CreateAcceptedDuties
         if (DB::transactionLevel() === 0 || $request->status !== RequestStatus::Accepted) {
             throw new LogicException('Duties require a locked accepted request.');
         }
+        if ($request->type === RequestType::Rating) {
+            return;
+        }
         $this->create($request, DutyKind::Service, $request->recipient_id, $request->author_id, $request->description, $request->due_at, ! in_array($request->type, [RequestType::Money, RequestType::Gift], true));
         $condition = $request->conditions()->whereNotNull('accepted_at')->lockForUpdate()->first();
         if ($condition !== null) {
-            $this->create($request, DutyKind::Condition, $request->author_id, $request->recipient_id, $condition->description, $condition->due_at, ! in_array($condition->type, [ConditionType::Money, ConditionType::Gift], true), conditionId: $condition->id);
+            $this->create($request, DutyKind::Condition, $request->author_id, $request->recipient_id, $condition->description, $condition->due_at, $condition->method_kind !== 'fuel' && ! in_array($condition->type, [ConditionType::Money, ConditionType::Gift], true), conditionId: $condition->id);
         }
     }
 

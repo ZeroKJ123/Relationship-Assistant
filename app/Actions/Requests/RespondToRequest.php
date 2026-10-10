@@ -39,6 +39,9 @@ final class RespondToRequest
             if ($current->version === $data->expectedVersion + 1 && $this->isRepeatedFinalResponse($current, $data)) {
                 return null;
             }
+            if ($current->type === RequestType::Rating && $data->response !== RequestResponse::Decline) {
+                $this->context->deny('rating_requires_score', requestId: $current->id);
+            }
             $this->context->requireVersion($current, $data->expectedVersion);
             $this->applyResponse($actor, $current, $data);
             $current->version++;

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property ?string $emoji
  * @property int $id
  * @property int $couple_id
  * @property Couple $couple

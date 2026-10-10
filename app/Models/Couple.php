@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
+ * @property ?CarbonImmutable $married_on
+ * @property int $dates_version
  * @property int $id
  * @property CoupleStatus $status
  * @property CarbonImmutable $started_on
@@ -51,6 +53,6 @@ final class Couple extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['status' => CoupleStatus::class, 'started_on' => 'immutable_date', 'ended_at' => 'immutable_datetime', 'currency' => Currency::class];
+        return ['married_on' => 'immutable_date', 'dates_version' => 'integer', 'status' => CoupleStatus::class, 'started_on' => 'immutable_date', 'ended_at' => 'immutable_datetime', 'currency' => Currency::class];
     }
 }

@@ -1,3 +1,4 @@
+import { initializeMovies } from './modules/movies.js';
 import { initializePwa } from './modules/pwa.js';
 import { initializeDuties } from './modules/duties.js';
 import { initializeWishlist } from './modules/wishlist.js';
@@ -7,6 +8,7 @@ import { initializeDishes } from './modules/dishes.js';
 import { initializeRequests } from './modules/requests.js';
 import { initializeDialogs, initializeTabs } from './modules/dialogs.js';
 
+initializeMovies(document);
 initializePwa(document);
 initializeDialogs(document);
 initializeTabs(document);

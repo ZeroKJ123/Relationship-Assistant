@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Notifications;
 
+use App\Enums\DeclineReason;
 use App\Enums\NotificationKind;
 use App\Enums\ReminderStatus;
+use App\Enums\RequestType;
 use App\Models\Duty;
 use App\Models\DutyConfirmation;
 use App\Models\MoodEntry;
@@ -14,15 +16,18 @@ use App\Models\NotificationDelivery;
 use App\Models\PartnerReminder;
 use App\Models\PartnerRequest;
 use App\Models\RequestEvent;
+use Illuminate\Support\Str;
 
 final class DeliveryContent
 {
+    private const MESSAGE_LENGTH = 3900;
+
     public function getText(NotificationDelivery $delivery): ?string
     {
         return match ($delivery->kind) {
             NotificationKind::RequestEvent => $this->getRequestText($delivery),
             NotificationKind::DutyEvent => $this->getDutyText($delivery),
-            NotificationKind::MoodEntry => $this->getMoodText($delivery),
+            NotificationKind::MoodEntry, NotificationKind::MoodEmoji => $this->getMoodText($delivery),
             NotificationKind::MoodPrompt => $this->getPromptText($delivery),
             NotificationKind::Reminder => $this->getReminderText($delivery),
         };
@@ -39,7 +44,48 @@ final class DeliveryContent
             return null;
         }
 
-        return sprintf("%s: %s.\n%s", __('Просьба обновлена'), $request->status->label(), route('requests.show', [$delivery->couple_id, $request->id]));
+        $label = match ($event->type) {
+            'created' => $request->type === RequestType::Rating ? __('Партнёр просит оценить свой поступок:') : __('Вам просьба от партнёра:'),
+            'agree' => __('Партнёр согласился на вашу просьбу:'),
+            'decline' => __('Партнёр отказался от просьбы:'),
+            'conditional' => __('Партнёр предлагает встречное условие:'),
+            'condition_accepted' => __('Партнёр принял предложенное условие:'),
+            'condition_declined' => __('Партнёр отклонил предложенное условие:'),
+            'cancellation_proposed' => __('Партнёр предлагает отменить просьбу:'),
+            'cancelled' => __('Просьба отменена:'),
+            'rated' => __('Партнёр оценил ваш поступок:'),
+            default => __($event->status->label()),
+        };
+        $details = [sprintf("%s\n%s", $label, Str::limit($request->description, 2000)), sprintf('%s: %s', __('Вид просьбы'), __($request->type->label())), sprintf('%s: %s', __('Ответить или выполнить до'), $request->due_at->setTimezone($request->couple->timezone)->format('d.m.Y H:i'))];
+        if ($request->heart_price > 0) {
+            $details[] = __('Цена: :amount сердечек', ['amount' => $request->heart_price]);
+        }
+        if ($request->is_very_wanted) {
+            $details[] = __('Очень хочу');
+        }
+        if ($request->moneyRequest !== null) {
+            $details[] = sprintf('%s: %s %s', __('Сумма'), $request->moneyRequest->amount, $request->moneyRequest->currency->value);
+        }
+        if (in_array($event->type, ['conditional', 'condition_accepted', 'condition_declined'], true)) {
+            $condition = $request->conditions()->where('version', '<=', $event->version)->latest('version')->first();
+            if ($condition !== null) {
+                $details[] = sprintf("%s: %s\n%s: %s", __('Условие'), Str::limit($condition->description, 1000), __('Срок условия'), $condition->due_at->setTimezone($request->couple->timezone)->format('d.m.Y H:i'));
+            }
+        }
+        if ($event->type === 'decline') {
+            $details[] = $request->decline_reason === DeclineReason::NoFoodMoney ? __('Причина: нет денег на продукты.') : __('Причина: не могу согласиться.');
+        }
+        if ($event->type === 'rated') {
+            $details[] = __('Оценка: :score из 5', ['score' => $request->rating]);
+            if ($request->rating_comment !== null) {
+                $details[] = Str::limit($request->rating_comment, 1000);
+            }
+        }
+        if ($request->type === RequestType::Rating && $event->type === 'created') {
+            $details[] = __('Поставьте оценку от 1 до 5 и при желании оставьте комментарий в приложении.');
+        }
+
+        return Str::limit(implode("\n", $details), self::MESSAGE_LENGTH);
     }
 
     private function getDutyText(NotificationDelivery $delivery): ?string
@@ -59,7 +105,7 @@ final class DeliveryContent
             default => __('Дело обновлено'),
         };
 
-        return sprintf("%s.\n%s", $label, route('duties.show', [$delivery->couple_id, $duty->id]));
+        return sprintf("%s.\n%s\n%s: %s", $label, $duty->description, __('Срок'), $duty->due_at->setTimezone($duty->timezone)->format('d.m.Y H:i'));
     }
 
     private function getMoodText(NotificationDelivery $delivery): ?string
@@ -69,7 +115,7 @@ final class DeliveryContent
             return null;
         }
 
-        return sprintf("%s: %s.\n%s", __('Настроение партнёра'), $entry->level->label(), route('mood.index', $delivery->couple_id));
+        return trim(sprintf('%s: %s %s', __('Настроение партнёра'), $entry->level->label(), $entry->emoji ?? ''));
     }
 
     private function getPromptText(NotificationDelivery $delivery): ?string
@@ -84,7 +130,7 @@ final class DeliveryContent
             return null;
         }
 
-        return sprintf("%s\n%s", __('Как ваше настроение? Отметьте его в приложении.'), route('mood.index', $delivery->couple_id));
+        return __('Как ваше настроение? Выберите оценку кнопкой ниже или отметьте его в приложении.');
     }
 
     private function getReminderText(NotificationDelivery $delivery): ?string

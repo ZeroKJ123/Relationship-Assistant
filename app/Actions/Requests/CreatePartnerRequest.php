@@ -46,6 +46,9 @@ final class CreatePartnerRequest
             if (! $dueAt->isFuture()) {
                 $this->context->deny('expired_deadline', coupleId: $current->id);
             }
+            if ($data->type === RequestType::Rating && ($data->isVeryWanted || $data->heartPrice !== 0)) {
+                $this->context->deny('rating_without_payment_or_penalty', coupleId: $current->id);
+            }
             if ($data->isVeryWanted) {
                 $this->veryWanted->requireAvailability($actor, $current);
             }

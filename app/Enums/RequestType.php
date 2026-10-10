@@ -6,6 +6,8 @@ namespace App\Enums;
 
 enum RequestType: string
 {
+    case Rating = 'rating';
+
     case Gift = 'gift';
 
     case Service = 'service';
@@ -17,6 +19,7 @@ enum RequestType: string
     public function label(): string
     {
         return match ($this) {
+            self::Rating => 'Оценить поступок',
             self::Gift => 'Подарок',
             self::Service => 'Услуга',
             self::Food => 'Приготовление еды',

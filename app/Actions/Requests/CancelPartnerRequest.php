@@ -32,6 +32,9 @@ final class CancelPartnerRequest
             if ($current->status !== RequestStatus::Accepted && $actor->id !== $current->author_id) {
                 $this->context->deny('only_author_can_cancel_unaccepted', requestId: $current->id);
             }
+            if ($current->rating !== null) {
+                $this->context->deny('rating_already_completed', requestId: $current->id);
+            }
             if ($current->duties()->where('status', DutyStatus::Confirmed)->lockForUpdate()->first() !== null) {
                 $this->context->deny('already_completed', requestId: $current->id);
             }

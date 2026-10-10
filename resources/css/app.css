@@ -172,3 +172,9 @@ p { color: var(--color-muted); }
 
 .connection-status { border-radius: var(--radius-card); padding: var(--spacing-page); margin-bottom: var(--spacing-section); background: var(--color-butter); color: var(--color-ink); }
 @media (display-mode: standalone) { .app-shell { padding-top: calc(var(--spacing-page) + env(safe-area-inset-top)); } }
+
+.movie-swipe { touch-action: pan-y; }
+.movie-wheel { width: 8rem; height: 8rem; border-radius: 50%; display: grid; place-items: center; font-size: 3rem; background: conic-gradient(var(--color-lilac) 0deg 90deg, var(--color-butter) 90deg 180deg, var(--color-rose) 180deg 270deg, var(--color-lilac) 270deg 360deg); }
+.movie-wheel--spinning { animation: movie-spin 0.8s ease-out; }
+@keyframes movie-spin { from { transform: rotate(-720deg); } to { transform: rotate(0); } }
+@media (prefers-reduced-motion: reduce) { .movie-wheel--spinning { animation: none; } }

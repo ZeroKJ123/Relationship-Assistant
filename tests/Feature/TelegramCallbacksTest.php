@@ -186,7 +186,7 @@ it('attaches short opaque buttons to notification deliveries with no personal te
     TelegramAccount::factory()->create(['user_id' => $pair->second->id]);
     app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(RequestType::Service, 'Очень личная просьба', CarbonImmutable::now()->addDay()));
     $message = app(DeliveryLifecycle::class)->claim(NotificationDelivery::query()->sole());
-    expect($message->keyboard['inline_keyboard'])->toHaveCount(3);
+    expect($message->keyboard['inline_keyboard'])->toHaveCount(2);
     foreach ($message->keyboard['inline_keyboard'] as $row) {
         if (! isset($row[0]['callback_data'])) {
             continue;

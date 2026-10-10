@@ -14,6 +14,7 @@ Route::middleware(['auth', 'auth.session'])->group(function (): void {
     Route::post('couples/invitations', [CoupleInvitationController::class, 'store'])->middleware('throttle:couple-actions')->name('invitations.store');
     Route::delete('couples/invitations/{invitation}', [CoupleInvitationController::class, 'destroy'])->whereNumber('invitation')->name('invitations.destroy');
     Route::get('couples/{couple}', [CoupleController::class, 'show'])->whereNumber('couple')->middleware(EnsureCoupleAccess::class)->name('couples.show');
+    Route::patch('couples/{couple}/dates', [CoupleController::class, 'update'])->whereNumber('couple')->middleware([EnsureCoupleAccess::class, 'throttle:couple-actions'])->name('couples.dates');
     Route::get('couples/{couple}/end', [CoupleEndController::class, 'create'])->whereNumber('couple')->middleware(EnsureCoupleAccess::class)->name('couples.end');
     Route::post('couples/{couple}/end', [CoupleEndController::class, 'store'])->whereNumber('couple')->middleware(EnsureCoupleAccess::class)->name('couples.end_store');
     Route::get('invitations/{token}', [CoupleInvitationController::class, 'show'])->where('token', '[A-Za-z0-9]{64}')->name('invitations.show');

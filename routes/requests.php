@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ActRatingController;
 use App\Http\Controllers\PartnerRequestController;
 use App\Http\Controllers\RequestCancellationController;
 use App\Http\Controllers\RequestResponseController;
@@ -9,6 +10,7 @@ use App\Http\Middleware\EnsureCoupleAccess;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'auth.session', EnsureCoupleAccess::class])->prefix('couples/{couple}/requests')->whereNumber('couple')->group(function (): void {
+    Route::post('{partnerRequest}/rating', [ActRatingController::class, 'store'])->whereNumber('partnerRequest')->middleware('throttle:couple-actions')->name('requests.rating');
     Route::post('{partnerRequest}/cancel', RequestCancellationController::class)->whereNumber('partnerRequest')->middleware('throttle:couple-actions')->name('requests.cancel');
     Route::get('', [PartnerRequestController::class, 'index'])->name('requests.index');
     Route::get('create', [PartnerRequestController::class, 'create'])->name('requests.create');

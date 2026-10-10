@@ -28,5 +28,6 @@ final readonly class DashboardViewModel
         public Collection $duties,
         public ?PartnerRequest $newRequest,
         public bool $isAgreementPending,
+        public ?string $togetherDuration = null,
     ) {}
 }

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 use App\Actions\Admin\UpdateEconomySettings;
 use App\Actions\Auth\Telegram\ConsumeTelegramLinkCode;
+use App\Actions\Catalogs\CreateCar;
 use App\Actions\Couples\Agreements\AcceptProposal;
 use App\Actions\Couples\Agreements\ProposeWeeklyLimit;
 use App\Actions\Couples\Agreements\SubmitAnswer;
 use App\Actions\Couples\EndCouple;
+use App\Actions\Couples\UpdateRelationshipDates;
 use App\Actions\Dates\CreateDateInvitation;
 use App\Actions\Dishes\SaveDish;
 use App\Actions\Duties\CheckOverdueDuty;
@@ -18,15 +20,19 @@ use App\Actions\Friends\SaveFriend;
 use App\Actions\Hearts\AdjustPartnerHearts;
 use App\Actions\Money\CreateMoneyRequest;
 use App\Actions\Mood\RecordMood;
+use App\Actions\Movies\VoteForMovie;
 use App\Actions\Reminders\CancelReminder;
 use App\Actions\Reminders\CreateReminder;
 use App\Actions\Reminders\PrepareReminder;
 use App\Actions\Requests\CancelPartnerRequest;
 use App\Actions\Requests\CreateGuestVisit;
 use App\Actions\Requests\CreatePartnerRequest;
+use App\Actions\Requests\RatePartnerAct;
 use App\Actions\Requests\ResolveCondition;
 use App\Actions\Requests\RespondToRequest;
 use App\Data\Admin\EconomySettingsData;
+use App\Data\Catalogs\CarData;
+use App\Data\Couples\RelationshipDatesData;
 use App\Data\Couples\WeeklyLimitData;
 use App\Data\Dates\DateInvitationData;
 use App\Data\Dishes\DishData;
@@ -35,6 +41,7 @@ use App\Data\Hearts\AdjustmentData;
 use App\Data\Money\MoneyRequestData;
 use App\Data\Mood\MoodData;
 use App\Data\Reminders\ReminderData;
+use App\Data\Requests\ActRatingData;
 use App\Data\Requests\GuestVisitData;
 use App\Data\Requests\NewRequestData;
 use App\Data\Requests\RequestResponseData;
@@ -53,6 +60,7 @@ use App\Models\Couple;
 use App\Models\Dish;
 use App\Models\Duty;
 use App\Models\Friend;
+use App\Models\Movie;
 use App\Models\NotificationDelivery;
 use App\Models\PartnerReminder;
 use App\Models\PartnerRequest;
@@ -99,6 +107,10 @@ while (! file_exists($barrier)) {
 }
 try {
     match ($operation) {
+        'act_rate' => $app->make(RatePartnerAct::class)->execute($actor, $couple, PartnerRequest::query()->findOrFail($value), new ActRatingData(0, $limit, null)),
+        'movie_vote' => $app->make(VoteForMovie::class)->execute($actor, $couple, Movie::query()->findOrFail($value), $limit === 1),
+        'car_create' => $app->make(CreateCar::class)->execute($actor, new CarData('Race car', 'petrol', sprintf('00000000-0000-4000-8000-%012d', $value))),
+        'relationship_dates' => $app->make(UpdateRelationshipDates::class)->execute($actor, $couple, new RelationshipDatesData(sprintf('%d-01-01', $value), null, $limit)),
         'telegram_code' => $app->make(ConsumeTelegramLinkCode::class)->execute($actor, sprintf('00000000-0000-4000-8000-%012d', $value)),
         'telegram_callback' => $app->make(WebhookHandler::class)->execute(new IncomingUpdate($limit, TelegramAccount::query()->where('user_id', $actor->id)->sole()->telegram_id, '', null, sprintf('act:%s', str_pad((string) $value, 40, 'x')), null), hash('sha256', (string) $limit)),
         'notification_claim' => $app->make(DeliveryLifecycle::class)->claim(NotificationDelivery::query()->findOrFail($value)) ?? throw ValidationException::withMessages(['notification' => 'Unavailable']),

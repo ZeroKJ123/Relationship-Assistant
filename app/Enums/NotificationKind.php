@@ -10,5 +10,6 @@ enum NotificationKind: string
     case DutyEvent = 'duty_event';
     case MoodPrompt = 'mood_prompt';
     case MoodEntry = 'mood_entry';
+    case MoodEmoji = 'mood_emoji';
     case Reminder = 'reminder';
 }

@@ -38,7 +38,7 @@ final class RequestCatalog
             return ['type' => $data->conditionType ?? ConditionType::Custom, 'description' => $data->description ?? '', 'method_kind' => null, 'method_name' => null, 'sushi_size' => null];
         }
         $method = SettlementMethod::query()->whereKey($data->methodId)->lockForUpdate()->first();
-        if ($method === null || ($method->user_id !== null && $method->user_id !== $actor->id) || ! in_array($method->kind, ['action', 'kisses', 'sushi', 'custom', 'money', 'wishlist'], true)) {
+        if ($method === null || ($method->user_id !== null && $method->user_id !== $actor->id) || ! in_array($method->kind, ['action', 'kisses', 'sushi', 'custom', 'money', 'wishlist', 'fuel'], true)) {
             $this->deny();
         }
         if (($method->kind === 'sushi' && ! in_array($data->sushiSize, ['small', 'medium', 'large'], true)) || ($method->kind !== 'sushi' && $data->sushiSize !== null)) {

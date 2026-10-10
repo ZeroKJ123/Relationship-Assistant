@@ -9,6 +9,18 @@ use Carbon\CarbonImmutable;
 
 final class CoupleTimeline
 {
+    public function getDuration(Couple $couple): string
+    {
+        $start = CarbonImmutable::parse($couple->started_on->toDateString(), $couple->timezone);
+        $end = ($couple->ended_at ?? CarbonImmutable::now($couple->timezone))->setTimezone($couple->timezone)->startOfDay();
+        if ($start->greaterThan($end)) {
+            return __('0 г. 0 мес.');
+        }
+        $interval = $start->diff($end);
+
+        return __(':years г. :months мес.', ['years' => $interval->y, 'months' => $interval->m]);
+    }
+
     public function getDaysTogether(Couple $couple): int
     {
         $start = CarbonImmutable::parse($couple->started_on->toDateString(), $couple->timezone);

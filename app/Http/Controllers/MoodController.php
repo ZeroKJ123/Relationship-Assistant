@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Mood\AddMoodEmoji;
 use App\Actions\Mood\RecordMood;
 use App\Actions\Mood\SetMoodSchedule;
 use App\Enums\MoodLevel;
+use App\Http\Requests\MoodEmojiRequest;
 use App\Http\Requests\SetMoodScheduleRequest;
 use App\Http\Requests\StoreMoodRequest;
 use App\Models\Couple;
@@ -25,7 +27,7 @@ final class MoodController extends Controller
 {
     private const PAGE_SIZE = 20;
 
-    public function __construct(private readonly RecordMood $record, private readonly SetMoodSchedule $schedule, private readonly MoodHistory $history) {}
+    public function __construct(private readonly RecordMood $record, private readonly SetMoodSchedule $schedule, private readonly MoodHistory $history, private readonly AddMoodEmoji $addEmoji) {}
 
     public function index(Request $request, Couple $couple): View
     {
@@ -35,16 +37,27 @@ final class MoodController extends Controller
         $member = $couple->members()->where('user_id', $actor->id)->firstOrFail();
         $prompt = $request->filled('prompt_id') ? MoodPrompt::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->whereNull('answered_at')->where('expires_at', '>', now())->findOrFail($request->integer('prompt_id')) : null;
 
-        return view('mood.index', ['couple' => $couple, 'member' => $member, 'prompt' => $prompt, 'latestMoods' => $this->history->getLatest($couple), 'levels' => MoodLevel::cases(), 'operationKey' => Str::uuid()->toString(), 'entries' => MoodEntry::query()->where('couple_id', $couple->id)->where('recorded_at', '>=', now()->subDays(MoodEntry::HISTORY_DAYS))->with('user:id,name')->latest('id')->paginate(self::PAGE_SIZE)]);
+        $emojiEntry = $request->filled('emoji_entry') ? MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->whereNull('emoji')->find($request->integer('emoji_entry')) : null;
+
+        return view('mood.index', ['emojiEntry' => $emojiEntry, 'emojis' => AddMoodEmoji::EMOJIS, 'couple' => $couple, 'member' => $member, 'prompt' => $prompt, 'latestMoods' => $this->history->getLatest($couple), 'levels' => MoodLevel::cases(), 'operationKey' => Str::uuid()->toString(), 'entries' => MoodEntry::query()->where('couple_id', $couple->id)->where('recorded_at', '>=', now()->subDays(MoodEntry::HISTORY_DAYS))->with('user:id,name')->latest('id')->paginate(self::PAGE_SIZE)]);
     }
 
     public function store(StoreMoodRequest $request, Couple $couple): RedirectResponse
     {
         $actor = $request->user();
         abort_unless($actor instanceof User, Response::HTTP_UNAUTHORIZED);
-        $this->record->execute($actor, $couple, $request->getData());
+        $entry = $this->record->execute($actor, $couple, $request->getData());
 
-        return redirect()->route('mood.index', $couple)->with('status', __('Настроение сохранено и видно партнёру.'));
+        return redirect()->route('mood.index', [$couple, 'emoji_entry' => $entry->id])->with('status', __('Настроение сохранено и видно партнёру.'));
+    }
+
+    public function emoji(MoodEmojiRequest $request, Couple $couple, MoodEntry $moodEntry): RedirectResponse
+    {
+        $actor = $request->user();
+        abort_unless($actor instanceof User, Response::HTTP_UNAUTHORIZED);
+        $this->addEmoji->execute($actor, $couple, $moodEntry, $request->string('emoji')->toString());
+
+        return redirect()->route('mood.index', $couple)->with('status', __('Эмоджи добавлено к настроению.'));
     }
 
     public function schedule(SetMoodScheduleRequest $request, Couple $couple): RedirectResponse

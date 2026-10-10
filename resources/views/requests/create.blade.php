@@ -2,6 +2,7 @@
 @section('title', __('Новая просьба'))
 @section('content')
 <x-card class="auth-card">
+<p>{{ __('Для оценки поступка выберите этот вид, опишите поступок и укажите срок ответа. Партнёр поставит оценку 1–5 и сможет оставить комментарий. Цена — 0, без «Очень хочу», штрафов и наград.') }}</p>
 <h1 class="form-title">{{ __('Новая просьба') }}</h1>
 <p>{{ __('Срок указывается по часовому поясу пары: :zone', ['zone'=>$couple->timezone]) }}</p>
 @if($errors->any())<div role="alert">
@@ -17,7 +18,7 @@
 <div class="field">
 <label for="type">{{ __('О чём просьба') }}</label>
 <select id="type" name="type">
-@foreach($types as $type)<option value="{{ $type->value }}" @selected(old('type',$preset?->type->value) === $type->value)>{{ __($type->label()) }}</option>
+@foreach($types as $type)<option value="{{ $type->value }}" @selected(old('type',$selectedType ?? $preset?->type->value) === $type->value)>{{ __($type->label()) }}</option>
 @endforeach</select>
 </div>
 @endif
