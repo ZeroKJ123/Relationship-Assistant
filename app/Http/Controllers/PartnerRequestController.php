@@ -49,6 +49,12 @@ final class PartnerRequestController extends Controller
         if ($preset?->type === RequestType::Money) {
             return redirect()->route('money.create', [$couple, 'request_template_id' => $preset->id]);
         }
+        if ($preset?->type === RequestType::Guests) {
+            return redirect()->route('guests.create', [$couple, 'request_template_id' => $preset->id]);
+        }
+        if ($preset?->type === RequestType::Event) {
+            return redirect()->route('dates.create', [$couple, 'request_template_id' => $preset->id]);
+        }
 
         return view('requests.create', ['dish' => $dish, 'preset' => $preset, 'templates' => RequestTemplate::query()->where('type', '!=', RequestType::Money)->with('category')->orderBy('sort_order')->get(), 'expenses' => ExpenseCategory::query()->orderBy('sort_order')->get(), 'couple' => $couple, 'types' => array_filter(RequestType::cases(), fn (RequestType $type): bool => $type !== RequestType::Money), 'operationKey' => Str::uuid()->toString()]);
     }
@@ -66,7 +72,7 @@ final class PartnerRequestController extends Controller
     {
         abort_unless($partnerRequest->couple_id === $couple->id, Response::HTTP_NOT_FOUND);
         Gate::authorize('view', $partnerRequest);
-        $partnerRequest->load(['author:id,name', 'recipient:id,name', 'moneyRequest']);
+        $partnerRequest->load(['author:id,name', 'recipient:id,name', 'moneyRequest', 'guestVisit', 'dateInvitation']);
 
         return view('requests.show', ['wishes' => WishlistItem::query()->where('user_id', auth()->id())->whereNull('archived_at')->whereNull('claimed_condition_id')->latest('id')->paginate(self::PAGE_SIZE, ['*'], 'wishes_page')->withQueryString(), 'currencies' => Currency::cases(), 'conditionTypes' => ConditionType::cases(), 'methods' => SettlementMethod::query()->whereIn('kind', ['action', 'kisses', 'sushi', 'custom', 'money', 'wishlist'])->where(fn (Builder $query) => $query->whereNull('user_id')->orWhere('user_id', auth()->id()))->orderBy('sort_order')->get(), 'couple' => $couple, 'partnerRequest' => $partnerRequest, 'conditions' => $partnerRequest->conditions()->latest('version')->paginate(self::PAGE_SIZE), 'currentCondition' => $partnerRequest->conditions()->latest('version')->first()]);
     }

@@ -21,3 +21,5 @@ require sprintf('%s/admin.php', __DIR__);
 
 require sprintf('%s/catalogs.php', __DIR__);
 require sprintf('%s/products.php', __DIR__);
+
+require sprintf('%s/social.php', __DIR__);

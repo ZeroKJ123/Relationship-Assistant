@@ -203,3 +203,7 @@ Before relying on a package's API, confirm its installed version:
 
 - `routes/products.php`, `app/Services/Requests/*Attachments.php`: снимки блюд и условий, обещания подарков, денежные реквизиты.
 - `app/Services/Media/PrivatePhotos.php`: проверка и закрытая выдача фото каталога.
+
+- `app/Actions/Friends/`, `routes/social.php`: личные друзья и архив.
+- `app/Actions/Requests/CreateGuestVisit.php`, `app/Actions/Dates/`, `app/Services/Requests/SocialInvitations.php`: гостевые визиты и свидания с неизменяемыми снимками.
+- `docs/friends-guests-dates.md`: правила приглашений, миграция и проверки.

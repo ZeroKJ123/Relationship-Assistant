@@ -7,21 +7,28 @@ use App\Actions\Couples\Agreements\AcceptProposal;
 use App\Actions\Couples\Agreements\ProposeWeeklyLimit;
 use App\Actions\Couples\Agreements\SubmitAnswer;
 use App\Actions\Couples\EndCouple;
+use App\Actions\Dates\CreateDateInvitation;
 use App\Actions\Dishes\SaveDish;
 use App\Actions\Duties\CheckOverdueDuty;
 use App\Actions\Duties\ReportDuty;
 use App\Actions\Duties\VerifyDuty;
+use App\Actions\Friends\ArchiveFriend;
+use App\Actions\Friends\SaveFriend;
 use App\Actions\Hearts\AdjustPartnerHearts;
 use App\Actions\Money\CreateMoneyRequest;
 use App\Actions\Requests\CancelPartnerRequest;
+use App\Actions\Requests\CreateGuestVisit;
 use App\Actions\Requests\CreatePartnerRequest;
 use App\Actions\Requests\ResolveCondition;
 use App\Actions\Requests\RespondToRequest;
 use App\Data\Admin\EconomySettingsData;
 use App\Data\Couples\WeeklyLimitData;
+use App\Data\Dates\DateInvitationData;
 use App\Data\Dishes\DishData;
+use App\Data\Friends\FriendData;
 use App\Data\Hearts\AdjustmentData;
 use App\Data\Money\MoneyRequestData;
+use App\Data\Requests\GuestVisitData;
 use App\Data\Requests\NewRequestData;
 use App\Data\Requests\RequestResponseData;
 use App\Enums\ConditionType;
@@ -29,12 +36,14 @@ use App\Enums\Currency;
 use App\Enums\DeclineReason;
 use App\Enums\DishKind;
 use App\Enums\HeartOperationType;
+use App\Enums\InvitationKind;
 use App\Enums\RequestResponse;
 use App\Enums\RequestType;
 use App\Models\AgreementProposal;
 use App\Models\Couple;
 use App\Models\Dish;
 use App\Models\Duty;
+use App\Models\Friend;
 use App\Models\PartnerRequest;
 use App\Models\User;
 use App\Services\Hearts\EconomySettingsStore;
@@ -72,6 +81,10 @@ while (! file_exists($barrier)) {
 }
 try {
     match ($operation) {
+        'friend_edit' => $app->make(SaveFriend::class)->execute($actor, new FriendData(sprintf('Friend %d', $limit), sprintf('00000000-0000-4000-8000-%012d', $limit)), Friend::query()->findOrFail($value)),
+        'friend_archive' => $app->make(ArchiveFriend::class)->execute($actor, Friend::query()->findOrFail($value), 0),
+        'visit_create' => $app->make(CreateGuestVisit::class)->execute($actor, $couple, new GuestVisitData([['id' => $value, 'version' => 0]], CarbonImmutable::tomorrow(), 60, 'Race visit', sprintf('00000000-0000-4000-8000-%012d', $limit))),
+        'date_create' => $app->make(CreateDateInvitation::class)->execute($actor, $couple, new DateInvitationData(InvitationKind::Date, 'Race date', CarbonImmutable::tomorrow(), null, null, sprintf('00000000-0000-4000-8000-%012d', $value))),
         'money_create' => $app->make(CreateMoneyRequest::class)->execute($actor, $couple, new MoneyRequestData('12.30', Currency::Byn, 'Race', CarbonImmutable::tomorrow(), sprintf('00000000-0000-4000-8000-%012d', $value))),
         'dish_edit' => $app->make(SaveDish::class)->execute($actor, new DishData(sprintf('Edit %d', $limit), 'Ingredient', '9.99', Currency::Byn, DishKind::Ordinary, 1, 0, sprintf('00000000-0000-4000-8000-%012d', $limit)), Dish::query()->findOrFail($value)),
         'economy_edit' => $app->make(UpdateEconomySettings::class)->execute($actor, new EconomySettingsData($value, array_replace($app->make(EconomySettingsStore::class)->initialize()->settings, ['reward' => $limit]))),

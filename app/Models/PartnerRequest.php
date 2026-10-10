@@ -22,6 +22,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property ?DishKind $dish_kind
  * @property ?array<string,int|string|null> $dish_snapshot
  * @property ?MoneyRequest $moneyRequest
+ * @property ?GuestVisit $guestVisit
+ * @property ?DateInvitation $dateInvitation
  * @property ?int $request_template_id
  * @property ?int $expense_category_id
  * @property ?string $template_name
@@ -75,6 +77,18 @@ final class PartnerRequest extends Model
     public function moneyRequest(): HasOne
     {
         return $this->hasOne(MoneyRequest::class);
+    }
+
+    /** @return HasOne<GuestVisit, $this> */
+    public function guestVisit(): HasOne
+    {
+        return $this->hasOne(GuestVisit::class);
+    }
+
+    /** @return HasOne<DateInvitation, $this> */
+    public function dateInvitation(): HasOne
+    {
+        return $this->hasOne(DateInvitation::class);
     }
 
     /** @return HasMany<RequestCondition, $this> */

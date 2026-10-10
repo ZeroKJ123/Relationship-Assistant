@@ -16,6 +16,7 @@ use App\Services\Hearts\ServicePayments;
 use App\Services\Requests\RefusalTariff;
 use App\Services\Requests\RequestAttachments;
 use App\Services\Requests\RequestContext;
+use App\Services\Requests\SocialInvitations;
 use App\Services\Requests\VeryWantedRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +25,7 @@ use Illuminate\Support\Str;
 
 final class CreatePartnerRequest
 {
-    public function __construct(private readonly RequestContext $context, private readonly RefusalTariff $tariff, private readonly VeryWantedRequests $veryWanted, private readonly ServicePayments $payments, private readonly RequestCatalog $catalog, private readonly RequestAttachments $attachments) {}
+    public function __construct(private readonly RequestContext $context, private readonly RefusalTariff $tariff, private readonly VeryWantedRequests $veryWanted, private readonly ServicePayments $payments, private readonly RequestCatalog $catalog, private readonly RequestAttachments $attachments, private readonly SocialInvitations $invitations) {}
 
     public function execute(User $actor, Couple $couple, NewRequestData $data): PartnerRequest
     {
@@ -36,7 +37,7 @@ final class CreatePartnerRequest
             $current = $this->context->lockCouple($actor, $couple);
             $existing = PartnerRequest::query()->where('author_id', $actor->id)->where('operation_key', $operationKey)->lockForUpdate()->first();
             if ($existing !== null) {
-                if (! $this->attachments->isSame($existing, $data) || $existing->couple_id !== $current->id || $existing->type !== $data->type || $existing->description !== $data->description || ! $existing->due_at->equalTo($dueAt) || $existing->is_very_wanted !== $data->isVeryWanted || $existing->heart_price !== $data->heartPrice || $existing->request_template_id !== $data->templateId || $existing->expense_category_id !== $data->expenseCategoryId) {
+                if (! $this->attachments->isSame($existing, $data) || ! $this->invitations->isSame($existing, $data) || $existing->couple_id !== $current->id || $existing->type !== $data->type || $existing->description !== $data->description || ! $existing->due_at->equalTo($dueAt) || $existing->is_very_wanted !== $data->isVeryWanted || $existing->heart_price !== $data->heartPrice || $existing->request_template_id !== $data->templateId || $existing->expense_category_id !== $data->expenseCategoryId) {
                     $this->context->deny('changed_creation_payload', coupleId: $current->id);
                 }
 
@@ -73,6 +74,7 @@ final class CreatePartnerRequest
             ])->save();
 
             $this->attachments->attachMoney($request, $data);
+            $this->invitations->attach($actor, $request, $data);
 
             return [$request, $this->context->record($actor, $request, 'created')];
         }, attempts: 3);
