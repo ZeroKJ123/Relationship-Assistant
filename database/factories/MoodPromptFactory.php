@@ -16,6 +16,6 @@ final class MoodPromptFactory extends Factory
     /** @return array<string,mixed> */
     public function definition(): array
     {
-        return ['couple_id' => Couple::factory(), 'user_id' => User::factory(), 'scheduled_at' => CarbonImmutable::now()->subHour(), 'expires_at' => CarbonImmutable::now()->addHour(), 'answered_at' => null];
+        return ['is_manual' => false, 'couple_id' => Couple::factory(), 'user_id' => User::factory(), 'scheduled_at' => CarbonImmutable::now()->subHour(), 'expires_at' => CarbonImmutable::now()->addHour(), 'answered_at' => null];
     }
 }

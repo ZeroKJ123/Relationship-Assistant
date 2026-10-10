@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 use App\Actions\Reminders\CancelReminder;
+use App\Enums\NotificationKind;
 use App\Enums\ReminderStatus;
 use App\Models\MoodEntry;
 use App\Models\MoodPrompt;
+use App\Models\NotificationDelivery;
 use App\Models\PartnerReminder;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -54,4 +56,12 @@ it('serializes cancellation with preparation and never revives a cancelled remin
         app(CancelReminder::class)->execute($pair->first, $reminder, $reminder->version);
     }
     expect($reminder->refresh()->status)->toBe(ReminderStatus::Cancelled);
+});
+
+it('reuses one manual partner mood prompt for concurrent button presses', function (): void {
+    $pair = AgreementScenario::create();
+    $args = [(string) $pair->first->id, (string) $pair->couple->id, 'mood_partner_request', '0', '0'];
+    expect((new ConcurrentOperations)->run('agreement-worker.php', [$args, $args]))->toBe(['accepted', 'accepted']);
+    expect(MoodPrompt::query()->count())->toBe(1);
+    expect(NotificationDelivery::query()->where('kind', NotificationKind::MoodPrompt)->count())->toBe(1);
 });

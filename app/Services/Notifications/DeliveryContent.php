@@ -126,8 +126,12 @@ final class DeliveryContent
         }
         $enabled = $delivery->couple->members()->where('user_id', $delivery->recipient_id)->where('active_user_id', $delivery->recipient_id)->where('mood_schedule_enabled', true)->lockForUpdate()->first() !== null;
         $hasNewMood = MoodEntry::query()->where('couple_id', $delivery->couple_id)->where('user_id', $delivery->recipient_id)->where('recorded_at', '>=', $prompt->scheduled_at)->lockForUpdate()->first() !== null;
-        if (! $enabled || $hasNewMood) {
+        if ((! $prompt->is_manual && ! $enabled) || $hasNewMood) {
             return null;
+        }
+
+        if ($prompt->is_manual) {
+            return __('Партнёр хочет узнать ваше настроение. Как вы сейчас? Выберите оценку кнопкой ниже или отметьте её в приложении.');
         }
 
         return __('Как ваше настроение? Выберите оценку кнопкой ниже или отметьте его в приложении.');

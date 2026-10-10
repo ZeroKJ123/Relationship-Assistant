@@ -47,46 +47,28 @@ export function initializeRequests(root) {
         if (initialKind && kinds[initialKind]) type.value = kinds[initialKind];
         updateFields(false);
     });
-    root.querySelectorAll('[data-condition-section]').forEach((section) => {
-        const content = section.querySelector('[data-condition-sheet]');
-        const opener = section.querySelector('[data-condition-open]');
-        if (!content || !opener || typeof HTMLDialogElement === 'undefined') return;
-        opener.hidden = false;
-        const dialog = document.createElement('dialog');
-        dialog.id = content.id;
-        dialog.className = 'sheet condition-sheet';
-        dialog.setAttribute('aria-labelledby', 'condition-sheet-title');
-        while (content.firstChild) dialog.append(content.firstChild);
-        content.replaceWith(dialog);
-        const closer = dialog.querySelector('[data-condition-close]');
-        closer.hidden = false;
-        opener.addEventListener('click', () => {
-            dialog.showModal();
-            opener.setAttribute('aria-expanded', 'true');
-        });
-        closer.addEventListener('click', () => dialog.close());
-        dialog.addEventListener('close', () => {
-            opener.setAttribute('aria-expanded', 'false');
-            opener.focus();
-        });
-        if (section.dataset.conditionErrors === 'true') opener.click();
-    });
     root.querySelectorAll('[data-request-editor]').forEach((form) => {
         const type = form.elements.namedItem('type');
         if (!type || type.type === 'hidden') return;
-        function updateRatingFields() {
+        function updateRequestFields() {
             const isRating = type.value === 'rating';
             ['heart_price', 'is_very_wanted'].forEach((name) => {
                 const field = form.elements.namedItem(name);
                 if (!field) return;
-                field.disabled = isRating;
+                field.disabled = name === 'heart_price' ? type.value !== 'service' : isRating;
                 if (isRating && field.type === 'checkbox') field.checked = false;
-                if (isRating && field.type !== 'checkbox') field.value = '0';
+                if (field.disabled && field.type !== 'checkbox') field.value = '0';
             });
+            const price = form.querySelector('[data-request-price]');
+            const veryWanted = form.querySelector('[data-request-very-wanted]');
+            const ratingHint = form.querySelector('[data-request-rating-hint]');
+            if (price) price.hidden = type.value !== 'service';
+            if (veryWanted) veryWanted.hidden = isRating;
+            if (ratingHint) ratingHint.hidden = !isRating;
         }
-        updateRatingFields();
+        updateRequestFields();
         type.addEventListener('change', () => {
-            updateRatingFields();
+            updateRequestFields();
             const preset = form.elements.namedItem('request_template_id');
             if (preset) preset.value = '';
         });

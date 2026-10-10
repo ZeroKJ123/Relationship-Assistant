@@ -30,7 +30,7 @@ final class SetMoodSchedule
             }
             $member->forceFill(['mood_schedule_enabled' => $enabled, 'mood_schedule_version' => $version + 1])->save();
             if (! $enabled) {
-                MoodPrompt::query()->where('couple_id', $current->id)->where('user_id', $actor->id)->whereNull('answered_at')->where('expires_at', '>', now())->update(['expires_at' => now()]);
+                MoodPrompt::query()->where('couple_id', $current->id)->where('user_id', $actor->id)->where('is_manual', false)->whereNull('answered_at')->where('expires_at', '>', now())->update(['expires_at' => now()]);
             }
             DB::afterCommit(fn () => Log::info('mood.schedule_changed', ['actor_id' => $actor->id, 'couple_id' => $current->id, 'version' => $member->mood_schedule_version]));
         }, attempts: 3);

@@ -8,6 +8,7 @@ use App\Data\Hearts\BalanceSnapshot;
 use App\Models\Couple;
 use App\Models\Duty;
 use App\Models\MoodEntry;
+use App\Models\MoodPrompt;
 use App\Models\PartnerRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -29,5 +30,6 @@ final readonly class DashboardViewModel
         public ?PartnerRequest $newRequest,
         public bool $isAgreementPending,
         public ?string $togetherDuration = null,
+        public ?MoodPrompt $pendingMoodPrompt = null,
     ) {}
 }

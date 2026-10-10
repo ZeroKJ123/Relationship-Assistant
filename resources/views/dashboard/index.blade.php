@@ -18,11 +18,12 @@
         </div>
     </section>
     <x-form-feedback />
+    @if($dashboard->pendingMoodPrompt?->is_manual)<x-card tone="purple" class="section-space form-stack"><p>{{ __('Партнёр спрашивает, как вы себя чувствуете.') }}</p><a class="button button--primary" href="{{ route('mood.index',$dashboard->couple) }}">{{ __('Ответить о настроении') }}</a></x-card>@endif
     <div class="dashboard-summary">
         <x-card tone="purple" class="form-stack">
             <h2>{{ __('Настроение партнёра') }}</h2>
             @forelse($dashboard->latestMoods as $entry)<p><strong>{{ $entry->user->name }}</strong> · {{ $entry->level->label() }} @if($entry->emoji)<span aria-label="{{ __('Эмоджи настроения') }}">{{ $entry->emoji }}</span>@endif<br><span>{{ __('Обновлено :date', ['date'=>$entry->recorded_at->setTimezone($dashboard->couple->timezone)->format('d.m H:i')]) }}</span></p>@empty<p>{{ __('Оценок пока нет') }}</p>@endforelse
-            @if($dashboard->couple)<a href="{{ route('mood.index',$dashboard->couple) }}">{{ __('Отметить настроение') }}</a>@endif
+            @if($dashboard->couple)<x-mood-request :couple="$dashboard->couple" /><a href="{{ route('mood.index',$dashboard->couple) }}">{{ __('Отметить настроение') }}</a>@endif
         </x-card>
         <x-card tone="yellow" class="form-stack">
             <h2>{{ __('Мои сердечки') }}</h2><a class="wallet-total" href="{{ route('hearts.index') }}" aria-label="{{ __('Баланс :amount сердечек. Открыть историю', ['amount'=>$dashboard->wallet->balance]) }}"><span aria-hidden="true">♥</span> {{ $dashboard->wallet->balance }}</a>
@@ -44,7 +45,7 @@
     <section class="section-space" aria-labelledby="my-duties-title"><div class="section-heading"><h2 id="my-duties-title">{{ __('Мои дела') }}</h2>@if($dashboard->couple)<a href="{{ route('duties.index',$dashboard->couple) }}">{{ __('Все') }} →</a>@endif</div>
         <div class="form-stack">@forelse($dashboard->duties as $duty)<x-card class="dashboard-duty"><div><h3>{{ $duty->description }}</h3><p>{{ __($duty->status->label()) }} · {{ $duty->due_at->setTimezone($dashboard->couple->timezone)->format('d.m H:i') }}</p></div><a class="button button--quiet" href="{{ route('duties.show',[$dashboard->couple,$duty]) }}">{{ __('Открыть') }}</a></x-card>@empty<x-card><p>{{ __('Срочных дел нет. Можно запланировать что-нибудь приятное.') }}</p></x-card>@endforelse</div>
     </section>
-    @if($dashboard->newRequest)<x-card class="section-space dashboard-duty"><div><h2>{{ __('Новая просьба от :name', ['name'=>$dashboard->newRequest->author->name]) }}</h2><p class="request-description">{{ $dashboard->newRequest->description }}</p></div><a class="button button--primary" href="{{ route('requests.show',[$dashboard->couple,$dashboard->newRequest]) }}">{{ __('Открыть') }}</a></x-card>@endif
+    @if($dashboard->newRequest)<x-card class="section-space dashboard-duty"><div><h2>{{ $dashboard->newRequest->status === \App\Enums\RequestStatus::Conditional ? __('Условие от :name', ['name'=>$dashboard->newRequest->recipient->name]) : __('Новая просьба от :name', ['name'=>$dashboard->newRequest->author->name]) }}</h2><p class="request-description">{{ $dashboard->newRequest->description }}</p></div><a class="button button--primary" href="{{ route('requests.show',[$dashboard->couple,$dashboard->newRequest]) }}">{{ __('Открыть') }}</a></x-card>@endif
     <p class="page-transition" role="status" hidden data-page-transition>{{ __('Открываем страницу…') }}</p>
 </div>
 @endsection

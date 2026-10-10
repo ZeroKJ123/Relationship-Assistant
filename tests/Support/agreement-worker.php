@@ -20,6 +20,7 @@ use App\Actions\Friends\SaveFriend;
 use App\Actions\Hearts\AdjustPartnerHearts;
 use App\Actions\Money\CreateMoneyRequest;
 use App\Actions\Mood\RecordMood;
+use App\Actions\Mood\RequestPartnerMood;
 use App\Actions\Movies\VoteForMovie;
 use App\Actions\Reminders\CancelReminder;
 use App\Actions\Reminders\CreateReminder;
@@ -115,6 +116,7 @@ try {
         'telegram_callback' => $app->make(WebhookHandler::class)->execute(new IncomingUpdate($limit, TelegramAccount::query()->where('user_id', $actor->id)->sole()->telegram_id, '', null, sprintf('act:%s', str_pad((string) $value, 40, 'x')), null), hash('sha256', (string) $limit)),
         'notification_claim' => $app->make(DeliveryLifecycle::class)->claim(NotificationDelivery::query()->findOrFail($value)) ?? throw ValidationException::withMessages(['notification' => 'Unavailable']),
         'care_process' => $app->make(DueCare::class)->execute(),
+        'mood_partner_request' => $app->make(RequestPartnerMood::class)->execute($actor, $couple),
         'mood_record' => $app->make(RecordMood::class)->execute($actor, $couple, new MoodData(MoodLevel::Good, sprintf('00000000-0000-4000-8000-%012d', $value))),
         'mood_prompt' => $app->make(RecordMood::class)->execute($actor, $couple, new MoodData(MoodLevel::Good, sprintf('00000000-0000-4000-8000-%012d', $limit), promptId: $value)),
         'reminder_create' => $app->make(CreateReminder::class)->execute($actor, $couple, new ReminderData('Race reminder', CarbonImmutable::tomorrow(), sprintf('00000000-0000-4000-8000-%012d', $value))),

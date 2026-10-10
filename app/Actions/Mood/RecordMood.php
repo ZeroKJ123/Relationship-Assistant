@@ -52,7 +52,7 @@ final class RecordMood
     {
         $prompt = MoodPrompt::query()->whereKey($id)->where('couple_id', $couple->id)->where('user_id', $actor->id)->lockForUpdate()->first();
         $member = $couple->members()->where('user_id', $actor->id)->lockForUpdate()->firstOrFail();
-        if ($prompt === null || $prompt->answered_at !== null || $prompt->scheduled_at->isFuture() || $prompt->expires_at->lessThanOrEqualTo(now()) || ! $member->mood_schedule_enabled) {
+        if ($prompt === null || $prompt->answered_at !== null || $prompt->scheduled_at->isFuture() || $prompt->expires_at->lessThanOrEqualTo(now()) || (! $prompt->is_manual && ! $member->mood_schedule_enabled)) {
             $this->deny('unavailable_prompt');
         }
         if (MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->where('recorded_at', '>=', $prompt->scheduled_at)->lockForUpdate()->exists()) {

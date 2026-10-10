@@ -35,7 +35,7 @@ final class MoodController extends Controller
         $actor = $request->user();
         abort_unless($actor instanceof User, Response::HTTP_UNAUTHORIZED);
         $member = $couple->members()->where('user_id', $actor->id)->firstOrFail();
-        $prompt = $request->filled('prompt_id') ? MoodPrompt::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->whereNull('answered_at')->where('expires_at', '>', now())->findOrFail($request->integer('prompt_id')) : null;
+        $prompt = $request->filled('prompt_id') ? MoodPrompt::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->whereNull('answered_at')->where('expires_at', '>', now())->findOrFail($request->integer('prompt_id')) : $this->history->getPendingPrompt($actor, $couple);
 
         $emojiEntry = $request->filled('emoji_entry') ? MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->whereNull('emoji')->find($request->integer('emoji_entry')) : null;
 

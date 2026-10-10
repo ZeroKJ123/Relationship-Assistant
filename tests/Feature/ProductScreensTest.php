@@ -44,11 +44,11 @@ it('shows insufficient free hearts and filters without mixing up product estimat
     $this->asUser($pair->first)->get(route('dishes.index', ['owner_id' => $pair->second->id, 'kind' => 'special']))->assertOk()->assertSee($special->title)->assertDontSee($ordinary->title)->assertSee('99.00')->assertSee('Заказ: ♥ 30')->assertSee('Не хватает свободных сердечек');
 });
 
-it('offers a progressive condition sheet and the food money exception without changing shared responses', function (): void {
+it('offers a progressive condition form and the food money exception without changing shared responses', function (): void {
     $pair = AgreementScenario::create();
     $this->seed(CatalogSeeder::class);
     $request = PartnerRequest::factory()->create(['couple_id' => $pair->couple->id, 'author_id' => $pair->first->id, 'recipient_id' => $pair->second->id, 'type' => RequestType::Food]);
-    $this->asUser($pair->second)->get(route('requests.show', [$pair->couple, $request]))->assertOk()->assertSee('data-condition-form', false)->assertSee('Нет денег на продукты — без списания')->assertSee('data-condition-choice="sushi"', false)->assertSee('Маленький')->assertSee('Средний')->assertSee('Большой')->assertSee('Автор просьбы примет этот вариант отдельно.');
+    $this->asUser($pair->second)->get(route('requests.show', [$pair->couple, $request]))->assertOk()->assertSee('data-condition-form', false)->assertSee('Нет денег на продукты — без списания')->assertSee('data-condition-choice="sushi"', false)->assertSee('Маленький')->assertSee('Средний')->assertSee('Большой')->assertSee('Автор просьбы примет условие отдельно.');
     $this->asUser($pair->first)->get(route('requests.show', [$pair->couple, $request]))->assertOk()->assertDontSee('data-condition-form', false);
 });
 
@@ -70,12 +70,17 @@ it('uses the personal currency before joining a couple and the shared currency a
     $this->asUser($pair->first)->get(route('dishes.create'))->assertOk()->assertViewHas('defaultCurrency', Currency::Eur);
 });
 
-it('keeps condition errors visible and opens the sheet only for a rejected condition', function (string $response, string $isOpen): void {
+it('keeps condition errors visible and opens the form only for a rejected condition', function (string $response, bool $isOpen): void {
     $pair = AgreementScenario::create();
     $request = PartnerRequest::factory()->create(['couple_id' => $pair->couple->id, 'author_id' => $pair->first->id, 'recipient_id' => $pair->second->id]);
     $errors = (new ViewErrorBag)->put('default', new MessageBag(['due_at' => 'Срок уже прошёл. Обновите своё решение.']));
     $this->asUser($pair->second)->withSession(['errors' => $errors, '_old_input' => ['response' => $response]]);
     session()->save();
     $page = $this->get(route('requests.show', [$pair->couple, $request]));
-    $page->assertOk()->assertSee(sprintf('data-condition-errors="%s"', $isOpen), false)->assertSee('Срок уже прошёл. Обновите своё решение.');
-})->with([['conditional', 'true'], ['agree', 'false']]);
+    $page->assertOk()->assertSee('Срок уже прошёл. Обновите своё решение.');
+    $document = new DOMDocument;
+    @$document->loadHTML('<?xml encoding="UTF-8">'.$page->getContent());
+    $xpath = new DOMXPath($document);
+    $conditionSection = $xpath->query('//details[contains(@class,"condition-section")]')->item(0);
+    expect($conditionSection?->hasAttribute('open'))->toBe($isOpen);
+})->with([['conditional', true], ['agree', false]]);

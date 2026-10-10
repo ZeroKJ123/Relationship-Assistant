@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $couple_id
  * @property Couple $couple
+ * @property bool $is_manual
  * @property int $user_id
  * @property User $user
  * @property CarbonImmutable $scheduled_at
@@ -44,6 +45,6 @@ final class MoodPrompt extends Model
     /** @return array<string,string> */
     protected function casts(): array
     {
-        return ['couple_id' => 'integer', 'user_id' => 'integer', 'scheduled_at' => 'immutable_datetime', 'expires_at' => 'immutable_datetime', 'answered_at' => 'immutable_datetime'];
+        return ['is_manual' => 'boolean', 'couple_id' => 'integer', 'user_id' => 'integer', 'scheduled_at' => 'immutable_datetime', 'expires_at' => 'immutable_datetime', 'answered_at' => 'immutable_datetime'];
     }
 }
