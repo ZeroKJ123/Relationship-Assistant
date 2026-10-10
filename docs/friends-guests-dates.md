@@ -1,4 +1,4 @@
-[← Кухня, желания и деньги](dishes-wishlist-money.md) · [К README](../README.md)
+[← Кухня, желания и деньги](dishes-wishlist-money.md) · [К README](../README.md) · [Настроение и напоминания →](mood-and-reminders.md)
 
 # Друзья, гости и свидания
 

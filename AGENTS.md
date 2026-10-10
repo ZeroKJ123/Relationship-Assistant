@@ -171,12 +171,14 @@ Before relying on a package's API, confirm its installed version:
 | README | README.md | Назначение и запуск проекта |
 | Development | docs/development.md | Проверки и изоляция тестов |
 | Interface | docs/interface.md | Компоненты и доступность |
-| Accounts | docs/accounts.md | Регистрация и миграции профиля |
-| Couples | docs/couples.md | Пары, приглашения и согласование недельного лимита |
-| Requests | docs/requests.md | Просьбы, версии условий, ответы и снимки тарифа |
-| Products | docs/dishes-wishlist-money.md | Кухня, желания, приватные фото и денежные просьбы |
-| Economy and catalogs | docs/economy-and-catalogs.md | Версии настроек, резерв цены услуги и стартовые каталоги |
-| Hearts and duties | docs/hearts-and-duties.md | Отметки и проверки, личный журнал, награды, штрафы и ограничения |
+| Accounts | docs/accounts.md | Регистрация и восстановление |
+| Couples | docs/couples.md | Пары, приглашения и недельный лимит |
+| Requests | docs/requests.md | Просьбы, условия и версии |
+| Hearts and duties | docs/hearts-and-duties.md | Проверка выполнения и журнал сердечек |
+| Economy and catalogs | docs/economy-and-catalogs.md | Правила, резерв цены и каталоги |
+| Products | docs/dishes-wishlist-money.md | Кухня, желания и денежные просьбы |
+| Friends and dates | docs/friends-guests-dates.md | Личные друзья, гости и свидания |
+| Mood and reminders | docs/mood-and-reminders.md | Настроение, расписание и напоминания |
 
 ## Project entry points
 
@@ -207,3 +209,6 @@ Before relying on a package's API, confirm its installed version:
 - `app/Actions/Friends/`, `routes/social.php`: личные друзья и архив.
 - `app/Actions/Requests/CreateGuestVisit.php`, `app/Actions/Dates/`, `app/Services/Requests/SocialInvitations.php`: гостевые визиты и свидания с неизменяемыми снимками.
 - `docs/friends-guests-dates.md`: правила приглашений, миграция и проверки.
+
+- `app/Actions/Mood/`, `app/Services/Mood/MoodHistory.php`: оценки, запросы настроения и личное расписание.
+- `app/Actions/Reminders/`, `app/Services/Reminders/ReminderLifecycle.php`, `routes/care.php`: разовые напоминания, отмена и подготовка доставки; Telegram и scheduler подключаются отдельно.

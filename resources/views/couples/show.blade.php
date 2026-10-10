@@ -32,7 +32,9 @@
 @if($couple->status === \App\Enums\CoupleStatus::Ended)
     <x-card class="section-space"><h2>{{ __('История сохранена') }}</h2><p>{{ __('Пара завершена. История доступна только её прежним участникам. Новые совместные действия закрыты.') }}</p></x-card>
 @endif
+<x-mood-summary :couple="$couple" :latest-moods="$latestMoods" />
 <div class="confirmation-actions section-space">
+<a class="button button--quiet" href="{{ route('reminders.index',$couple) }}">{{ __('Напоминания') }}</a>
 <a class="button button--quiet" href="{{ route('friends.index') }}">{{ __('Мои друзья') }}</a>@can('update',$couple)<a class="button button--primary" href="{{ route('guests.create',$couple) }}">{{ __('Позвать гостей') }}</a><a class="button button--quiet" href="{{ route('dates.create',$couple) }}">{{ __('Свидание / мероприятие') }}</a>@endcan
 <a class="button button--quiet" href="{{ route('dishes.index') }}">{{ __('Кухня') }}</a><a class="button button--quiet" href="{{ route('wishlist.index') }}">{{ __('Виш-лист') }}</a>@can('update',$couple)<a class="button button--primary" href="{{ route('money.create',$couple) }}">{{ __('Попросить деньги') }}</a>@endcan
     <a class="button button--quiet" href="{{ route('catalogs.index') }}">{{ __('Каталоги') }}</a>

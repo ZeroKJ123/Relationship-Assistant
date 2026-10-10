@@ -16,6 +16,10 @@ use App\Actions\Friends\ArchiveFriend;
 use App\Actions\Friends\SaveFriend;
 use App\Actions\Hearts\AdjustPartnerHearts;
 use App\Actions\Money\CreateMoneyRequest;
+use App\Actions\Mood\RecordMood;
+use App\Actions\Reminders\CancelReminder;
+use App\Actions\Reminders\CreateReminder;
+use App\Actions\Reminders\PrepareReminder;
 use App\Actions\Requests\CancelPartnerRequest;
 use App\Actions\Requests\CreateGuestVisit;
 use App\Actions\Requests\CreatePartnerRequest;
@@ -28,6 +32,8 @@ use App\Data\Dishes\DishData;
 use App\Data\Friends\FriendData;
 use App\Data\Hearts\AdjustmentData;
 use App\Data\Money\MoneyRequestData;
+use App\Data\Mood\MoodData;
+use App\Data\Reminders\ReminderData;
 use App\Data\Requests\GuestVisitData;
 use App\Data\Requests\NewRequestData;
 use App\Data\Requests\RequestResponseData;
@@ -37,6 +43,7 @@ use App\Enums\DeclineReason;
 use App\Enums\DishKind;
 use App\Enums\HeartOperationType;
 use App\Enums\InvitationKind;
+use App\Enums\MoodLevel;
 use App\Enums\RequestResponse;
 use App\Enums\RequestType;
 use App\Models\AgreementProposal;
@@ -44,6 +51,7 @@ use App\Models\Couple;
 use App\Models\Dish;
 use App\Models\Duty;
 use App\Models\Friend;
+use App\Models\PartnerReminder;
 use App\Models\PartnerRequest;
 use App\Models\User;
 use App\Services\Hearts\EconomySettingsStore;
@@ -81,6 +89,11 @@ while (! file_exists($barrier)) {
 }
 try {
     match ($operation) {
+        'mood_record' => $app->make(RecordMood::class)->execute($actor, $couple, new MoodData(MoodLevel::Good, sprintf('00000000-0000-4000-8000-%012d', $value))),
+        'mood_prompt' => $app->make(RecordMood::class)->execute($actor, $couple, new MoodData(MoodLevel::Good, sprintf('00000000-0000-4000-8000-%012d', $limit), promptId: $value)),
+        'reminder_create' => $app->make(CreateReminder::class)->execute($actor, $couple, new ReminderData('Race reminder', CarbonImmutable::tomorrow(), sprintf('00000000-0000-4000-8000-%012d', $value))),
+        'reminder_cancel' => $app->make(CancelReminder::class)->execute($actor, PartnerReminder::query()->findOrFail($value), $limit),
+        'reminder_prepare_late' => $app->make(PrepareReminder::class)->execute(PartnerReminder::query()->findOrFail($value), $limit),
         'friend_edit' => $app->make(SaveFriend::class)->execute($actor, new FriendData(sprintf('Friend %d', $limit), sprintf('00000000-0000-4000-8000-%012d', $limit)), Friend::query()->findOrFail($value)),
         'friend_archive' => $app->make(ArchiveFriend::class)->execute($actor, Friend::query()->findOrFail($value), 0),
         'visit_create' => $app->make(CreateGuestVisit::class)->execute($actor, $couple, new GuestVisitData([['id' => $value, 'version' => 0]], CarbonImmutable::tomorrow(), 60, 'Race visit', sprintf('00000000-0000-4000-8000-%012d', $limit))),

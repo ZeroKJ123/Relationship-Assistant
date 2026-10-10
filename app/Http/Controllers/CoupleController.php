@@ -8,6 +8,7 @@ use App\Enums\InvitationStatus;
 use App\Models\Couple;
 use App\Models\User;
 use App\Services\Couples\CoupleTimeline;
+use App\Services\Mood\MoodHistory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -17,7 +18,7 @@ final class CoupleController extends Controller
 {
     private const HISTORY_PAGE_SIZE = 10;
 
-    public function __construct(private readonly CoupleTimeline $timeline) {}
+    public function __construct(private readonly CoupleTimeline $timeline, private readonly MoodHistory $moods) {}
 
     public function index(Request $request): View
     {
@@ -37,6 +38,6 @@ final class CoupleController extends Controller
         $link = $request->session()->get('invitation_link_couple') === $couple->id && is_string($encryptedLink) ? Crypt::decryptString($encryptedLink) : null;
         $invitation = $couple->invitations()->where('status', InvitationStatus::Pending->value)->where('expires_at', '>', now())->latest('id')->first();
 
-        return view('couples.show', ['couple' => $couple, 'daysTogether' => $daysTogether, 'invitationLink' => $link, 'invitation' => $invitation]);
+        return view('couples.show', ['latestMoods' => $this->moods->getLatest($couple), 'couple' => $couple, 'daysTogether' => $daysTogether, 'invitationLink' => $link, 'invitation' => $invitation]);
     }
 }

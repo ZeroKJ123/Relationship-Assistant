@@ -5,7 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', HomeController::class)->name('home');
+Route::get('/', HomeController::class)->middleware('auth.session')->name('home');
 
 require __DIR__.'/auth.php';
 
@@ -23,3 +23,5 @@ require sprintf('%s/catalogs.php', __DIR__);
 require sprintf('%s/products.php', __DIR__);
 
 require sprintf('%s/social.php', __DIR__);
+
+require sprintf('%s/care.php', __DIR__);

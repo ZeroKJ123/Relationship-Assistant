@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+    @if($currentCouple)<x-mood-summary :couple="$currentCouple" :latest-moods="$latestMoods" />@endif
     <section class="hero">
         <div class="hero-copy">
             <p class="eyebrow">{{ __('Для вас двоих') }}</p>

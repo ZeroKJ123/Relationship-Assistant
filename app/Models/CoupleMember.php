@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $user_id
+ * @property bool $mood_schedule_enabled
+ * @property int $mood_schedule_version
  * @property int $couple_id
  * @property ?int $active_user_id
  * @property CoupleSlot $slot
@@ -42,6 +44,6 @@ final class CoupleMember extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['user_id' => 'integer', 'couple_id' => 'integer', 'active_user_id' => 'integer', 'slot' => CoupleSlot::class, 'joined_at' => 'immutable_datetime', 'ended_at' => 'immutable_datetime'];
+        return ['mood_schedule_enabled' => 'boolean', 'mood_schedule_version' => 'integer', 'user_id' => 'integer', 'couple_id' => 'integer', 'active_user_id' => 'integer', 'slot' => CoupleSlot::class, 'joined_at' => 'immutable_datetime', 'ended_at' => 'immutable_datetime'];
     }
 }
