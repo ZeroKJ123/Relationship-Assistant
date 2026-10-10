@@ -13,7 +13,7 @@ final class OwnedCatalogAccess
 {
     public function getCurrency(User $actor): Currency
     {
-        return CoupleMember::query()->with('couple')->where('active_user_id', $actor->id)->first()?->couple->currency ?? Currency::Byn;
+        return CoupleMember::query()->with('couple')->where('active_user_id', $actor->id)->first()?->couple->currency ?? $actor->currency ?? Currency::Byn;
     }
 
     public function canView(User $actor, int $ownerId): bool

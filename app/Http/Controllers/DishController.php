@@ -12,6 +12,7 @@ use App\Models\CoupleMember;
 use App\Models\Dish;
 use App\Models\User;
 use App\Services\Catalogs\OwnedCatalogAccess;
+use App\Services\Hearts\WalletSnapshot;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ final class DishController extends Controller
 {
     private const PAGE_SIZE = 12;
 
-    public function __construct(private readonly SaveDish $save, private readonly OwnedCatalogAccess $access) {}
+    public function __construct(private readonly SaveDish $save, private readonly OwnedCatalogAccess $access, private readonly WalletSnapshot $wallets) {}
 
     public function index(Request $request): View
     {
@@ -39,7 +40,7 @@ final class DishController extends Controller
             $query->where('kind', $filter);
         }
 
-        return view('dishes.index', ['items' => $query->latest('id')->paginate(self::PAGE_SIZE)->withQueryString(), 'owner' => $owner, 'partner' => $partner, 'couple' => $membership?->couple, 'isOwn' => $owner->id === $actor->id, 'kinds' => DishKind::cases(), 'filter' => $filter]);
+        return view('dishes.index', ['wallet' => $this->wallets->get($actor), 'items' => $query->latest('id')->paginate(self::PAGE_SIZE)->withQueryString(), 'owner' => $owner, 'partner' => $partner, 'couple' => $membership?->couple, 'isOwn' => $owner->id === $actor->id, 'kinds' => DishKind::cases(), 'filter' => $filter]);
     }
 
     public function create(Request $request): View

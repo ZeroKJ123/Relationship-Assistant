@@ -170,7 +170,7 @@ Before relying on a package's API, confirm its installed version:
 | --- | --- | --- |
 | README | README.md | Назначение и запуск проекта |
 | Development | docs/development.md | Проверки и изоляция тестов |
-| Interface | docs/interface.md | Компоненты и доступность |
+| Interface | docs/interface.md | Главная, кухня, условия и доступность |
 | Accounts | docs/accounts.md | Регистрация и восстановление |
 | Couples | docs/couples.md | Пары, приглашения и недельный лимит |
 | Requests | docs/requests.md | Просьбы, условия и версии |
@@ -183,7 +183,7 @@ Before relying on a package's API, confirm its installed version:
 
 ## Project entry points
 
-- `app/Http/Controllers/HomeController.php`: стартовая страница.
+- `app/Http/Controllers/DashboardController.php`, `app/Services/Couples/DashboardData.php`, `app/ViewModels/DashboardViewModel.php`: главная с данными текущего аккаунта; `resources/views/home.blade.php`: знакомство для гостя.
 - `resources/views/layouts/app.blade.php` и `resources/views/components/`: каркас интерфейса.
 - `tests/Support/TestEnvironment.php`: обязательная защита тестовой базы.
 - `.github/workflows/quality.yml`: проверки без деплоя.

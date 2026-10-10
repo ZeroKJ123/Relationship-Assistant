@@ -1,11 +1,11 @@
 @extends('layouts.app')
 @section('title', __('Просьба партнёру'))
 @section('content')
-<x-card class="start-card form-stack">
+<x-card class="request-overview form-stack">
 <p>{{ __('Цена услуги: :amount сердечек', ['amount'=>$partnerRequest->heart_price]) }}</p>
 <x-status>{{ __($partnerRequest->status->label()) }}</x-status>
-<h1>{{ __($partnerRequest->type->label()) }}</h1>
-<p>{{ $partnerRequest->author->name }} → {{ $partnerRequest->recipient->name }}</p>
+<h1 class="screen-title">{{ __($partnerRequest->type->label()) }}</h1>
+<div class="request-person"><x-avatar :name="$partnerRequest->author->name" /><p><strong>{{ $partnerRequest->author->name }}</strong> → {{ $partnerRequest->recipient->name }}</p></div>
 @if($partnerRequest->category_name)<p>{{ __('Категория: :name', ['name'=>$partnerRequest->category_name]) }}</p>@endif
 @if($partnerRequest->template_name)<p>{{ __('Шаблон: :name', ['name'=>$partnerRequest->template_name]) }}</p>@endif
 <p class="request-description">{{ $partnerRequest->description }}</p>
@@ -54,13 +54,8 @@
 <h2>{{ __('Ваш ответ') }}</h2>
 <form method="post" action="{{ route('requests.responses.store',[$couple,$partnerRequest]) }}" class="form-stack" data-submit-lock>
 @csrf<input type="hidden" name="expected_version" value="{{ $partnerRequest->version }}">
-<div class="field">
-<label for="reason">{{ __('Причина при отказе') }}</label>
-<select name="reason" id="reason">
-<option value="ordinary">{{ __('Не могу согласиться') }}</option>
-@if($partnerRequest->type === \App\Enums\RequestType::Food)<option value="no_food_money">{{ __('Нет денег на продукты — без штрафа') }}</option>
-@endif</select>
-</div>
+<fieldset class="response-reasons"><legend>{{ __('Причина при отказе') }}</legend><label class="choice-chip"><input type="radio" name="reason" value="ordinary" checked>{{ __('Не могу согласиться') }}</label>
+@if($partnerRequest->type === \App\Enums\RequestType::Food)<label class="choice-chip"><input type="radio" name="reason" value="no_food_money">{{ __('Нет денег на продукты — без списания') }}</label>@endif</fieldset>
 <label class="confirmation-check">
 <input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю выбранный ответ') }}</label>
 <div class="confirmation-actions">
@@ -71,33 +66,13 @@
 </x-card>
 @endif
 @if(!$partnerRequest->moneyRequest && in_array($partnerRequest->status,[\App\Enums\RequestStatus::Pending,\App\Enums\RequestStatus::Conditional],true))
-<x-card class="section-space">
-<h2>{{ __('Предложить встречное условие') }}</h2>
-<form method="post" action="{{ route('requests.responses.store',[$couple,$partnerRequest]) }}" class="form-stack" data-submit-lock>
-@csrf<input type="hidden" name="expected_version" value="{{ $partnerRequest->version }}">
-<input type="hidden" name="response" value="conditional">
-<div class="field">
-<label for="settlement_method_id">{{ __('Способ из каталога — если нужен') }}</label><select name="settlement_method_id" id="settlement_method_id"><option value="">{{ __('Без способа из каталога') }}</option>@foreach($methods as $method)<option value="{{ $method->id }}" @selected((string)old('settlement_method_id') === (string)$method->id)>{{ $method->name }}</option>@endforeach</select></div>
-<div class="field"><label for="sushi_size">{{ __('Размер суши — только для этого способа') }}</label><select name="sushi_size" id="sushi_size"><option value="">{{ __('Не выбрано') }}</option>@foreach(['small'=>__('Маленький'),'medium'=>__('Средний'),'large'=>__('Большой')] as $size=>$label)<option value="{{ $size }}" @selected(old('sushi_size') === $size)>{{ $label }}</option>@endforeach</select></div>
-<div class="field"><label for="condition_type">{{ __('Вид условия') }}</label>
-<select name="condition_type" id="condition_type">
-@foreach($conditionTypes as $type)<option value="{{ $type->value }}" @selected(old('condition_type') === $type->value)>{{ __($type->label()) }}</option>
-@endforeach</select>
-</div>
-<div class="field"><label for="wishlist_choice">{{ __('Для подарка — ваше желание') }}</label><select id="wishlist_choice" name="wishlist_choice"><option value="">{{ __('Не выбрано') }}</option>@foreach($wishes as $wish)<option value="{{ $wish->id }}:{{ $wish->version }}" @selected(old('wishlist_choice') === sprintf('%d:%d',$wish->id,$wish->version))>{{ $wish->title }} · {{ $wish->price }} {{ $wish->currency->value }}</option>@endforeach</select></div>
-{{ $wishes->links() }}
-<x-field name="amount" :label="__('Для денежного условия — точная сумма')" :value="old('amount','')" inputmode="decimal" /><div class="field"><label for="currency">{{ __('Валюта денежного условия') }}</label><select id="currency" name="currency">@foreach($currencies as $currency)<option value="{{ $currency->value }}" @selected(old('currency',$couple->currency->value) === $currency->value)>{{ $currency->value }}</option>@endforeach</select></div><p>{{ __('Заполняйте сумму только для денег, а желание только для подарка. Для других условий оставьте оба поля пустыми.') }}</p>
-<div class="field">
-<label for="description">{{ __('Условие') }}</label>
-<textarea id="description" name="description" rows="4" maxlength="2000" required>{{ old('description') }}</textarea>
-</div>
-<x-field name="due_at" :label="__('Выполнить условие до')" type="datetime-local" :value="old('due_at','')" required />
-<p>{{ __('Часовой пояс: :zone. Автор просьбы примет этот вариант отдельно.', ['zone'=>$couple->timezone]) }}</p>
-<label class="confirmation-check">
-<input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю предложение условия') }}</label>
-<x-button type="submit">{{ __('Отправить условие') }}</x-button>
-</form>
-</x-card>
+<section class="section-space condition-section" data-condition-section data-condition-errors="{{ $errors->any() && old('response') === 'conditional' ? 'true' : 'false' }}">
+    <x-button variant="quiet" hidden data-condition-open aria-expanded="false" aria-controls="condition-sheet">{{ __('С условием') }}</x-button>
+    <div class="card form-stack" id="condition-sheet" data-condition-sheet>
+        <div class="sheet-heading"><h2 id="condition-sheet-title">{{ __('Моё условие') }}</h2><x-button variant="quiet" data-condition-close hidden :aria-label="__('Закрыть условие')">×</x-button></div>
+        <x-condition-form :couple="$couple" :partner-request="$partnerRequest" :methods="$methods" :wishes="$wishes" :currencies="$currencies" :condition-types="$conditionTypes" />
+    </div>
+</section>
 @endif
 @endcan
 @if($conditions->total() > 1)<x-card class="section-space">
@@ -120,3 +95,5 @@
 @endif
 @endif
 @endsection
+
+@section('navigation')<x-bottom-navigation :couple="$couple" />@endsection

@@ -1,7 +1,13 @@
+import { initializeDashboard } from './modules/dashboard.js';
+import { initializeDishes } from './modules/dishes.js';
+import { initializeRequests } from './modules/requests.js';
 import { initializeDialogs, initializeTabs } from './modules/dialogs.js';
 
 initializeDialogs(document);
 initializeTabs(document);
+initializeDashboard(document);
+initializeDishes(document);
+initializeRequests(document);
 
 function unlockForms() {
     document.querySelectorAll('[data-submit-lock]').forEach((form) => {
