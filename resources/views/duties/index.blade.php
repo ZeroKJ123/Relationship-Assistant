@@ -1,19 +1,11 @@
 @extends('layouts.app')
 @section('title', __('Наши дела'))
 @section('content')
-<x-card class="start-card"><h1>{{ __('Наши дела') }}</h1><p>{{ __('Согласие создаёт дело. Отметьте выполнение, затем дождитесь проверки партнёром.') }}</p></x-card>
-@forelse($duties as $duty)
-    <x-card class="section-space form-stack">
-        <x-status>{{ __($duty->status->label()) }}</x-status>
-        <h2>{{ __($duty->kind->label()) }}</h2>
-        <p>{{ __('Исполнитель: :name', ['name'=>$duty->executor->name]) }}</p>
-        <p class="request-description">{{ $duty->description }}</p>
-        <p>{{ __('Срок: :date', ['date'=>$duty->due_at->setTimezone($duty->timezone)->format('d.m.Y H:i')]) }}</p>
-        <a class="button button--quiet" href="{{ route('duties.show',[$couple,$duty]) }}">{{ __('Открыть дело') }}</a>
-    </x-card>
-@empty
-    <x-card class="section-space"><p>{{ __('Дела появятся после принятия просьбы или встречного условия.') }}</p></x-card>
-@endforelse
+<x-card class="start-card"><h1 class="screen-title">{{ __('Наши дела') }}</h1><p>{{ __('Согласие создаёт дело. Отметьте выполнение, затем дождитесь проверки партнёром.') }}</p></x-card>
+<nav class="catalog-tabs duty-tabs section-space" aria-label="{{ __('Статус дела') }}">@foreach($filters as $option)<a class="button {{ $filter === $option ? 'button--primary' : 'button--quiet' }}" href="{{ route('duties.index',[$couple,'filter'=>$option->value]) }}" @if($filter === $option) aria-current="page" @endif>{{ __($option->label()) }}</a>@endforeach</nav>
+@forelse($duties as $duty)<x-duty-card :duty="$duty" :couple="$couple" />@empty<x-card class="section-space form-stack"><h2>{{ __('Здесь пока нет дел') }}</h2><p>{{ __('В выбранной вкладке нет дел. Посмотрите все или создайте новую просьбу.') }}</p><a href="{{ route('duties.index',[$couple,'filter'=>'all']) }}">{{ __('Показать все дела') }}</a></x-card>@endforelse
 {{ $duties->links() }}
 <a class="button button--quiet section-space" href="{{ route('couples.show',$couple) }}">{{ __('Наша пара') }}</a>
 @endsection
+
+@section('navigation')<x-bottom-navigation :couple="$couple" />@endsection

@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\Duties\ReportDuty;
 use App\Actions\Duties\VerifyDuty;
+use App\Enums\DutyFilter;
 use App\Enums\DutyKind;
 use App\Http\Requests\ConfirmDutyRequest;
 use App\Models\Couple;
@@ -15,8 +16,10 @@ use App\Models\RequestCondition;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 
 final class DutyController extends Controller
 {
@@ -24,9 +27,14 @@ final class DutyController extends Controller
 
     public function __construct(private readonly ReportDuty $report, private readonly VerifyDuty $verify) {}
 
-    public function index(Couple $couple): View
+    public function index(Request $request, Couple $couple): View
     {
-        return view('duties.index', ['couple' => $couple, 'duties' => Duty::query()->where('couple_id', $couple->id)->with(['executor:id,name', 'reviewer:id,name'])->latest('id')->paginate(self::PAGE_SIZE)]);
+        $filter = $request->enum('filter', DutyFilter::class) ?? DutyFilter::Active;
+        Log::debug('duties.list_started', ['couple_id' => $couple->id, 'filter' => $filter->value]);
+        $duties = Duty::query()->where('couple_id', $couple->id)->whereIn('status', $filter->statuses())->with(['executor:id,name', 'reviewer:id,name'])->orderBy('due_at')->orderBy('id')->paginate(self::PAGE_SIZE)->withQueryString();
+        Log::debug('duties.list_loaded', ['couple_id' => $couple->id, 'filter' => $filter->value, 'count' => $duties->count()]);
+
+        return view('duties.index', ['couple' => $couple, 'duties' => $duties, 'filters' => DutyFilter::cases(), 'filter' => $filter]);
     }
 
     public function show(Couple $couple, Duty $duty): View
@@ -37,7 +45,7 @@ final class DutyController extends Controller
 
         $type = $duty->kind === DutyKind::Service ? PartnerRequest::query()->findOrFail($duty->partner_request_id)->type->value : RequestCondition::query()->findOrFail($duty->request_condition_id)->type->value;
         $reportLabel = match ($type) {
-            'money' => __('Я оплатил'),'gift' => __('Подарок передан'),default => __('Сделано')
+            'money' => __('Оплата отправлена'),'gift' => __('Подарок передан'),default => __('Сделано')
         };
         $verifyLabel = match ($type) {
             'money' => __('Деньги получены'),'gift' => __('Подарок получен'),default => __('Подтвердить выполнение')

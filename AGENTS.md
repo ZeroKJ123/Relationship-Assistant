@@ -170,11 +170,11 @@ Before relying on a package's API, confirm its installed version:
 | --- | --- | --- |
 | README | README.md | Назначение и запуск проекта |
 | Development | docs/development.md | Проверки и изоляция тестов |
-| Interface | docs/interface.md | Главная, кухня, условия и доступность |
+| Interface | docs/interface.md | Главная, кухня, дела, желания и доступность |
 | Accounts | docs/accounts.md | Регистрация и восстановление |
 | Couples | docs/couples.md | Пары, приглашения и недельный лимит |
 | Requests | docs/requests.md | Просьбы, условия и версии |
-| Hearts and duties | docs/hearts-and-duties.md | Проверка выполнения и журнал сердечек |
+| Hearts and duties | docs/hearts-and-duties.md | Вкладки дел, подтверждение и журнал сердечек |
 | Economy and catalogs | docs/economy-and-catalogs.md | Правила, резерв цены и каталоги |
 | Products | docs/dishes-wishlist-money.md | Кухня, желания и денежные просьбы |
 | Friends and dates | docs/friends-guests-dates.md | Личные друзья, гости и свидания |

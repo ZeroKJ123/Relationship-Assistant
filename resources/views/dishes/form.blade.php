@@ -17,7 +17,7 @@
 <p data-dish-free-note hidden>{{ __('Обычное блюдо: цена всегда 0 сердечек.') }}</p>
 <p>{{ __('Обычное блюдо всегда бесплатно. Особое: 0 или от 5 до 50 сердечек; подсказки — 10, 20, 30. Ориентир продуктов не создаёт денежный долг.') }}</p>
 @if($item?->photo_path)<x-product-photo :src="route('photos.dishes',$item)" :alt="$item->title" />@endif
-<div class="field"><label for="photo">{{ __('Фото — если хотите') }}</label><input type="file" name="photo" id="photo" accept="image/jpeg,image/png,image/webp"><p>{{ __('JPEG, PNG или WebP, до 4 МБ. Фото видно только вам и партнёру; оставьте поле пустым, чтобы сохранить прежнее.') }}</p><p role="status" data-photo-status hidden></p><div data-photo-preview hidden><img class="product-photo" alt="{{ __('Предпросмотр выбранного фото') }}" data-photo-image></div></div>
+<x-photo-field />
 <x-button type="submit">{{ __('Сохранить') }}</x-button>
 </form>
 </x-card><a class="button button--quiet section-space" href="{{ route('dishes.index') }}">{{ __('К каталогу') }}</a>

@@ -1,3 +1,6 @@
+import { initializeDuties } from './modules/duties.js';
+import { initializeWishlist } from './modules/wishlist.js';
+import { initializeProductPhotos } from './modules/photos.js';
 import { initializeDashboard } from './modules/dashboard.js';
 import { initializeDishes } from './modules/dishes.js';
 import { initializeRequests } from './modules/requests.js';
@@ -8,6 +11,9 @@ initializeTabs(document);
 initializeDashboard(document);
 initializeDishes(document);
 initializeRequests(document);
+initializeDuties(document);
+initializeWishlist(document);
+initializeProductPhotos(document);
 
 function unlockForms() {
     document.querySelectorAll('[data-submit-lock]').forEach((form) => {

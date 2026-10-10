@@ -60,7 +60,7 @@ it('shares encrypted payment details only after acceptance and separates paying 
     expect($money->refresh()->payment_details_snapshot)->toBe('TEST recipient account');
     $duty = $request->duties()->sole();
     expect($duty->is_reward_eligible)->toBeFalse();
-    $this->get(route('duties.show', [$pair->couple, $duty]))->assertOk()->assertSee('Я оплатил');
+    $this->get(route('duties.show', [$pair->couple, $duty]))->assertOk()->assertSee('Оплата отправлена');
     app(ReportDuty::class)->execute($pair->second, $pair->couple, $duty, 0, true);
     app(ReportDuty::class)->execute($pair->second, $pair->couple, $duty, 0, true);
     expect($duty->refresh()->status)->toBe(DutyStatus::Reported);
