@@ -38,13 +38,27 @@ afterEach(function (): void {
 it('asks only the partner and reuses the pending request without duplicate delivery', function (): void {
     $pair = AgreementScenario::create();
     app(SetMoodSchedule::class)->execute($pair->second, $pair->couple, false, 0);
-    $this->asUser($pair->first)->post(route('mood.prompts.store', $pair->couple), ['user_id' => $pair->first->id])->assertRedirect(route('home'));
+    $this->asUser($pair->first)->post(route('mood.prompts.store', $pair->couple), ['user_id' => $pair->first->id])->assertRedirect(route('home'))->assertSessionHas('status', 'Запрос настроения создан. Уведомление будет отправлено в подключённый Telegram партнёра.');
     $prompt = MoodPrompt::query()->sole();
     expect($prompt->user_id)->toBe($pair->second->id)->and($prompt->is_manual)->toBeTrue();
-    $this->post(route('mood.prompts.store', $pair->couple))->assertRedirect(route('home'));
+    CarbonImmutable::setTestNow(CarbonImmutable::now()->addSeconds(RequestPartnerMood::RESEND_COOLDOWN_SECONDS - 1));
+    $this->post(route('mood.prompts.store', $pair->couple))->assertRedirect(route('home'))->assertSessionHas('status', 'Запрос уже создан. Отправить его повторно можно через минуту после предыдущего нажатия.');
     expect(MoodPrompt::query()->count())->toBe(1)->and(NotificationDelivery::query()->where('kind', NotificationKind::MoodPrompt)->count())->toBe(1);
     $delivery = NotificationDelivery::query()->sole();
     expect(app(DeliveryContent::class)->getText($delivery))->toContain('Партнёр хочет узнать ваше настроение')->not->toContain('http');
+});
+
+it('resends a manual question at the cooldown boundary and rejects the superseded answer', function (): void {
+    $pair = AgreementScenario::create();
+    $original = app(RequestPartnerMood::class)->execute($pair->first, $pair->couple);
+    CarbonImmutable::setTestNow($original->scheduled_at->addSeconds(RequestPartnerMood::RESEND_COOLDOWN_SECONDS));
+    $replacement = app(RequestPartnerMood::class)->execute($pair->first, $pair->couple);
+    expect($replacement->id)->not->toBe($original->id);
+    expect($original->refresh()->expires_at->lessThanOrEqualTo(now()))->toBeTrue();
+    expect(app(DeliveryContent::class)->getText(NotificationDelivery::query()->where('source_id', $original->id)->sole()))->toBeNull();
+    expect(fn () => app(RecordMood::class)->execute($pair->second, $pair->couple, new MoodData(MoodLevel::Neutral, Str::uuid()->toString(), promptId: $original->id)))->toThrow(ValidationException::class);
+    expect(NotificationDelivery::query()->count())->toBe(2);
+    expect(app(RequestPartnerMood::class)->execute($pair->first, $pair->couple)->id)->toBe($replacement->id);
 });
 
 it('shows and answers a manual request on the website with the schedule disabled', function (): void {

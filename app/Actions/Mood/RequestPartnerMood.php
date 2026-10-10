@@ -18,6 +18,8 @@ use Illuminate\Validation\ValidationException;
 
 final class RequestPartnerMood
 {
+    public const RESEND_COOLDOWN_SECONDS = 60;
+
     public function __construct(private readonly RequestContext $context, private readonly NotificationOutbox $outbox) {}
 
     public function execute(User $actor, Couple $couple): MoodPrompt
@@ -31,7 +33,9 @@ final class RequestPartnerMood
                 $pending->where('scheduled_at', '>', $latestMoodAt);
             }
             $existing = $pending->latest('id')->lockForUpdate()->first();
-            if ($existing !== null) {
+            if ($existing !== null && $existing->scheduled_at->addSeconds(self::RESEND_COOLDOWN_SECONDS)->isFuture()) {
+                DB::afterCommit(fn () => Log::info('mood.partner_prompt_reused', ['prompt_id' => $existing->id, 'actor_id' => $actor->id]));
+
                 return $existing;
             }
             $scheduledAt = CarbonImmutable::now()->setMicrosecond(0)->utc();
@@ -39,6 +43,9 @@ final class RequestPartnerMood
                 throw ValidationException::withMessages(['mood' => __('Запрос уже отправлен. Подождите секунду перед новым запросом.')]);
             }
             $expiresAt = $scheduledAt->addHours(MoodPrompt::RESPONSE_WINDOW_HOURS);
+            if ($existing !== null) {
+                $existing->forceFill(['expires_at' => $scheduledAt])->save();
+            }
             $prompt = new MoodPrompt;
             $prompt->forceFill(['couple_id' => $current->id, 'user_id' => $recipientId, 'is_manual' => true, 'scheduled_at' => $scheduledAt, 'expires_at' => $expiresAt])->save();
             $this->outbox->record($current->id, $recipientId, NotificationKind::MoodPrompt, $prompt->id, expiresAt: $expiresAt);

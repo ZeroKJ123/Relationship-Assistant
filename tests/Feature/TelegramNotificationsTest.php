@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\Couples\EndCouple;
 use App\Actions\Mood\CreateMoodPrompt;
 use App\Actions\Mood\RecordMood;
+use App\Actions\Mood\RequestPartnerMood;
 use App\Actions\Mood\SetMoodSchedule;
 use App\Actions\Notifications\SendTelegramNotification;
 use App\Actions\Reminders\CancelReminder;
@@ -79,6 +80,20 @@ it('sends only to the bound partner outside transactions and persists an idempot
     expect($this->reminder->refresh()->status)->toBe(ReminderStatus::Delivered);
     Http::assertSentCount(1);
     Queue::assertPushed(SendTelegramNotificationJob::class, 1);
+});
+
+it('delivers a second manual mood question after the resend cooldown', function (): void {
+    Http::fake(['*' => Http::response(['ok' => true, 'result' => ['message_id' => 42]])]);
+    $original = app(RequestPartnerMood::class)->execute($this->pair->first, $this->pair->couple);
+    $firstDelivery = NotificationDelivery::query()->where('kind', NotificationKind::MoodPrompt)->sole();
+    app(SendTelegramNotification::class)->execute($firstDelivery->id);
+    CarbonImmutable::setTestNow($original->scheduled_at->addSeconds(RequestPartnerMood::RESEND_COOLDOWN_SECONDS));
+    $replacement = app(RequestPartnerMood::class)->execute($this->pair->first, $this->pair->couple);
+    $secondDelivery = NotificationDelivery::query()->where('kind', NotificationKind::MoodPrompt)->where('source_id', $replacement->id)->sole();
+    app(SendTelegramNotification::class)->execute($secondDelivery->id);
+    expect($firstDelivery->refresh()->status)->toBe(DeliveryStatus::Sent)->and($secondDelivery->refresh()->status)->toBe(DeliveryStatus::Sent);
+    Http::assertSentCount(2);
+    Queue::assertPushed(SendTelegramNotificationJob::class, 3);
 });
 
 it('rolls back the notification together with the domain event and dispatches nothing before commit', function (): void {

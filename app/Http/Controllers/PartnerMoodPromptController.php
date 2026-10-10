@@ -19,8 +19,10 @@ final class PartnerMoodPromptController extends Controller
     {
         $actor = $request->user();
         abort_unless($actor instanceof User, Response::HTTP_UNAUTHORIZED);
-        $this->requestPartnerMood->execute($actor, $couple);
+        $prompt = $this->requestPartnerMood->execute($actor, $couple);
 
-        return redirect()->route('home')->with('status', __('Партнёру отправлен запрос настроения. Повторное нажатие не отправляет ещё один запрос, пока он ожидает ответа.'));
+        return redirect()->route('home')->with('status', $prompt->wasRecentlyCreated
+            ? __('Запрос настроения создан. Уведомление будет отправлено в подключённый Telegram партнёра.')
+            : __('Запрос уже создан. Отправить его повторно можно через минуту после предыдущего нажатия.'));
     }
 }
