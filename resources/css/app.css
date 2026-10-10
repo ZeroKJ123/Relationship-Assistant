@@ -102,6 +102,7 @@ p { color: var(--color-muted); }
 .dashboard-tiles strong { font-size: 1.4rem; }
 .section-heading, .dashboard-duty, .request-person { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-page); }
 .section-heading > h1, .dashboard-duty > div, .request-person > p { min-width: 0; overflow-wrap: anywhere; }
+.section-heading > .price-chip { flex-shrink: 0; white-space: nowrap; }
 .dashboard-duty h3 { font-size: 1.1rem; }
 .dashboard-duty .button { flex-shrink: 0; }
 .bottom-navigation a[aria-current="page"] { color: var(--color-violet); text-decoration: underline; text-underline-offset: .25rem; }

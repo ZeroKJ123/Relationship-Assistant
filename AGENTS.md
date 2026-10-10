@@ -169,6 +169,7 @@ Before relying on a package's API, confirm its installed version:
 | Document | Path | Description |
 | --- | --- | --- |
 | README | README.md | Назначение и запуск проекта |
+| Operations | docs/operations.md | Ноутбук, локальная сеть, процессы, резервирование и обновления |
 | Development | docs/development.md | Проверки и изоляция тестов |
 | Interface | docs/interface.md | Главная, кухня, дела, желания и доступность |
 | Accounts | docs/accounts.md | Регистрация и восстановление |
