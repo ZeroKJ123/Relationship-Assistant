@@ -51,11 +51,14 @@ use App\Models\Couple;
 use App\Models\Dish;
 use App\Models\Duty;
 use App\Models\Friend;
+use App\Models\NotificationDelivery;
 use App\Models\PartnerReminder;
 use App\Models\PartnerRequest;
 use App\Models\User;
 use App\Services\Hearts\EconomySettingsStore;
 use App\Services\Hearts\Ledger;
+use App\Services\Notifications\DeliveryLifecycle;
+use App\Services\Scheduling\DueCare;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Console\Kernel;
@@ -76,6 +79,9 @@ $barrier = $argv[6] ?? '';
 if (! is_int($value) || ! is_int($limit) || $barrier === '') {
     throw new RuntimeException('Invalid agreement worker arguments.');
 }
+if ($operation === 'care_process') {
+    Date::setTestNow(CarbonImmutable::createFromTimestampUTC($limit));
+}
 if (str_ends_with($operation, '_late')) {
     Date::setTestNow(CarbonImmutable::now()->addDays(5));
 }
@@ -89,6 +95,8 @@ while (! file_exists($barrier)) {
 }
 try {
     match ($operation) {
+        'notification_claim' => $app->make(DeliveryLifecycle::class)->claim(NotificationDelivery::query()->findOrFail($value)) ?? throw ValidationException::withMessages(['notification' => 'Unavailable']),
+        'care_process' => $app->make(DueCare::class)->execute(),
         'mood_record' => $app->make(RecordMood::class)->execute($actor, $couple, new MoodData(MoodLevel::Good, sprintf('00000000-0000-4000-8000-%012d', $value))),
         'mood_prompt' => $app->make(RecordMood::class)->execute($actor, $couple, new MoodData(MoodLevel::Good, sprintf('00000000-0000-4000-8000-%012d', $limit), promptId: $value)),
         'reminder_create' => $app->make(CreateReminder::class)->execute($actor, $couple, new ReminderData('Race reminder', CarbonImmutable::tomorrow(), sprintf('00000000-0000-4000-8000-%012d', $value))),

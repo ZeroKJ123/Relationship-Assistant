@@ -11,13 +11,24 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** @property string $telegram_id */
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $telegram_id
+ * @property string $chat_id
+ */
 #[Fillable(['user_id', 'telegram_id', 'chat_id'])]
 #[Hidden(['telegram_id', 'chat_id'])]
 final class TelegramAccount extends Model
 {
     /** @use HasFactory<TelegramAccountFactory> */
     use HasFactory;
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return ['user_id' => 'integer'];
+    }
 
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo

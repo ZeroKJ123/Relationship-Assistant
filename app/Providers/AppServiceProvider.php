@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Jobs\SendTelegramNotificationJob;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -13,6 +14,10 @@ use Illuminate\Support\ServiceProvider;
 
 final class AppServiceProvider extends ServiceProvider
 {
+    private const TELEGRAM_MESSAGES_PER_SECOND = 20;
+
+    private const TELEGRAM_RECIPIENT_MESSAGES_PER_SECOND = 1;
+
     private const COUPLE_ACTIONS_PER_MINUTE = 20;
 
     private const LOGIN_REQUESTS_PER_MINUTE = 20;
@@ -35,6 +40,10 @@ final class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('manage-system-settings', fn (User $user): bool => $user->is_admin);
+        RateLimiter::for('telegram', fn (SendTelegramNotificationJob $job): array => [
+            Limit::perSecond(self::TELEGRAM_MESSAGES_PER_SECOND)->by('telegram-global'),
+            Limit::perSecond(self::TELEGRAM_RECIPIENT_MESSAGES_PER_SECOND)->by(sprintf('telegram-recipient:%d', $job->recipientId)),
+        ]);
         RateLimiter::for('couple-actions', fn (Request $request): Limit => Limit::perMinute(self::COUPLE_ACTIONS_PER_MINUTE)->by($request->user()?->getAuthIdentifier() ?? $request->ip() ?? 'unknown'));
         RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(self::LOGIN_REQUESTS_PER_MINUTE)->by($request->ip() ?? 'unknown'));
         RateLimiter::for('registration', fn (Request $request): Limit => Limit::perHour(self::REGISTRATIONS_PER_HOUR)->by($request->ip() ?? 'unknown'));

@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Actions\Mood;
 
 use App\Data\Mood\MoodData;
+use App\Enums\NotificationKind;
 use App\Models\Couple;
 use App\Models\MoodEntry;
 use App\Models\MoodPrompt;
 use App\Models\User;
+use App\Services\Notifications\NotificationOutbox;
 use App\Services\Requests\RequestContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +19,7 @@ use Illuminate\Validation\ValidationException;
 
 final class RecordMood
 {
-    public function __construct(private readonly RequestContext $context) {}
+    public function __construct(private readonly RequestContext $context, private readonly NotificationOutbox $outbox) {}
 
     public function execute(User $actor, Couple $couple, MoodData $data): MoodEntry
     {
@@ -38,6 +40,8 @@ final class RecordMood
             }
             $entry = new MoodEntry;
             $entry->forceFill(['couple_id' => $current->id, 'user_id' => $actor->id, 'level' => $data->level, 'source' => $data->source, 'mood_prompt_id' => $data->promptId, 'operation_key' => $data->operationKey, 'recorded_at' => now()])->save();
+            $recipientId = $current->members()->where('user_id', '!=', $actor->id)->sole()->user_id;
+            $this->outbox->record($current->id, $recipientId, NotificationKind::MoodEntry, $entry->id);
             DB::afterCommit(fn () => Log::info('mood.recorded', ['entry_id' => $entry->id, 'actor_id' => $actor->id, 'couple_id' => $current->id, 'source' => $data->source->value]));
 
             return $entry;

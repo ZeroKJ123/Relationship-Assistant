@@ -8,6 +8,7 @@ enum ReminderStatus: string
 {
     case Scheduled = 'scheduled';
     case Ready = 'ready';
+    case Sending = 'sending';
     case Cancelled = 'cancelled';
     case Expired = 'expired';
     case Delivered = 'delivered';
@@ -16,7 +17,7 @@ enum ReminderStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Scheduled => __('Запланировано'), self::Ready => __('Ждёт доставки'), self::Cancelled => __('Отменено'), self::Expired => __('Срок прошёл'), self::Delivered => __('Доставлено'), self::Failed => __('Не доставлено')
+            self::Scheduled => __('Запланировано'), self::Ready => __('Ждёт доставки'), self::Sending => __('Передаётся в Telegram'), self::Cancelled => __('Отменено'), self::Expired => __('Срок прошёл'), self::Delivered => __('Отправлено в Telegram'), self::Failed => __('Доставка не подтверждена')
         };
     }
 

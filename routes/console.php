@@ -11,3 +11,6 @@ Artisan::command('inspire', function (): void {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('duties:check-overdue')->everyMinute()->withoutOverlapping();
+
+Schedule::command('care:process-due')->everyMinute()->withoutOverlapping();
+Schedule::command('telegram:dispatch-notifications')->everyMinute()->withoutOverlapping();

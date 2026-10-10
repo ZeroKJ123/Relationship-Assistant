@@ -81,6 +81,7 @@ it('creates scheduled mood prompts in the couple timezone once and answers them 
     CarbonImmutable::setTestNow(CarbonImmutable::parse('2026-10-11 06:30:00', 'UTC'));
     $pair = AgreementScenario::create();
     $scheduled = CarbonImmutable::parse('2026-10-11 06:00:00', 'UTC');
+    $pair->couple->members()->update(['joined_at' => $scheduled->subDay()]);
     $prompt = app(CreateMoodPrompt::class)->execute($pair->first, $pair->couple, $scheduled);
     expect($prompt)->not->toBeNull();
     expect(app(CreateMoodPrompt::class)->execute($pair->first, $pair->couple, $scheduled)->id)->toBe($prompt->id);

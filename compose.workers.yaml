@@ -1,0 +1,32 @@
+# Optional local processes. Start explicitly after applying migrations and confirming Telegram bindings.
+services:
+    telegram-worker:
+        image: 'sail-starter-8.4/app'
+        restart: unless-stopped
+        command: ['php', 'artisan', 'queue:work', 'database', '--queue=telegram,default', '--timeout=30', '--tries=0', '--no-interaction']
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: 'off'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            mariadb:
+                condition: service_healthy
+    scheduler:
+        image: 'sail-starter-8.4/app'
+        restart: unless-stopped
+        command: ['php', 'artisan', 'schedule:work', '--no-interaction']
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: 'off'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            mariadb:
+                condition: service_healthy

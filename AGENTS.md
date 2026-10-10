@@ -179,6 +179,7 @@ Before relying on a package's API, confirm its installed version:
 | Products | docs/dishes-wishlist-money.md | Кухня, желания и денежные просьбы |
 | Friends and dates | docs/friends-guests-dates.md | Личные друзья, гости и свидания |
 | Mood and reminders | docs/mood-and-reminders.md | Настроение, расписание и напоминания |
+| Telegram and scheduling | docs/telegram-and-scheduling.md | Доставка, очередь, расписание и повторные попытки |
 
 ## Project entry points
 
@@ -211,4 +212,8 @@ Before relying on a package's API, confirm its installed version:
 - `docs/friends-guests-dates.md`: правила приглашений, миграция и проверки.
 
 - `app/Actions/Mood/`, `app/Services/Mood/MoodHistory.php`: оценки, запросы настроения и личное расписание.
-- `app/Actions/Reminders/`, `app/Services/Reminders/ReminderLifecycle.php`, `routes/care.php`: разовые напоминания, отмена и подготовка доставки; Telegram и scheduler подключаются отдельно.
+- `app/Actions/Reminders/`, `app/Services/Reminders/ReminderLifecycle.php`, `routes/care.php`: разовые напоминания, отмена и подготовка доставки; отправитель и scheduler запускаются отдельными процессами.
+
+- `app/Services/Notifications/`, `app/Actions/Notifications/`, `app/Jobs/SendTelegramNotificationJob.php`: транзакционный outbox, проверка источника/пары/привязки, lease и итоги Telegram.
+- `app/Services/Telegram/BotClient.php`, `config/services.php`: выключаемый транспорт без секретов в логах; пользовательский вход/webhook ещё не реализованы.
+- `app/Services/Scheduling/DueCare.php`, `care:process-due`, `telegram:dispatch-notifications`: локальные часы пары, ограниченный catch-up и восстановление очереди; необязательный `compose.workers.yaml` и отдельные процессы описаны в `docs/telegram-and-scheduling.md`.

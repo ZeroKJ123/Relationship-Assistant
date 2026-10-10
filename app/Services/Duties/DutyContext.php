@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Duties;
 
+use App\Enums\NotificationKind;
 use App\Models\Couple;
 use App\Models\Duty;
 use App\Models\DutyConfirmation;
 use App\Models\User;
+use App\Services\Notifications\NotificationOutbox;
 use App\Services\Requests\RequestContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -16,7 +18,7 @@ use Illuminate\Validation\ValidationException;
 
 final class DutyContext
 {
-    public function __construct(private readonly RequestContext $requests) {}
+    public function __construct(private readonly RequestContext $requests, private readonly NotificationOutbox $outbox) {}
 
     public function lock(User $actor, Couple $couple, Duty $duty, string $ability): Duty
     {
@@ -53,7 +55,12 @@ final class DutyContext
 
     public function record(Duty $duty, ?User $actor, string $stage, ?bool $answer): void
     {
-        (new DutyConfirmation)->forceFill(['duty_id' => $duty->id, 'actor_id' => $actor?->id, 'stage' => $stage, 'answer' => $answer, 'version' => $duty->version])->save();
+        $event = new DutyConfirmation;
+        $event->forceFill(['duty_id' => $duty->id, 'actor_id' => $actor?->id, 'stage' => $stage, 'answer' => $answer, 'version' => $duty->version])->save();
+        $recipientIds = $actor === null ? [$duty->executor_id, $duty->reviewer_id] : [$actor->id === $duty->executor_id ? $duty->reviewer_id : $duty->executor_id];
+        foreach ($recipientIds as $recipientId) {
+            $this->outbox->record($duty->couple_id, $recipientId, NotificationKind::DutyEvent, $event->id);
+        }
         DB::afterCommit(fn () => Log::info('duty.transitioned', ['duty_id' => $duty->id, 'actor_id' => $actor?->id, 'stage' => $stage, 'status' => $duty->status->value, 'version' => $duty->version, 'reported_at' => $duty->reported_at?->toIso8601String(), 'reviewed_at' => $duty->reviewed_at?->toIso8601String()]));
     }
 }

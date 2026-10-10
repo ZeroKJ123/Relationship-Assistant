@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Mood;
 
+use App\Enums\NotificationKind;
 use App\Models\Couple;
 use App\Models\MoodPrompt;
 use App\Models\User;
+use App\Services\Notifications\NotificationOutbox;
 use App\Services\Requests\RequestContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 
 final class CreateMoodPrompt
 {
-    public function __construct(private readonly RequestContext $context) {}
+    public function __construct(private readonly RequestContext $context, private readonly NotificationOutbox $outbox) {}
 
     public function execute(User $actor, Couple $couple, CarbonImmutable $scheduledAt): ?MoodPrompt
     {
@@ -22,7 +24,7 @@ final class CreateMoodPrompt
             $current = $this->context->lockCouple($actor, $couple);
             $member = $current->members()->where('user_id', $actor->id)->lockForUpdate()->firstOrFail();
             $local = $scheduledAt->setTimezone($current->timezone);
-            if (! $member->mood_schedule_enabled || ! in_array($local->hour, MoodPrompt::HOURS, true) || $local->minute !== 0 || $local->second !== 0 || $scheduledAt->isFuture()) {
+            if (! $member->mood_schedule_enabled || ! in_array($local->hour, MoodPrompt::HOURS, true) || $scheduledAt->lessThan($member->joined_at) || $local->minute !== 0 || $local->second !== 0 || $scheduledAt->isFuture()) {
                 return null;
             }
             $expiresAt = $scheduledAt->setMicrosecond(0)->utc()->addHours(MoodPrompt::RESPONSE_WINDOW_HOURS);
@@ -35,6 +37,7 @@ final class CreateMoodPrompt
             }
             $prompt = new MoodPrompt;
             $prompt->forceFill(['couple_id' => $current->id, 'user_id' => $actor->id, 'scheduled_at' => $scheduledAt->setMicrosecond(0)->utc(), 'expires_at' => $expiresAt])->save();
+            $this->outbox->record($current->id, $actor->id, NotificationKind::MoodPrompt, $prompt->id, expiresAt: $expiresAt);
             DB::afterCommit(fn () => Log::info('mood.prompt_created', ['prompt_id' => $prompt->id, 'actor_id' => $actor->id]));
 
             return $prompt;

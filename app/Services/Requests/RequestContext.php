@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Services\Requests;
 
 use App\Enums\CoupleStatus;
+use App\Enums\NotificationKind;
 use App\Models\Couple;
 use App\Models\CoupleMember;
 use App\Models\PartnerRequest;
 use App\Models\RequestEvent;
 use App\Models\User;
 use App\Services\Couples\CoupleLock;
+use App\Services\Notifications\NotificationOutbox;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +21,7 @@ final class RequestContext
 {
     private const PARTNER_COUNT = 2;
 
-    public function __construct(private readonly CoupleLock $lock) {}
+    public function __construct(private readonly CoupleLock $lock, private readonly NotificationOutbox $outbox) {}
 
     public function lockCouple(User $actor, Couple $couple): Couple
     {
@@ -64,6 +66,9 @@ final class RequestContext
     {
         $event = new RequestEvent;
         $event->forceFill(['partner_request_id' => $request->id, 'actor_id' => $actor->id, 'type' => $type, 'status' => $request->status, 'version' => $request->version])->save();
+
+        $recipientId = $actor->id === $request->author_id ? $request->recipient_id : $request->author_id;
+        $this->outbox->record($request->couple_id, $recipientId, NotificationKind::RequestEvent, $event->id);
 
         return $event;
     }
