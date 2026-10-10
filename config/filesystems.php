@@ -37,6 +37,7 @@ return [
     */
 
     'disks' => [
+        'catalog_photos' => ['driver' => 'local', 'root' => storage_path('app/private/catalog-photos'), 'serve' => false, 'throw' => true, 'report' => false],
 
         'local' => [
             'driver' => 'local',

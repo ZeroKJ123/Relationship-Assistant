@@ -38,7 +38,7 @@ final class RequestCatalog
             return ['type' => $data->conditionType ?? ConditionType::Custom, 'description' => $data->description ?? '', 'method_kind' => null, 'method_name' => null, 'sushi_size' => null];
         }
         $method = SettlementMethod::query()->whereKey($data->methodId)->lockForUpdate()->first();
-        if ($method === null || ($method->user_id !== null && $method->user_id !== $actor->id) || ! in_array($method->kind, ['action', 'kisses', 'sushi', 'custom'], true)) {
+        if ($method === null || ($method->user_id !== null && $method->user_id !== $actor->id) || ! in_array($method->kind, ['action', 'kisses', 'sushi', 'custom', 'money', 'wishlist'], true)) {
             $this->deny();
         }
         if (($method->kind === 'sushi' && ! in_array($data->sushiSize, ['small', 'medium', 'large'], true)) || ($method->kind !== 'sushi' && $data->sushiSize !== null)) {
@@ -53,7 +53,7 @@ final class RequestCatalog
         }
 
         return ['type' => match ($method->kind) {
-            'kisses' => ConditionType::Kisses,'action' => ConditionType::Action,default => ConditionType::Custom
+            'money' => ConditionType::Money,'wishlist' => ConditionType::Gift,'kisses' => ConditionType::Kisses,'action' => ConditionType::Action,default => ConditionType::Custom
         }, 'description' => trim($description), 'method_kind' => $method->kind, 'method_name' => $method->name, 'sushi_size' => $data->sushiSize];
     }
 

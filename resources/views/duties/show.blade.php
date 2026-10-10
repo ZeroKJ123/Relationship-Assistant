@@ -23,7 +23,7 @@
                 @csrf
                 <input type="hidden" name="expected_version" value="{{ $duty->version }}">
                 <label class="confirmation-check"><input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю выбранный ответ о выполнении') }}</label>
-                <div class="confirmation-actions"><x-button type="submit" name="answer" value="1">{{ __('Сделано') }}</x-button><x-button type="submit" name="answer" value="0" variant="quiet">{{ __('Пока не сделано') }}</x-button></div>
+                <div class="confirmation-actions"><x-button type="submit" name="answer" value="1">{{ $reportLabel }}</x-button><x-button type="submit" name="answer" value="0" variant="quiet">{{ __('Пока не сделано') }}</x-button></div>
             </form>
         </x-card>
     @endif
@@ -36,7 +36,7 @@
                 @csrf
                 <input type="hidden" name="expected_version" value="{{ $duty->version }}">
                 <label class="confirmation-check"><input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю результат проверки') }}</label>
-                <div class="confirmation-actions"><x-button type="submit" name="answer" value="1">{{ __('Подтвердить выполнение') }}</x-button><x-button type="submit" name="answer" value="0" variant="quiet">{{ __('Оспорить отметку') }}</x-button></div>
+                <div class="confirmation-actions"><x-button type="submit" name="answer" value="1">{{ $verifyLabel }}</x-button><x-button type="submit" name="answer" value="0" variant="quiet">{{ __('Оспорить отметку') }}</x-button></div>
             </form>
         </x-card>
     @endif
@@ -47,5 +47,5 @@
     @empty<p>{{ __('Ответов ещё нет.') }}</p>@endforelse
 </x-card>
 {{ $history->links() }}
-<div class="confirmation-actions section-space"><a class="button button--quiet" href="{{ route('duties.index',$couple) }}">{{ __('Все дела') }}</a><a class="button button--quiet" href="{{ route('hearts.index') }}">{{ __('Мои сердечки') }}</a></div>
+<div class="confirmation-actions section-space"><a class="button button--quiet" href="{{ route('requests.show',[$couple,$duty->partner_request_id]) }}">{{ __('К просьбе и условиям') }}</a><a class="button button--quiet" href="{{ route('duties.index',$couple) }}">{{ __('Все дела') }}</a><a class="button button--quiet" href="{{ route('hearts.index') }}">{{ __('Мои сердечки') }}</a></div>
 @endsection

@@ -11,6 +11,7 @@ use App\Models\CoupleMember;
 use App\Models\User;
 use App\Services\Couples\CoupleLock;
 use App\Services\Hearts\ServicePayments;
+use App\Services\Requests\AgreementAttachments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -18,7 +19,7 @@ use Illuminate\Validation\ValidationException;
 
 final class EndCouple
 {
-    public function __construct(private readonly CoupleLock $lock, private readonly ServicePayments $payments) {}
+    public function __construct(private readonly CoupleLock $lock, private readonly ServicePayments $payments, private readonly AgreementAttachments $attachments) {}
 
     public function execute(User $actor, Couple $couple): void
     {
@@ -34,6 +35,7 @@ final class EndCouple
             if ($current->members()->orderBy('user_id')->get()->map(fn (CoupleMember $member): int => $member->user_id)->values()->all() !== $userIds) {
                 throw ValidationException::withMessages(['couple' => __('Состав пары изменился. Обновите страницу и подтвердите выход снова.')]);
             }
+            $this->attachments->releaseCouple($current);
             $this->payments->releaseCouple($current);
             $endedAt = now();
             $current->members()->whereNull('ended_at')->update(['active_user_id' => null, 'ended_at' => $endedAt]);

@@ -20,3 +20,4 @@ require sprintf('%s/duties.php', __DIR__);
 require sprintf('%s/admin.php', __DIR__);
 
 require sprintf('%s/catalogs.php', __DIR__);
+require sprintf('%s/products.php', __DIR__);

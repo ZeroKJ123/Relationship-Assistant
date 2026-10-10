@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title', __('Наши просьбы'))
 @section('content')
+@can('update',$couple)<a class="button button--quiet section-space" href="{{ route('money.create',$couple) }}">{{ __('Попросить деньги') }}</a>@endcan
 <x-card class="start-card">
 <h1>{{ __('Наши просьбы') }}</h1>
 <p>{{ __('Ответ и встречное условие сохраняются отдельно от выполнения.') }}</p>

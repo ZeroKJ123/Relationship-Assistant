@@ -6,9 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Actions\Duties\ReportDuty;
 use App\Actions\Duties\VerifyDuty;
+use App\Enums\DutyKind;
 use App\Http\Requests\ConfirmDutyRequest;
 use App\Models\Couple;
 use App\Models\Duty;
+use App\Models\PartnerRequest;
+use App\Models\RequestCondition;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -32,7 +35,15 @@ final class DutyController extends Controller
         Gate::authorize('view', $duty);
         $duty->load(['executor:id,name', 'reviewer:id,name']);
 
-        return view('duties.show', ['couple' => $couple, 'duty' => $duty, 'history' => $duty->confirmations()->latest('version')->paginate(self::PAGE_SIZE)]);
+        $type = $duty->kind === DutyKind::Service ? PartnerRequest::query()->findOrFail($duty->partner_request_id)->type->value : RequestCondition::query()->findOrFail($duty->request_condition_id)->type->value;
+        $reportLabel = match ($type) {
+            'money' => __('Я оплатил'),'gift' => __('Подарок передан'),default => __('Сделано')
+        };
+        $verifyLabel = match ($type) {
+            'money' => __('Деньги получены'),'gift' => __('Подарок получен'),default => __('Подтвердить выполнение')
+        };
+
+        return view('duties.show', ['reportLabel' => $reportLabel, 'verifyLabel' => $verifyLabel, 'couple' => $couple, 'duty' => $duty, 'history' => $duty->confirmations()->latest('version')->paginate(self::PAGE_SIZE)]);
     }
 
     public function report(ConfirmDutyRequest $request, Couple $couple, Duty $duty): RedirectResponse

@@ -14,6 +14,7 @@ use App\Services\Catalogs\RequestCatalog;
 use App\Services\Hearts\EconomyRules;
 use App\Services\Hearts\ServicePayments;
 use App\Services\Requests\RefusalTariff;
+use App\Services\Requests\RequestAttachments;
 use App\Services\Requests\RequestContext;
 use App\Services\Requests\VeryWantedRequests;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ use Illuminate\Support\Str;
 
 final class CreatePartnerRequest
 {
-    public function __construct(private readonly RequestContext $context, private readonly RefusalTariff $tariff, private readonly VeryWantedRequests $veryWanted, private readonly ServicePayments $payments, private readonly RequestCatalog $catalog) {}
+    public function __construct(private readonly RequestContext $context, private readonly RefusalTariff $tariff, private readonly VeryWantedRequests $veryWanted, private readonly ServicePayments $payments, private readonly RequestCatalog $catalog, private readonly RequestAttachments $attachments) {}
 
     public function execute(User $actor, Couple $couple, NewRequestData $data): PartnerRequest
     {
@@ -35,7 +36,7 @@ final class CreatePartnerRequest
             $current = $this->context->lockCouple($actor, $couple);
             $existing = PartnerRequest::query()->where('author_id', $actor->id)->where('operation_key', $operationKey)->lockForUpdate()->first();
             if ($existing !== null) {
-                if ($existing->couple_id !== $current->id || $existing->type !== $data->type || $existing->description !== $data->description || ! $existing->due_at->equalTo($dueAt) || $existing->is_very_wanted !== $data->isVeryWanted || $existing->heart_price !== $data->heartPrice || $existing->request_template_id !== $data->templateId || $existing->expense_category_id !== $data->expenseCategoryId) {
+                if (! $this->attachments->isSame($existing, $data) || $existing->couple_id !== $current->id || $existing->type !== $data->type || $existing->description !== $data->description || ! $existing->due_at->equalTo($dueAt) || $existing->is_very_wanted !== $data->isVeryWanted || $existing->heart_price !== $data->heartPrice || $existing->request_template_id !== $data->templateId || $existing->expense_category_id !== $data->expenseCategoryId) {
                     $this->context->deny('changed_creation_payload', coupleId: $current->id);
                 }
 
@@ -47,7 +48,7 @@ final class CreatePartnerRequest
             if ($data->isVeryWanted) {
                 $this->veryWanted->requireAvailability($actor, $current);
             }
-            if ($data->heartPrice > 0 && $data->type !== RequestType::Service) {
+            if ($data->heartPrice > 0 && $data->type !== RequestType::Service && ($data->type !== RequestType::Food || $data->dishId === null)) {
                 $this->context->deny('unsupported_paid_request', coupleId: $current->id);
             }
             $this->payments->requireAvailability($actor, $data->heartPrice);
@@ -55,6 +56,7 @@ final class CreatePartnerRequest
             $request = new PartnerRequest;
             $request->forceFill([
                 ...$this->catalog->requestSnapshot($data),
+                ...$this->attachments->snapshot($actor, $recipient->user_id, $data),
                 'heart_price' => $data->heartPrice,
                 'operation_key' => $operationKey,
                 'couple_id' => $current->id,
@@ -69,6 +71,8 @@ final class CreatePartnerRequest
                 'status' => RequestStatus::Pending,
                 'version' => 0,
             ])->save();
+
+            $this->attachments->attachMoney($request, $data);
 
             return [$request, $this->context->record($actor, $request, 'created')];
         }, attempts: 3);

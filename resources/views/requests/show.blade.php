@@ -9,6 +9,8 @@
 @if($partnerRequest->category_name)<p>{{ __('Категория: :name', ['name'=>$partnerRequest->category_name]) }}</p>@endif
 @if($partnerRequest->template_name)<p>{{ __('Шаблон: :name', ['name'=>$partnerRequest->template_name]) }}</p>@endif
 <p class="request-description">{{ $partnerRequest->description }}</p>
+@if($partnerRequest->dish_snapshot)<x-product-photo :src="!empty($partnerRequest->dish_snapshot['photo_path']) ? route('photos.requests',$partnerRequest) : null" :alt="$partnerRequest->dish_snapshot['title'] ?? ''" symbol="♨" /><p>{{ $partnerRequest->dish_snapshot['title'] }} · {{ $partnerRequest->dish_kind->label() }}</p><p>{{ $partnerRequest->dish_snapshot['ingredients'] }}</p><p>{{ __('Продукты ≈ :amount :currency · порций: :portions',['amount'=>$partnerRequest->dish_snapshot['estimate'],'currency'=>$partnerRequest->dish_snapshot['currency'],'portions'=>$partnerRequest->dish_snapshot['portions']]) }}</p>@endif
+@if($partnerRequest->moneyRequest)<p class="price-chip">{{ $partnerRequest->moneyRequest->amount }} {{ $partnerRequest->moneyRequest->currency->value }}</p><p>{{ __('Оплата отмечается плательщиком; поступление отдельно подтверждает получатель. Денежные переводы не дают награду.') }}</p>@if($partnerRequest->status === \App\Enums\RequestStatus::Accepted)<h2>{{ __('Реквизиты получателя') }}</h2><p class="request-description">{{ $partnerRequest->moneyRequest->payment_details_snapshot }}</p>@endif @endif
 <p>{{ __('Выполнить до :date', ['date'=>$partnerRequest->due_at->setTimezone($couple->timezone)->format('d.m.Y H:i')]) }}</p>
 @if(session('status'))<p role="status">{{ session('status') }}</p>
 @endif
@@ -27,6 +29,8 @@
 <h2>{{ __('Встречное условие · вариант :version', ['version'=>$currentCondition->version]) }}</h2>
 <p>{{ __($currentCondition->type->label()) }}</p>
 <p class="request-description">{{ $currentCondition->description }}</p>
+@if($currentCondition->gift_snapshot)<x-product-photo :src="!empty($currentCondition->gift_snapshot['photo_path']) ? route('photos.conditions',$currentCondition) : null" :alt="$currentCondition->gift_snapshot['title'] ?? ''" /><p>{{ $currentCondition->gift_snapshot['title'] }}</p><p class="price-chip">{{ $currentCondition->gift_snapshot['price'] }} {{ $currentCondition->gift_snapshot['currency'] }}</p><p>{{ __('Получатель подтвердит подарок отдельно. После получения желание уйдёт в архив.') }}</p>@endif
+@if($currentCondition->amount)<p class="price-chip">{{ $currentCondition->amount }} {{ $currentCondition->currency->value }}</p>@if($currentCondition->accepted_at && $partnerRequest->status === \App\Enums\RequestStatus::Accepted)<h3>{{ __('Реквизиты получателя') }}</h3><p class="request-description">{{ $currentCondition->payment_details_snapshot }}</p>@endif @endif
 <p>{{ __('Срок условия: :date', ['date'=>$currentCondition->due_at->setTimezone($couple->timezone)->format('d.m.Y H:i')]) }}</p>
 @if($currentCondition->accepted_at)<p>{{ __('Условие принято автором просьбы.') }}</p>
 @endif
@@ -65,7 +69,7 @@
 </form>
 </x-card>
 @endif
-@if(in_array($partnerRequest->status,[\App\Enums\RequestStatus::Pending,\App\Enums\RequestStatus::Conditional],true))
+@if(!$partnerRequest->moneyRequest && in_array($partnerRequest->status,[\App\Enums\RequestStatus::Pending,\App\Enums\RequestStatus::Conditional],true))
 <x-card class="section-space">
 <h2>{{ __('Предложить встречное условие') }}</h2>
 <form method="post" action="{{ route('requests.responses.store',[$couple,$partnerRequest]) }}" class="form-stack" data-submit-lock>
@@ -76,9 +80,12 @@
 <div class="field"><label for="sushi_size">{{ __('Размер суши — только для этого способа') }}</label><select name="sushi_size" id="sushi_size"><option value="">{{ __('Не выбрано') }}</option>@foreach(['small'=>__('Маленький'),'medium'=>__('Средний'),'large'=>__('Большой')] as $size=>$label)<option value="{{ $size }}" @selected(old('sushi_size') === $size)>{{ $label }}</option>@endforeach</select></div>
 <div class="field"><label for="condition_type">{{ __('Вид условия') }}</label>
 <select name="condition_type" id="condition_type">
-@foreach(\App\Enums\ConditionType::cases() as $type)<option value="{{ $type->value }}" @selected(old('condition_type') === $type->value)>{{ __($type->label()) }}</option>
+@foreach($conditionTypes as $type)<option value="{{ $type->value }}" @selected(old('condition_type') === $type->value)>{{ __($type->label()) }}</option>
 @endforeach</select>
 </div>
+<div class="field"><label for="wishlist_choice">{{ __('Для подарка — ваше желание') }}</label><select id="wishlist_choice" name="wishlist_choice"><option value="">{{ __('Не выбрано') }}</option>@foreach($wishes as $wish)<option value="{{ $wish->id }}:{{ $wish->version }}" @selected(old('wishlist_choice') === sprintf('%d:%d',$wish->id,$wish->version))>{{ $wish->title }} · {{ $wish->price }} {{ $wish->currency->value }}</option>@endforeach</select></div>
+{{ $wishes->links() }}
+<x-field name="amount" :label="__('Для денежного условия — точная сумма')" :value="old('amount','')" inputmode="decimal" /><div class="field"><label for="currency">{{ __('Валюта денежного условия') }}</label><select id="currency" name="currency">@foreach($currencies as $currency)<option value="{{ $currency->value }}" @selected(old('currency',$couple->currency->value) === $currency->value)>{{ $currency->value }}</option>@endforeach</select></div><p>{{ __('Заполняйте сумму только для денег, а желание только для подарка. Для других условий оставьте оба поля пустыми.') }}</p>
 <div class="field">
 <label for="description">{{ __('Условие') }}</label>
 <textarea id="description" name="description" rows="4" maxlength="2000" required>{{ old('description') }}</textarea>

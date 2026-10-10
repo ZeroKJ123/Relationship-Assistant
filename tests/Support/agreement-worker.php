@@ -7,26 +7,33 @@ use App\Actions\Couples\Agreements\AcceptProposal;
 use App\Actions\Couples\Agreements\ProposeWeeklyLimit;
 use App\Actions\Couples\Agreements\SubmitAnswer;
 use App\Actions\Couples\EndCouple;
+use App\Actions\Dishes\SaveDish;
 use App\Actions\Duties\CheckOverdueDuty;
 use App\Actions\Duties\ReportDuty;
 use App\Actions\Duties\VerifyDuty;
 use App\Actions\Hearts\AdjustPartnerHearts;
+use App\Actions\Money\CreateMoneyRequest;
 use App\Actions\Requests\CancelPartnerRequest;
 use App\Actions\Requests\CreatePartnerRequest;
 use App\Actions\Requests\ResolveCondition;
 use App\Actions\Requests\RespondToRequest;
 use App\Data\Admin\EconomySettingsData;
 use App\Data\Couples\WeeklyLimitData;
+use App\Data\Dishes\DishData;
 use App\Data\Hearts\AdjustmentData;
+use App\Data\Money\MoneyRequestData;
 use App\Data\Requests\NewRequestData;
 use App\Data\Requests\RequestResponseData;
 use App\Enums\ConditionType;
+use App\Enums\Currency;
 use App\Enums\DeclineReason;
+use App\Enums\DishKind;
 use App\Enums\HeartOperationType;
 use App\Enums\RequestResponse;
 use App\Enums\RequestType;
 use App\Models\AgreementProposal;
 use App\Models\Couple;
+use App\Models\Dish;
 use App\Models\Duty;
 use App\Models\PartnerRequest;
 use App\Models\User;
@@ -65,6 +72,8 @@ while (! file_exists($barrier)) {
 }
 try {
     match ($operation) {
+        'money_create' => $app->make(CreateMoneyRequest::class)->execute($actor, $couple, new MoneyRequestData('12.30', Currency::Byn, 'Race', CarbonImmutable::tomorrow(), sprintf('00000000-0000-4000-8000-%012d', $value))),
+        'dish_edit' => $app->make(SaveDish::class)->execute($actor, new DishData(sprintf('Edit %d', $limit), 'Ingredient', '9.99', Currency::Byn, DishKind::Ordinary, 1, 0, sprintf('00000000-0000-4000-8000-%012d', $limit)), Dish::query()->findOrFail($value)),
         'economy_edit' => $app->make(UpdateEconomySettings::class)->execute($actor, new EconomySettingsData($value, array_replace($app->make(EconomySettingsStore::class)->initialize()->settings, ['reward' => $limit]))),
         'request_cancel' => $app->make(CancelPartnerRequest::class)->execute($actor, $couple, PartnerRequest::query()->findOrFail($value), $limit),
         'duty_report', 'duty_report_late' => $app->make(ReportDuty::class)->execute($actor, $couple, Duty::query()->findOrFail($value), version: $limit, isDone: true),

@@ -13,12 +13,13 @@ use App\Models\User;
 use App\Services\Duties\DutyContext;
 use App\Services\Hearts\ApplyDutyEconomy;
 use App\Services\Hearts\ServicePayments;
+use App\Services\Requests\AgreementAttachments;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 final class VerifyDuty
 {
-    public function __construct(private readonly DutyContext $context, private readonly ApplyDutyEconomy $economy, private readonly ServicePayments $payments) {}
+    public function __construct(private readonly DutyContext $context, private readonly ApplyDutyEconomy $economy, private readonly ServicePayments $payments, private readonly AgreementAttachments $attachments) {}
 
     public function execute(User $actor, Couple $couple, Duty $duty, int $version, bool $isConfirmed): void
     {
@@ -36,6 +37,7 @@ final class VerifyDuty
             $current->reviewed_at = now()->toImmutable();
             $current->version++;
             $current->save();
+            $this->attachments->verified($current, $isConfirmed);
             if ($isConfirmed) {
                 $this->payments->settle($current);
                 $this->economy->reward($current);

@@ -10,12 +10,13 @@ use App\Models\Couple;
 use App\Models\PartnerRequest;
 use App\Models\User;
 use App\Services\Hearts\ServicePayments;
+use App\Services\Requests\AgreementAttachments;
 use App\Services\Requests\RequestContext;
 use Illuminate\Support\Facades\DB;
 
 final class CancelPartnerRequest
 {
-    public function __construct(private readonly RequestContext $context, private readonly ServicePayments $payments) {}
+    public function __construct(private readonly RequestContext $context, private readonly ServicePayments $payments, private readonly AgreementAttachments $attachments) {}
 
     public function execute(User $actor, Couple $couple, PartnerRequest $request, int $version): void
     {
@@ -44,6 +45,7 @@ final class CancelPartnerRequest
             if ($current->status === RequestStatus::Accepted && $current->cancellation_proposed_by_id === $actor->id) {
                 $this->context->deny('needs_partner_cancellation', requestId: $current->id);
             }
+            $this->attachments->release($current);
             $this->payments->release($current);
             $current->duties()->whereIn('status', [DutyStatus::Pending, DutyStatus::Overdue, DutyStatus::Reported])->update(['status' => DutyStatus::Cancelled]);
             $current->forceFill(['status' => RequestStatus::Cancelled, 'version' => $current->version + 1])->save();

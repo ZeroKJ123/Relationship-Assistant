@@ -174,6 +174,7 @@ Before relying on a package's API, confirm its installed version:
 | Accounts | docs/accounts.md | Регистрация и миграции профиля |
 | Couples | docs/couples.md | Пары, приглашения и согласование недельного лимита |
 | Requests | docs/requests.md | Просьбы, версии условий, ответы и снимки тарифа |
+| Products | docs/dishes-wishlist-money.md | Кухня, желания, приватные фото и денежные просьбы |
 | Economy and catalogs | docs/economy-and-catalogs.md | Версии настроек, резерв цены услуги и стартовые каталоги |
 | Hearts and duties | docs/hearts-and-duties.md | Отметки и проверки, личный журнал, награды, штрафы и ограничения |
 
@@ -199,3 +200,6 @@ Before relying on a package's API, confirm its installed version:
 - `app/Actions/Duties/`, `app/Services/Duties/`, `routes/duties.php`: отдельное выполнение и проверка обязанностей.
 - `app/Services/Hearts/`, `app/Actions/Hearts/`: журнал, сверка и ручные операции только действующим партнёром.
 - `app/Console/Commands/`, `routes/console.php`: проверка просрочек и сверка балансов; scheduler нужно запускать отдельно.
+
+- `routes/products.php`, `app/Services/Requests/*Attachments.php`: снимки блюд и условий, обещания подарков, денежные реквизиты.
+- `app/Services/Media/PrivatePhotos.php`: проверка и закрытая выдача фото каталога.

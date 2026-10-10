@@ -6,6 +6,7 @@ namespace App\Http\Requests;
 
 use App\Data\Requests\RequestResponseData;
 use App\Enums\ConditionType;
+use App\Enums\Currency;
 use App\Enums\DeclineReason;
 use App\Enums\RequestResponse;
 use App\Models\Couple;
@@ -23,7 +24,7 @@ final class RespondPartnerRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
-        return ['confirmation' => ['required', 'accepted'], 'response' => ['required', Rule::enum(RequestResponse::class)], 'expected_version' => ['required', 'integer', 'min:0'],
+        return ['wishlist_choice' => ['nullable', 'regex:/\A[1-9][0-9]*:[0-9]+\z/D'], 'amount' => ['nullable', 'string', 'max:20'], 'currency' => ['nullable', Rule::enum(Currency::class)], 'confirmation' => ['required', 'accepted'], 'response' => ['required', Rule::enum(RequestResponse::class)], 'expected_version' => ['required', 'integer', 'min:0'],
             'reason' => ['exclude_unless:response,decline', 'required', Rule::enum(DeclineReason::class)],
             'settlement_method_id' => ['nullable', 'integer', 'min:1'], 'sushi_size' => ['nullable', 'in:small,medium,large'], 'condition_type' => ['exclude_unless:response,conditional', 'required', Rule::enum(ConditionType::class)],
             'description' => ['exclude_unless:response,conditional', 'required', 'string', 'max:2000'],
@@ -32,8 +33,9 @@ final class RespondPartnerRequest extends FormRequest
 
     public function getData(Couple $couple): RequestResponseData
     {
+        $choice = explode(':', $this->string('wishlist_choice')->toString());
         $response = RequestResponse::from($this->string('response')->toString());
 
-        return new RequestResponseData(methodId: $this->filled('settlement_method_id') ? $this->integer('settlement_method_id') : null, sushiSize: $this->filled('sushi_size') ? $this->string('sushi_size')->toString() : null, response: $response, expectedVersion: $this->integer('expected_version'), reason: $response === RequestResponse::Decline ? DeclineReason::from($this->string('reason')->toString()) : null, conditionType: $response === RequestResponse::Conditional ? ConditionType::from($this->string('condition_type')->toString()) : null, description: $response === RequestResponse::Conditional ? $this->string('description')->trim()->toString() : null, dueAt: $response === RequestResponse::Conditional ? CarbonImmutable::createFromFormat('!Y-m-d\TH:i', $this->string('due_at')->toString(), $couple->timezone) : null);
+        return new RequestResponseData(wishlistItemId: $this->filled('wishlist_choice') ? (int) $choice[0] : null, wishlistVersion: $this->filled('wishlist_choice') ? (int) ($choice[1] ?? 0) : null, amount: $this->filled('amount') ? $this->string('amount')->toString() : null, currency: $this->filled('amount') && $this->filled('currency') ? Currency::from($this->string('currency')->toString()) : null, methodId: $this->filled('settlement_method_id') ? $this->integer('settlement_method_id') : null, sushiSize: $this->filled('sushi_size') ? $this->string('sushi_size')->toString() : null, response: $response, expectedVersion: $this->integer('expected_version'), reason: $response === RequestResponse::Decline ? DeclineReason::from($this->string('reason')->toString()) : null, conditionType: $response === RequestResponse::Conditional ? ConditionType::from($this->string('condition_type')->toString()) : null, description: $response === RequestResponse::Conditional ? $this->string('description')->trim()->toString() : null, dueAt: $response === RequestResponse::Conditional ? CarbonImmutable::createFromFormat('!Y-m-d\TH:i', $this->string('due_at')->toString(), $couple->timezone) : null);
     }
 }
