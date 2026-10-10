@@ -86,6 +86,7 @@ final class CallbackOperations
         return match ($operation) {
             TelegramOperation::MoodGreat => MoodLevel::Great,
             TelegramOperation::MoodGood => MoodLevel::Good,
+            TelegramOperation::MoodNeutral => MoodLevel::Neutral,
             TelegramOperation::MoodLow => MoodLevel::Low,
             TelegramOperation::MoodBad => MoodLevel::Bad,
             default => throw ValidationException::withMessages(['telegram' => __('Действие недоступно.')]),

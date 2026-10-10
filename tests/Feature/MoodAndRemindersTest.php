@@ -201,3 +201,11 @@ it('does not expose home page moods to an invalidated password session', functio
     $pair->second->forceFill(['password' => 'Changed-test-password-123'])->save();
     $this->get(route('home'))->assertRedirect(route('login'))->assertDontSee($pair->first->name);
 });
+
+it('accepts neutral mood from the website and shows it to the partner', function (): void {
+    $pair = AgreementScenario::create();
+    $this->asUser($pair->first)->get(route('mood.index', $pair->couple))->assertOk()->assertSee('Нейтрально');
+    $this->post(route('mood.store', $pair->couple), ['operation_key' => Str::uuid()->toString(), 'level' => 'neutral'])->assertSessionHasNoErrors()->assertRedirect();
+    expect(MoodEntry::query()->sole()->level)->toBe(MoodLevel::Neutral);
+    $this->asUser($pair->second)->get(route('home'))->assertOk()->assertSee('Нейтрально');
+});

@@ -8,13 +8,14 @@ enum MoodLevel: string
 {
     case Great = 'great';
     case Good = 'good';
+    case Neutral = 'neutral';
     case Low = 'low';
     case Bad = 'bad';
 
     public function label(): string
     {
         return match ($this) {
-            self::Great => __('Отлично'), self::Good => __('Хорошо'), self::Low => __('Не очень'), self::Bad => __('Плохо')
+            self::Great => __('Отлично'), self::Good => __('Хорошо'), self::Neutral => __('Нейтрально'), self::Low => __('Не очень'), self::Bad => __('Плохо')
         };
     }
 }

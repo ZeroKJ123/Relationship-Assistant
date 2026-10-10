@@ -17,6 +17,7 @@ enum TelegramOperation: string
     case Dispute = 'dispute';
     case MoodGreat = 'mood_great';
     case MoodGood = 'mood_good';
+    case MoodNeutral = 'mood_neutral';
     case MoodLow = 'mood_low';
     case MoodBad = 'mood_bad';
 
@@ -38,6 +39,7 @@ enum TelegramOperation: string
             self::Done => __('Сделано'), self::NotDone => __('Не сделано'),
             self::Verify => __('Подтвердить выполнение'), self::Dispute => __('Оспорить выполнение'),
             self::MoodGreat => __('Отлично'), self::MoodGood => __('Хорошо'),
+            self::MoodNeutral => __('Нейтрально'),
             self::MoodLow => __('Не очень'), self::MoodBad => __('Плохо'),
         };
     }
