@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [PreventPrivateCaching::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->dontFlash(['recovery_code', 'payment_details']);
+        $exceptions->dontFlash(['recovery_code', 'payment_details', 'telegram_code']);
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request): bool => $request->is('api/*') || $request->expectsJson(),
         );

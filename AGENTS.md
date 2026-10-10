@@ -227,3 +227,6 @@ Before relying on a package's API, confirm its installed version:
 - `public/manifest.webmanifest`, `public/sw.js`, `public/offline-v1.html`, `public/icons/`: установка PWA и ограниченный кэш только публичных версионированных файлов; личные ответы и действия не кэшировать.
 - `resources/js/modules/pwa.js`, `resources/views/components/pwa-help.blade.php`: ручная установка, состояние сети, блокировка offline-форм и повторная проверка авторизованной страницы из browser back cache.
 - `tests/JavaScript/pwa.test.mjs`, `npm run test:pwa`: проверки политики кэша и клиентского поведения без дополнительных зависимостей; включены в Quality.
+
+- `app/Actions/Auth/Telegram/IssueTelegramLinkCode.php`, `ConsumeTelegramLinkCode.php`, `profile.telegram.link`: одноразовая привязка по UUID из `/start`.
+- `app/Services/Telegram/PollTelegramUpdates.php`, `telegram:poll-updates`, профиль Compose `telegram-polling`: приём сообщений без публичного webhook; токен не выводить.

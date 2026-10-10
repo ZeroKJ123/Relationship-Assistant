@@ -1,5 +1,21 @@
 # Optional local processes. Start explicitly after applying migrations and confirming Telegram bindings.
 services:
+    telegram-poller:
+        profiles: ['telegram-polling']
+        image: 'sail-starter-8.4/app'
+        restart: unless-stopped
+        command: ['php', 'artisan', 'telegram:poll-updates', '--no-interaction']
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: 'off'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            mariadb:
+                condition: service_healthy
     telegram-worker:
         image: 'sail-starter-8.4/app'
         restart: unless-stopped

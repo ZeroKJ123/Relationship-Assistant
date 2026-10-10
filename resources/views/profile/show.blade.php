@@ -35,9 +35,21 @@
         @if($hasTelegram)
             <x-status tone="success">{{ __('Telegram привязан') }}</x-status>
             <p>{{ __('Уведомления отправляются в подключённый чат. Состояние доставки напоминаний можно посмотреть в приложении.') }}</p>
-        @elseif($telegramAvailable)
+        @elseif($telegramLinkAvailable)
+            <p>{{ __('Отправьте /start своему боту, скопируйте полученный код и вставьте его здесь. Привязывайте только свой Telegram. Код действует 10 минут.') }}</p>
+            @if($telegramBotUrl)<a class="button button--quiet" href="{{ $telegramBotUrl }}" target="_blank" rel="noopener noreferrer">{{ __('Открыть бота') }}</a>@endif
+            <form method="post" action="{{ route('profile.telegram.link') }}" class="form-stack" data-submit-lock>
+                @csrf
+                <x-field name="telegram_code" :label="__('Код из Telegram')" :error="$errors->first('telegram_code')" required maxlength="36" autocomplete="off" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+                <x-button type="submit">{{ __('Связать Telegram') }}</x-button>
+            </form>
+            @if($telegramAvailable)
+            <details class="settings-history">
+            <summary>{{ __('Другой способ привязки') }}</summary>
             <p>{{ __('Привяжите свой аккаунт, чтобы получать уведомления и отвечать через бота. Привязка требует подтверждения в Telegram и в этом браузере.') }}</p>
             <form method="post" action="{{ route('telegram.login.store') }}" data-submit-lock>@csrf<x-button type="submit" variant="quiet">{{ __('Привязать Telegram') }}</x-button></form>
+            </details>
+            @endif
         @else
             <x-status>{{ __('Подключение временно недоступно') }}</x-status>
             <p>{{ __('Вы можете пользоваться приложением. Привязка появится, когда подключение к боту будет настроено.') }}</p>

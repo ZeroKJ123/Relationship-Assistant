@@ -12,9 +12,11 @@
 
 После первой установки и миграций из README:
 
+Команды ниже включают получатель Telegram для `TELEGRAM_MODE=polling`. Если бот не используется, уберите `--profile telegram-polling` из команд `up`; очередь и расписание можно оставить работающими с отключённым транспортом.
+
 ```sh
 npm run build
-docker compose -f compose.yaml -f compose.workers.yaml up -d
+docker compose -f compose.yaml -f compose.workers.yaml --profile telegram-polling up -d
 docker compose -f compose.yaml -f compose.workers.yaml ps
 ```
 
@@ -31,21 +33,21 @@ docker compose exec -T laravel.test php artisan hearts:check-balances --no-inter
 Не запускайте второй scheduler. Для остановки с сохранением базы:
 
 ```sh
-docker compose -f compose.yaml -f compose.workers.yaml stop
+docker compose -f compose.yaml -f compose.workers.yaml --profile telegram-polling stop
 ```
 
-## Что требует HTTPS
+## Telegram и HTTPS
 
 Через локальный IP и HTTP доступны страницы и обычные формы приложения. Установка PWA с service worker и автономный экран требуют доверенного HTTPS; localhost на самом ноутбуке является отдельным исключением. Проверка в настольном браузере не подтверждает установку в Safari iOS или Chrome Android.
 
-Вход и быстрые действия Telegram требуют, чтобы серверы Telegram могли достучаться до публичного HTTPS webhook. Локальный IP этого не обеспечивает. Поэтому для текущего локального запуска оставьте `TELEGRAM_ENABLED=false`: токен может храниться в `.env`, но наличие токена не означает работающую интеграцию. Напоминания не обозначаются как доставленные при отключённом боте. Подключение webhook и реальные сообщения требуют отдельной настройки по [инструкции](telegram-and-scheduling.md).
+Для Telegram в локальной сети используйте `TELEGRAM_ENABLED=true`, `TELEGRAM_MODE=polling`, действительный токен и имя бота. Получение сообщений включается отдельным процессом `telegram-poller`; порядок запуска описан в [инструкции Telegram](telegram-and-scheduling.md). Публичный HTTPS для этого режима не нужен. Привязка: `/start` в боте → UUID → поле кода в профиле. Уведомления требуют работающей очереди, расписания и интернета на ноутбуке. В режиме `webhook` серверы Telegram должны иметь доступ к публичному HTTPS-адресу; не включайте одновременно webhook и polling.
 
 ## Обновление и резервная копия
 
 Перед обновлением сохраните согласованный комплект: дамп MariaDB, `.env` с неизменным `APP_KEY`, весь каталог `storage/app/private` и версию кода. Ключ нужен для расшифровки сохранённых данных; его смена не является обычным обновлением. Копии содержат личные данные: храните их вне Git и переносите на отдельный защищённый носитель. Для согласованной копии сначала остановите приложение, очередь и расписание; база остаётся запущенной.
 
 ```sh
-docker compose -f compose.yaml -f compose.workers.yaml stop laravel.test telegram-worker scheduler
+docker compose -f compose.yaml -f compose.workers.yaml stop laravel.test telegram-worker scheduler telegram-poller
 umask 077
 mkdir -p work/backups
 docker compose exec -T mariadb sh -c 'exec mariadb-dump --single-transaction --user="$MYSQL_USER" --password="$MYSQL_PASSWORD" "$MYSQL_DATABASE"' > work/backups/homeassist.sql
@@ -63,7 +65,7 @@ composer install --no-interaction
 npm ci
 npm run build
 docker compose run --rm --no-deps laravel.test php artisan migrate --force --no-interaction
-docker compose -f compose.yaml -f compose.workers.yaml up -d
+docker compose -f compose.yaml -f compose.workers.yaml --profile telegram-polling up -d
 ```
 
 Не используйте `migrate:fresh`, `db:wipe` или `down -v` на рабочем окружении. Откат версии кода может требовать прежней схемы и сохранённого комплекта: восстановление сначала проверяется отдельно, затем выполняется с остановленными обработчиками. Новые миграции не гарантируют восстановление утраченных данных при rollback.
@@ -88,6 +90,6 @@ docker compose exec -T laravel.test php artisan hearts:check-balances --no-inter
 
 ## Диагностика
 
-При недоступности проверьте питание/сон ноутбука, Docker, одинаковую сеть устройств, текущий IP, порт и разрешение входящих соединений в системе. Затем проверьте `docker compose ... ps`, где `...` означает оба файла выше. Если страницы работают, а сроки не обрабатываются, проверьте `scheduler` и `schedule:list`. При проблемах доставки следуйте [инструкции Telegram](telegram-and-scheduling.md).
+При недоступности проверьте питание/сон ноутбука, Docker, одинаковую сеть устройств, текущий IP, порт и разрешение входящих соединений в системе. Затем проверьте `docker compose ... --profile telegram-polling ps`, где `...` означает оба файла выше. Если страницы работают, а сроки не обрабатываются, проверьте `scheduler` и `schedule:list`. При проблемах доставки следуйте [инструкции Telegram](telegram-and-scheduling.md).
 
 `DEBUG` предназначен для локальной разработки; `INFO` — для этапов обработки, `WARN` — для отказов и повторов, `ERROR` — для неожиданных ошибок. Рабочий журнал — `storage/logs/laravel.log`. При разборе используйте коды `schedule.*`, `notification.*`, `telegram.transport_failed` и `failed_jobs`; не публикуйте `.env`, резервные коды, URL с токеном, реквизиты, содержимое сообщений или целые личные страницы. Сверка сердечек сообщает расхождения и не исправляет их молча.

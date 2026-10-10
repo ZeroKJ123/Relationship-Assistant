@@ -20,6 +20,8 @@ final class MariaDbEnvironment
             'DB_PASSWORD' => 'test_only_password', 'DB_URL' => '', 'CACHE_STORE' => 'array',
             'SESSION_DRIVER' => 'array', 'QUEUE_CONNECTION' => 'sync', 'LOG_CHANNEL' => 'single',
             'BCRYPT_ROUNDS' => '4',
+            'TELEGRAM_ENABLED' => 'false', 'TELEGRAM_BOT_TOKEN' => '',
+            'TELEGRAM_BOT_USERNAME' => '', 'TELEGRAM_WEBHOOK_SECRET' => '', 'TELEGRAM_MODE' => 'webhook',
         ];
     }
 

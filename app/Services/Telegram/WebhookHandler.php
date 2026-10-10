@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Telegram;
 
 use App\Actions\Auth\Telegram\ConfirmTelegramIdentity;
+use App\Actions\Auth\Telegram\IssueTelegramLinkCode;
 use App\Data\Telegram\IncomingUpdate;
 use App\Models\TelegramUpdateReceipt;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -15,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 final class WebhookHandler
 {
-    public function __construct(private readonly ConfirmTelegramIdentity $login, private readonly CallbackRouter $callbacks) {}
+    public function __construct(private readonly ConfirmTelegramIdentity $login, private readonly CallbackRouter $callbacks, private readonly IssueTelegramLinkCode $linkCodes) {}
 
     /** @return array<string, mixed> */
     public function execute(IncomingUpdate $update, string $payloadHash): array
@@ -48,6 +49,9 @@ final class WebhookHandler
     /** @return array<string, mixed> */
     private function route(IncomingUpdate $update): array
     {
+        if ($update->callbackData === null && preg_match('/^\/start(?:@[A-Za-z0-9_]{5,32})?\s*$/D', $update->text ?? '') === 1) {
+            return $this->linkCodes->execute($update);
+        }
         if ($update->callbackData !== null && ! str_starts_with($update->callbackData, 'login:')) {
             return $this->callbacks->execute($update);
         }

@@ -11,6 +11,7 @@ use App\Enums\TelegramLoginStatus;
 use App\Enums\TelegramOperation;
 use App\Models\TelegramAccount;
 use App\Models\TelegramCallbackAction;
+use App\Models\TelegramLinkCode;
 use App\Models\TelegramLoginAttempt;
 use App\Models\TelegramUpdateReceipt;
 use App\Models\User;
@@ -21,6 +22,22 @@ use Tests\Support\AgreementScenario;
 use Tests\Support\ConcurrentOperations;
 
 uses(DatabaseMigrations::class);
+
+it('allows only one concurrent UUID claim for one identity or one application account', function (string $case): void {
+    $pair = AgreementScenario::create();
+    TelegramLinkCode::factory()->create(['code_hash' => hash('sha256', '00000000-0000-4000-8000-000000000001')]);
+    $secondUser = $pair->second;
+    $secondCode = 1;
+    if ($case === 'user') {
+        $secondUser = $pair->first;
+        $secondCode = 2;
+        TelegramLinkCode::factory()->create(['code_hash' => hash('sha256', '00000000-0000-4000-8000-000000000002')]);
+    }
+    $results = (new ConcurrentOperations)->run('agreement-worker.php', [[(string) $pair->first->id, (string) $pair->couple->id, 'telegram_code', '1', '0'], [(string) $secondUser->id, (string) $pair->couple->id, 'telegram_code', (string) $secondCode, '0']]);
+    expect($results)->toContain('accepted', 'rejected');
+    expect(TelegramAccount::query()->count())->toBe(1);
+    expect(TelegramLinkCode::query()->whereNotNull('consumed_at')->count())->toBe(1);
+})->with(['identity', 'user']);
 
 it('consumes a browser attempt only once in concurrent login completions', function (): void {
     $account = TelegramAccount::factory()->create();

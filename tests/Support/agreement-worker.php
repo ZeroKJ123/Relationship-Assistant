@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Admin\UpdateEconomySettings;
+use App\Actions\Auth\Telegram\ConsumeTelegramLinkCode;
 use App\Actions\Couples\Agreements\AcceptProposal;
 use App\Actions\Couples\Agreements\ProposeWeeklyLimit;
 use App\Actions\Couples\Agreements\SubmitAnswer;
@@ -98,6 +99,7 @@ while (! file_exists($barrier)) {
 }
 try {
     match ($operation) {
+        'telegram_code' => $app->make(ConsumeTelegramLinkCode::class)->execute($actor, sprintf('00000000-0000-4000-8000-%012d', $value)),
         'telegram_callback' => $app->make(WebhookHandler::class)->execute(new IncomingUpdate($limit, TelegramAccount::query()->where('user_id', $actor->id)->sole()->telegram_id, '', null, sprintf('act:%s', str_pad((string) $value, 40, 'x')), null), hash('sha256', (string) $limit)),
         'notification_claim' => $app->make(DeliveryLifecycle::class)->claim(NotificationDelivery::query()->findOrFail($value)) ?? throw ValidationException::withMessages(['notification' => 'Unavailable']),
         'care_process' => $app->make(DueCare::class)->execute(),

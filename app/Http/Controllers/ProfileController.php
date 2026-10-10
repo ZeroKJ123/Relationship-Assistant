@@ -11,6 +11,7 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Models\Couple;
 use App\Models\CoupleMember;
 use App\Models\User;
+use App\Services\Telegram\BotClient;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Log;
 
 final class ProfileController extends Controller
 {
-    public function __construct(private readonly UpdateProfile $updateProfile) {}
+    public function __construct(private readonly UpdateProfile $updateProfile, private readonly BotClient $bot) {}
 
     public function show(Request $request): View
     {
@@ -38,7 +39,10 @@ final class ProfileController extends Controller
         $couple = Couple::query()->whereIn('id', CoupleMember::query()->select('couple_id')->where('active_user_id', $user->id))->first();
         Log::debug('profile.screen_loaded', ['user_id' => $user->id, 'couple_id' => $couple?->id]);
 
-        return view('profile.show', ['user' => $user, 'couple' => $couple, 'currencies' => Currency::cases(), 'recoveryCodes' => $codes, 'pendingInvitationUrl' => $invitationUrl, 'hasTelegram' => $user->telegramAccount()->exists()]);
+        $username = config('services.telegram.bot_username');
+        $botUrl = is_string($username) && preg_match('/^[A-Za-z0-9_]{5,32}$/D', $username) === 1 ? sprintf('https://t.me/%s', $username) : null;
+
+        return view('profile.show', ['user' => $user, 'couple' => $couple, 'currencies' => Currency::cases(), 'recoveryCodes' => $codes, 'pendingInvitationUrl' => $invitationUrl, 'hasTelegram' => $user->telegramAccount()->exists(), 'telegramLinkAvailable' => $this->bot->isEnabled(), 'telegramBotUrl' => $botUrl]);
     }
 
     public function update(UpdateProfileRequest $request): RedirectResponse
