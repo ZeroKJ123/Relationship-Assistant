@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\Auth\TelegramLinkController;
 use App\Http\Controllers\Auth\TelegramLoginController;
+use App\Http\Controllers\ProfileAvatarController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,7 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware(['auth', 'auth.session'])->group(function (): void {
     Route::post('logout', [SessionController::class, 'destroy'])->name('logout');
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('profile/avatar', ProfileAvatarController::class)->middleware('throttle:couple-actions')->name('profile.avatar.store');
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('profile/telegram', TelegramLinkController::class)->middleware('throttle:recovery')->name('profile.telegram.link');
 });

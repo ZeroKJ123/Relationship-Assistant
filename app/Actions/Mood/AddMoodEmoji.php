@@ -10,12 +10,12 @@ use App\Models\Couple;
 use App\Models\MoodEntry;
 use App\Models\NotificationDelivery;
 use App\Models\User;
+use App\Rules\SingleEmoji;
 use App\Services\Notifications\NotificationOutbox;
 use App\Services\Requests\RequestContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 final class AddMoodEmoji
 {
@@ -25,7 +25,7 @@ final class AddMoodEmoji
 
     public function execute(User $actor, Couple $couple, MoodEntry $entry, string $emoji): void
     {
-        Validator::make(['emoji' => $emoji], ['emoji' => ['required', Rule::in(self::EMOJIS)]])->validate();
+        Validator::make(['emoji' => $emoji], ['emoji' => ['required', new SingleEmoji]])->validate();
         DB::transaction(function () use ($actor, $couple, $entry, $emoji): void {
             $currentCouple = $this->context->lockCouple($actor, $couple);
             $current = MoodEntry::query()->whereKey($entry->id)->where('couple_id', $currentCouple->id)->where('user_id', $actor->id)->lockForUpdate()->firstOrFail();

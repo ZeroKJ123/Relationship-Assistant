@@ -2,7 +2,15 @@
 @section('title', __('Мой профиль · Наша пара'))
 @section('content')
 <x-card class="auth-card">
-    <x-avatar :name="$user->name" :src="$user->avatar_path !== null ? route('profile.avatar') : null" />
+    <x-avatar :name="$user->name" :src="$user->avatar_path !== null ? route('profile.avatar', ['v'=>$user->updated_at?->getTimestamp()]) : null" />
+    <form method="post" enctype="multipart/form-data" action="{{ route('profile.avatar.store') }}" class="form-stack" data-submit-lock>
+        @csrf
+        <label for="profile-photo">{{ __('Фото профиля') }}</label>
+        <input id="profile-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required aria-describedby="profile-photo-hint">
+        <p id="profile-photo-hint" class="field-hint">{{ __('Выберите фото из галереи: JPEG, PNG или WebP до 4 МБ.') }}</p>
+        @error('photo')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+        <x-button type="submit" variant="quiet">{{ __('Сохранить фото') }}</x-button>
+    </form>
     <h1 class="form-title">{{ __('Привет, :name', ['name' => $user->name]) }}</h1>
     <p>{{ __('Личные данные, реквизиты и связь с Telegram — всё в одном месте.') }}</p>
     <x-form-feedback />

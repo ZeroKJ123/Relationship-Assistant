@@ -6,7 +6,6 @@ use App\Actions\Couples\Agreements\AcceptProposal;
 use App\Actions\Couples\EndCouple;
 use App\Actions\Duties\ReportDuty;
 use App\Actions\Money\CreateMoneyRequest;
-use App\Actions\Mood\AddMoodEmoji;
 use App\Actions\Mood\CreateMoodPrompt;
 use App\Actions\Mood\RecordMood;
 use App\Actions\Mood\RequestPartnerMood;
@@ -57,6 +56,13 @@ beforeEach(function (): void {
 function telegramCallbackPayload(int $id, string $telegramId, string $data): array
 {
     return ['update_id' => $id, 'callback_query' => ['id' => sprintf('query-%d', $id), 'from' => ['id' => (int) $telegramId, 'is_bot' => false, 'first_name' => 'Анна'], 'message' => ['message_id' => 1, 'chat' => ['id' => (int) $telegramId, 'type' => 'private']], 'data' => $data]];
+}
+
+function emojiResponse(TestCase $test, int $id, TelegramAccount $account, string $text): TestResponse
+{
+    $payload = ['update_id' => $id, 'message' => ['message_id' => $id, 'from' => ['id' => (int) $account->telegram_id, 'is_bot' => false, 'first_name' => 'Анна'], 'chat' => ['id' => (int) $account->telegram_id, 'type' => 'private'], 'text' => $text]];
+
+    return $test->postJson(route('telegram.webhook'), $payload, ['X-Telegram-Bot-Api-Secret-Token' => config('services.telegram.webhook_secret')])->assertOk();
 }
 
 function callbackResponse(TestCase $test, int $id, TelegramAccount $account, string $data): TestResponse
@@ -181,14 +187,15 @@ it('records Telegram mood immediately and offers an optional emoji without confi
     $button = app(KeyboardFactory::class)->createButton($account, $pair->couple->id, 'mood', $prompt->id, 1, TelegramOperation::MoodGood);
     $reply = callbackResponse($this, 80, $account, $button['callback_data'])->json();
     expect(MoodEntry::query()->count())->toBe(1);
-    expect($reply['text'])->toContain('Какой эмоджи');
-    expect(collect($reply['reply_markup']['inline_keyboard'])->flatten(1)->pluck('text')->all())->toBe([...AddMoodEmoji::EMOJIS, 'Пропустить']);
+    expect($reply['text'])->toContain('Напишите в ответ один эмоджи');
+    expect($reply['reply_markup']['force_reply'])->toBeTrue();
     callbackResponse($this, 80, $account, $button['callback_data'])->assertExactJson($reply);
-    $emoji = $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'];
-    callbackResponse($this, 81, $account, $emoji)->assertJsonMissingPath('reply_markup');
-    callbackResponse($this, 82, $account, $emoji);
+    emojiResponse($this, 79, $account, 'Просто текст')->assertJsonPath('reply_markup.force_reply', true);
+    $saved = emojiResponse($this, 81, $account, '🫠')->assertJsonMissingPath('reply_markup')->json();
+    emojiResponse($this, 81, $account, '🫠')->assertExactJson($saved);
+    emojiResponse($this, 82, $account, '😎');
     callbackResponse($this, 83, $account, $button['callback_data']);
-    expect(MoodEntry::query()->sole()->emoji)->toBe('😊');
+    expect(MoodEntry::query()->sole()->emoji)->toBe('🫠');
     expect(NotificationDelivery::query()->where('kind', NotificationKind::MoodEmoji)->count())->toBe(1);
     expect(MoodEntry::query()->sole()->source)->toBe(MoodSource::Telegram)->and($prompt->refresh()->answered_at)->not->toBeNull();
 });
@@ -256,18 +263,17 @@ it('offers neutral mood as the middle Telegram answer and records its immediate 
     expect(array_column($buttons, 'text'))->toBe(['Отлично', 'Хорошо', 'Нейтрально', 'Не очень', 'Плохо']);
     $reply = callbackResponse($this, 910, $account, $buttons[2]['callback_data'])->json();
     expect(MoodEntry::query()->count())->toBe(1);
-    $skip = $reply['reply_markup']['inline_keyboard'][3][0]['callback_data'];
-    callbackResponse($this, 911, $account, $skip)->assertJsonFragment(['text' => 'Настроение сохранено без эмоджи.']);
-    callbackResponse($this, 912, $account, $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'])->assertJsonMissingPath('reply_markup');
+    emojiResponse($this, 911, $account, '/skip')->assertJsonFragment(['text' => 'Настроение сохранено без эмоджи.']);
+    emojiResponse($this, 912, $account, '😊')->assertJsonMissingPath('reply_markup');
     expect(MoodEntry::query()->sole()->emoji)->toBeNull();
     expect(MoodEntry::query()->sole()->level)->toBe(MoodLevel::Neutral)->and(MoodEntry::query()->sole()->source)->toBe(MoodSource::Telegram)->and($prompt->refresh()->answered_at)->not->toBeNull();
 });
 
-it('rejects foreign stale expired and ended-pair emoji buttons', function (string $case): void {
+it('rejects foreign stale expired and ended-pair emoji replies', function (string $case): void {
     $pair = AgreementScenario::create();
     $account = TelegramAccount::factory()->create(['user_id' => $pair->first->id]);
     $entry = app(RecordMood::class)->execute($pair->first, $pair->couple, new MoodData(MoodLevel::Good, Str::uuid()->toString()));
-    $keyboard = app(KeyboardFactory::class)->createMoodEmoji($entry, $account);
+    app(KeyboardFactory::class)->createMoodEmoji($entry, $account);
     if ($case === 'foreign') {
         $account = TelegramAccount::factory()->create(['user_id' => $pair->second->id]);
     }
@@ -280,6 +286,6 @@ it('rejects foreign stale expired and ended-pair emoji buttons', function (strin
     if ($case === 'ended') {
         app(EndCouple::class)->execute($pair->first, $pair->couple);
     }
-    callbackResponse($this, 920, $account, $keyboard['inline_keyboard'][0][0]['callback_data'])->assertJsonMissingPath('reply_markup');
+    emojiResponse($this, 920, $account, '😊')->assertJsonMissingPath('reply_markup');
     expect($entry->refresh()->emoji)->toBeNull()->and(NotificationDelivery::query()->where('kind', NotificationKind::MoodEmoji)->count())->toBe(0);
 })->with(['foreign', 'stale', 'expired', 'ended']);

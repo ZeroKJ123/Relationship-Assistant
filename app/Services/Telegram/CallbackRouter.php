@@ -70,7 +70,7 @@ final class CallbackRouter
         if ($action->source_kind === 'mood') {
             $entry = MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->where('operation_key', $action->operation_key)->sole();
 
-            return ['text' => __('Настроение сохранено. Какой эмоджи подробнее описывает ваше настроение? Выберите его или нажмите «Пропустить».'), 'reply_markup' => $this->keyboards->createMoodEmoji($entry, $currentAccount)];
+            return ['text' => __('Настроение сохранено. Напишите в ответ один эмоджи, который подробнее описывает ваше настроение. Чтобы пропустить, отправьте /skip.'), 'reply_markup' => $this->keyboards->createMoodEmoji($entry, $currentAccount)];
         }
         if ($action->source_kind === 'mood_emoji') {
             return ['text' => $action->operation === TelegramOperation::MoodEmojiSkip ? __('Настроение сохранено без эмоджи.') : __('Эмоджи сохранён и виден партнёру.')];

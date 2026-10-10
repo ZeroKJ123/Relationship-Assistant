@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Enums\DeliveryStatus;
 use App\Models\TelegramLinkCode;
 use App\Models\TelegramUpdateReceipt;
+use App\Services\Telegram\BotClient;
 use App\Services\Telegram\PollTelegramUpdates;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -15,6 +17,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 uses(DatabaseMigrations::class);
+
+it('sends a free emoji reply prompt through the Telegram transport', function (): void {
+    Http::fake(['*/sendMessage' => Http::response(['ok' => true, 'result' => ['message_id' => 22]])]);
+    $markup = ['force_reply' => true, 'input_field_placeholder' => 'Ваш эмоджи'];
+    expect(app(BotClient::class)->sendMessage('123456', 'Напишите эмоджи', $markup)->status)->toBe(DeliveryStatus::Sent);
+    Http::assertSent(fn (Request $request): bool => $request['reply_markup'] === $markup && $request['chat_id'] === '123456');
+});
 
 beforeEach(function (): void {
     config(['services.telegram.enabled' => true, 'services.telegram.bot_token' => '123456789:fake-test-token', 'services.telegram.mode' => 'polling']);

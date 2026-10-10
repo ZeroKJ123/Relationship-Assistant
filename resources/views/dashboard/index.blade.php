@@ -22,8 +22,14 @@
     <div class="dashboard-summary">
         <x-card tone="purple" class="form-stack">
             <h2>{{ __('Настроение партнёра') }}</h2>
-            @forelse($dashboard->latestMoods as $entry)<p><strong>{{ $entry->user->name }}</strong> · {{ $entry->level->label() }} @if($entry->emoji)<span aria-label="{{ __('Эмоджи настроения') }}">{{ $entry->emoji }}</span>@endif<br><span>{{ __('Обновлено :date', ['date'=>$entry->recorded_at->setTimezone($dashboard->couple->timezone)->format('d.m H:i')]) }}</span></p>@empty<p>{{ __('Оценок пока нет') }}</p>@endforelse
-            @if($dashboard->couple)<x-mood-request :couple="$dashboard->couple" /><a href="{{ route('mood.index',$dashboard->couple) }}">{{ __('Отметить настроение') }}</a>@endif
+            @forelse($dashboard->latestMoods as $entry)
+                <div class="partner-mood">
+                    @if($entry->emoji)<span class="partner-mood__emoji" aria-label="{{ __('Эмоджи настроения партнёра') }}">{{ $entry->emoji }}</span>@endif
+                    <div><p class="partner-mood__level">{{ $entry->level->label() }}</p><p>{{ __('Так сейчас чувствует себя :name', ['name'=>$entry->user->name]) }}</p></div>
+                </div>
+                <p class="field-hint">{{ __('Партнёр поделился настроением :date', ['date'=>$entry->recorded_at->setTimezone($dashboard->couple->timezone)->format('d.m H:i')]) }}</p>
+            @empty<p>{{ __('Партнёр пока не поделился настроением. Спросите, как он себя чувствует.') }}</p>@endforelse
+            @if($dashboard->couple)<x-mood-request :couple="$dashboard->couple" compact />@endif
         </x-card>
         <x-card tone="yellow" class="form-stack">
             <h2>{{ __('Мои сердечки') }}</h2><a class="wallet-total" href="{{ route('hearts.index') }}" aria-label="{{ __('Баланс :amount сердечек. Открыть историю', ['amount'=>$dashboard->wallet->balance]) }}"><span aria-hidden="true">♥</span> {{ $dashboard->wallet->balance }}</a>

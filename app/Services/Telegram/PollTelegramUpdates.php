@@ -77,7 +77,7 @@ final class PollTelegramUpdates
 
             return false;
         }
-        /** @var array{inline_keyboard: list<list<array{text: string, callback_data: string}|array{text: string, url: string}|array{text: string, copy_text: array{text: string}}>>}|null $keyboard */
+        /** @var array{inline_keyboard: list<list<array{text: string, callback_data: string}|array{text: string, url: string}|array{text: string, copy_text: array{text: string}}>>}|array{force_reply: true, input_field_placeholder: string}|null $keyboard */
         $keyboard = $reply['reply_markup'] ?? null;
         $result = $this->bot->sendMessage($update->telegramId, $text, $keyboard, protectContent: ($reply['protect_content'] ?? true) !== false);
         if ($result->status === DeliveryStatus::Pending) {

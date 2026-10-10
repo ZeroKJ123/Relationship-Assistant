@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Telegram;
 
-use App\Actions\Mood\AddMoodEmoji;
 use App\Enums\ConditionType;
 use App\Enums\DutyStatus;
 use App\Enums\MoodLevel;
@@ -22,7 +21,6 @@ use App\Models\PartnerRequest;
 use App\Models\RequestEvent;
 use App\Models\TelegramAccount;
 use App\Models\TelegramCallbackAction;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use LogicException;
@@ -32,8 +30,6 @@ final class KeyboardFactory
     public const TOKEN_LENGTH = 40;
 
     private const LIFETIME_HOURS = 24;
-
-    private const EMOJIS_PER_ROW = 4;
 
     /** @return array{inline_keyboard: list<list<array{text: string, callback_data: string}|array{text: string, url: string}>>} */
     public function create(NotificationDelivery $delivery, TelegramAccount $account): array
@@ -60,14 +56,13 @@ final class KeyboardFactory
         return ['text' => $label ?? $operation->label(), 'callback_data' => sprintf('act:%s', $token)];
     }
 
-    /** @return array{inline_keyboard: list<list<array{text: string, callback_data: string}>>} */
+    /** @return array{force_reply: true, input_field_placeholder: string} */
     public function createMoodEmoji(MoodEntry $entry, TelegramAccount $account): array
     {
-        $buttons = collect(AddMoodEmoji::EMOJIS)->map(fn (string $emoji, int $index): array => $this->createButton($account, $entry->couple_id, 'mood_emoji', $entry->id, $index, TelegramOperation::MoodEmoji, $emoji));
-        $rows = array_values($buttons->chunk(self::EMOJIS_PER_ROW)->map(fn (Collection $row): array => array_values($row->all()))->all());
-        $rows[] = [$this->createButton($account, $entry->couple_id, 'mood_emoji', $entry->id, 0, TelegramOperation::MoodEmojiSkip)];
+        $button = $this->createButton($account, $entry->couple_id, 'mood_emoji', $entry->id, 0, TelegramOperation::MoodEmoji);
+        TelegramCallbackAction::query()->where('token_hash', hash('sha256', substr($button['callback_data'], 4)))->update(['stage' => TelegramActionStage::Awaiting]);
 
-        return ['inline_keyboard' => $rows];
+        return ['force_reply' => true, 'input_field_placeholder' => __('Ваш эмоджи')];
     }
 
     /** @return list<list<array{text: string, callback_data: string}|array{text: string, url: string}>> */

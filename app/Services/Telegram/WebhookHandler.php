@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 
 final class WebhookHandler
 {
-    public function __construct(private readonly ConfirmTelegramIdentity $login, private readonly CallbackRouter $callbacks, private readonly IssueTelegramLinkCode $linkCodes) {}
+    public function __construct(private readonly ConfirmTelegramIdentity $login, private readonly CallbackRouter $callbacks, private readonly IssueTelegramLinkCode $linkCodes, private readonly MoodEmojiReplies $emojiReplies) {}
 
     /** @return array<string, mixed> */
     public function execute(IncomingUpdate $update, string $payloadHash): array
@@ -56,6 +56,8 @@ final class WebhookHandler
             return $this->callbacks->execute($update);
         }
 
-        return $this->login->execute($update);
+        $emojiReply = $update->callbackData === null ? $this->emojiReplies->execute($update) : null;
+
+        return $emojiReply ?? $this->login->execute($update);
     }
 }
