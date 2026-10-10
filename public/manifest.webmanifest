@@ -1,0 +1,16 @@
+{
+    "id": "/",
+    "name": "Наша пара",
+    "short_name": "Наша пара",
+    "description": "Просьбы, забота и совместные планы для двоих",
+    "lang": "ru",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#f4eeff",
+    "theme_color": "#eee6ff",
+    "icons": [
+        { "src": "/icons/heart-v1-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "/icons/heart-v1-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    ]
+}

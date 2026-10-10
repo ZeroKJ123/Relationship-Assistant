@@ -1,3 +1,4 @@
+import { initializePwa } from './modules/pwa.js';
 import { initializeDuties } from './modules/duties.js';
 import { initializeWishlist } from './modules/wishlist.js';
 import { initializeProductPhotos } from './modules/photos.js';
@@ -6,6 +7,7 @@ import { initializeDishes } from './modules/dishes.js';
 import { initializeRequests } from './modules/requests.js';
 import { initializeDialogs, initializeTabs } from './modules/dialogs.js';
 
+initializePwa(document);
 initializeDialogs(document);
 initializeTabs(document);
 initializeDashboard(document);
@@ -24,6 +26,7 @@ function unlockForms() {
 }
 document.querySelectorAll('[data-submit-lock]').forEach((form) => {
     form.addEventListener('submit', (event) => {
+        if (event.defaultPrevented) { return; }
         if (form.dataset.submitting === 'true') { event.preventDefault(); return; }
         const submitter = event.submitter;
         if (submitter?.name) {

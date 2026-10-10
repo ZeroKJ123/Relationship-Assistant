@@ -168,3 +168,6 @@ p { color: var(--color-muted); }
 
 .field { min-width: 0; grid-template-columns: minmax(0,1fr); }
 .field input { min-width: 0; }
+
+.connection-status { border-radius: var(--radius-card); padding: var(--spacing-page); margin-bottom: var(--spacing-section); background: var(--color-butter); color: var(--color-ink); }
+@media (display-mode: standalone) { .app-shell { padding-top: calc(var(--spacing-page) + env(safe-area-inset-top)); } }

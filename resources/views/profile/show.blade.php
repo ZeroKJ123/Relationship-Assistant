@@ -61,5 +61,6 @@
     </nav>
     <form method="post" action="{{ route('logout') }}" class="form-footer" data-submit-lock>@csrf<x-button type="submit" variant="quiet">{{ __('Выйти') }}</x-button></form>
 </x-card>
+<x-pwa-help />
 @endsection
 @section('navigation')<x-bottom-navigation :couple="$couple" />@endsection

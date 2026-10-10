@@ -222,3 +222,7 @@ Before relying on a package's API, confirm its installed version:
 - `app/Services/Telegram/CallbackRouter.php`, `KeyboardFactory.php`, `WebhookHandler.php`: двойное подтверждение и общие Actions, атомарный receipt без raw update.
 - `app/Services/Telegram/ProfilePhoto.php`, `app/Http/Controllers/Auth/AvatarController.php`: импорт проверенного фото и закрытая выдача собственнику.
 - `telegram:prune-controls`: ежедневная очистка технических подтверждений через семь суток.
+
+- `public/manifest.webmanifest`, `public/sw.js`, `public/offline-v1.html`, `public/icons/`: установка PWA и ограниченный кэш только публичных версионированных файлов; личные ответы и действия не кэшировать.
+- `resources/js/modules/pwa.js`, `resources/views/components/pwa-help.blade.php`: ручная установка, состояние сети, блокировка offline-форм и повторная проверка авторизованной страницы из browser back cache.
+- `tests/JavaScript/pwa.test.mjs`, `npm run test:pwa`: проверки политики кэша и клиентского поведения без дополнительных зависимостей; включены в Quality.
