@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Telegram\WebhookController;
+use App\Http\Middleware\VerifyTelegramSecret;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->middleware('auth.session')->name('home');
@@ -25,3 +27,5 @@ require sprintf('%s/products.php', __DIR__);
 require sprintf('%s/social.php', __DIR__);
 
 require sprintf('%s/care.php', __DIR__);
+
+Route::post('telegram/webhook', WebhookController::class)->middleware(VerifyTelegramSecret::class)->name('telegram.webhook');

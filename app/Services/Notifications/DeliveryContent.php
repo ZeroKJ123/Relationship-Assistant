@@ -39,7 +39,7 @@ final class DeliveryContent
             return null;
         }
 
-        return sprintf("%s: %s.\n%s", __('Просьба обновлена'), $event->status->label(), route('requests.show', [$delivery->couple_id, $request->id]));
+        return sprintf("%s: %s.\n%s", __('Просьба обновлена'), $request->status->label(), route('requests.show', [$delivery->couple_id, $request->id]));
     }
 
     private function getDutyText(NotificationDelivery $delivery): ?string

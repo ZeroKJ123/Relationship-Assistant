@@ -25,7 +25,7 @@ final class SendTelegramNotification
         if ($message === null) {
             return;
         }
-        $result = $this->bot->sendMessage($message->chatId, $message->text);
+        $result = $this->bot->sendMessage($message->chatId, $message->text, $message->keyboard);
         $this->lifecycle->complete($delivery->refresh(), $message->leaseToken, $result);
     }
 }

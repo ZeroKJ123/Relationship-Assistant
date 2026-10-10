@@ -16,13 +16,14 @@ use App\Models\PartnerReminder;
 use App\Models\TelegramAccount;
 use App\Services\Couples\CoupleLock;
 use App\Services\Reminders\ReminderLifecycle;
+use App\Services\Telegram\KeyboardFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 final class DeliveryLifecycle
 {
-    public function __construct(private readonly CoupleLock $lock, private readonly DeliveryContent $content, private readonly ReminderLifecycle $reminders) {}
+    public function __construct(private readonly CoupleLock $lock, private readonly DeliveryContent $content, private readonly ReminderLifecycle $reminders, private readonly KeyboardFactory $keyboards) {}
 
     public function claim(NotificationDelivery $delivery): ?OutgoingMessage
     {
@@ -70,7 +71,7 @@ final class DeliveryLifecycle
             $this->startReminder($current);
             Log::debug('notification.claimed', ['delivery_id' => $current->id, 'attempt' => $current->attempts]);
 
-            return new OutgoingMessage($current->id, $token, $account->chat_id, $text);
+            return new OutgoingMessage($current->id, $token, $account->chat_id, $text, $this->keyboards->create($current, $account));
         }, attempts: 3);
     }
 

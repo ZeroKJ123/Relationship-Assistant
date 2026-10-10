@@ -1,0 +1,87 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Services\Telegram;
+
+use App\Data\Telegram\IncomingUpdate;
+use App\Enums\TelegramActionStage;
+use App\Models\Couple;
+use App\Models\TelegramAccount;
+use App\Models\TelegramCallbackAction;
+use App\Models\User;
+use App\Services\Requests\RequestContext;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+
+final class CallbackRouter
+{
+    private const CONFIRMATION_MINUTES = 10;
+
+    public function __construct(private readonly RequestContext $context, private readonly CallbackOperations $operations) {}
+
+    /** @return array<string, mixed> */
+    public function execute(IncomingUpdate $update): array
+    {
+        if (preg_match('/^(act|cancel):([A-Za-z0-9]{40})$/D', $update->callbackData ?? '', $matches) !== 1) {
+            $this->deny('invalid_token');
+        }
+        $action = TelegramCallbackAction::query()->where('token_hash', hash('sha256', $matches[2]))->first();
+        $account = TelegramAccount::query()->where('telegram_id', $update->telegramId)->where('chat_id', $update->telegramId)->first();
+        if ($action === null || $account === null || $account->id !== $action->telegram_account_id) {
+            $this->deny('foreign_identity');
+        }
+        $actor = User::query()->findOrFail($account->user_id);
+        $couple = $this->context->lockCouple($actor, Couple::query()->findOrFail($action->couple_id));
+        $currentAccount = TelegramAccount::query()->whereKey($account->id)->lockForUpdate()->first();
+        if ($currentAccount === null || $currentAccount->user_id !== $actor->id || $currentAccount->telegram_id !== $update->telegramId || $currentAccount->chat_id !== $update->telegramId) {
+            $this->deny('account_changed');
+        }
+        $action = TelegramCallbackAction::query()->whereKey($action->id)->lockForUpdate()->firstOrFail();
+        if ($action->expires_at->lessThanOrEqualTo(now())) {
+            $this->deny('expired');
+        }
+        if (in_array($action->stage, [TelegramActionStage::Consumed, TelegramActionStage::Cancelled, TelegramActionStage::Awaiting], true)) {
+            return ['text' => __('Эта кнопка уже использована. Проверьте результат в приложении.')];
+        }
+        if ($matches[1] === 'cancel') {
+            if ($action->stage !== TelegramActionStage::Confirm) {
+                $this->deny('not_confirming');
+            }
+            $action->forceFill(['stage' => TelegramActionStage::Cancelled])->save();
+
+            return ['text' => __('Действие отменено.')];
+        }
+        $this->operations->requireCurrent($action, $actor, $couple);
+        if ($action->stage === TelegramActionStage::Ready) {
+            return $this->askConfirmation($action);
+        }
+        if ($action->stage !== TelegramActionStage::Confirm) {
+            $this->deny('invalid_stage');
+        }
+        $this->operations->execute($action, $actor, $couple);
+        $action->forceFill(['stage' => TelegramActionStage::Consumed])->save();
+        Log::info('telegram.action_completed', ['action_id' => $action->id, 'actor_id' => $actor->id, 'operation' => $action->operation->value]);
+
+        return ['text' => __('Готово. Результат сохранён в приложении.')];
+    }
+
+    /** @return array<string, mixed> */
+    private function askConfirmation(TelegramCallbackAction $action): array
+    {
+        $token = Str::random(KeyboardFactory::TOKEN_LENGTH);
+        $confirmation = $action->replicate();
+        $confirmation->forceFill(['token_hash' => hash('sha256', $token), 'stage' => TelegramActionStage::Confirm, 'expires_at' => min($action->expires_at, now()->toImmutable()->addMinutes(self::CONFIRMATION_MINUTES))])->save();
+        $action->forceFill(['stage' => TelegramActionStage::Awaiting])->save();
+        Log::debug('telegram.action_confirmation_requested', ['action_id' => $action->id, 'confirmation_id' => $confirmation->id]);
+
+        return ['text' => sprintf('%s: «%s»? %s', __('Подтвердить действие'), $action->operation->label(), __('Применятся обычные правила, награды и штрафы приложения.')), 'reply_markup' => ['inline_keyboard' => [[['text' => __('Подтвердить'), 'callback_data' => sprintf('act:%s', $token)], ['text' => __('Отмена'), 'callback_data' => sprintf('cancel:%s', $token)]]]]];
+    }
+
+    private function deny(string $reason): never
+    {
+        Log::warning('telegram.action_denied', ['reason' => $reason]);
+        throw ValidationException::withMessages(['telegram' => __('Кнопка недоступна. Откройте актуальную страницу приложения.')]);
+    }
+}

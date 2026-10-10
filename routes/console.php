@@ -14,3 +14,5 @@ Schedule::command('duties:check-overdue')->everyMinute()->withoutOverlapping();
 
 Schedule::command('care:process-due')->everyMinute()->withoutOverlapping();
 Schedule::command('telegram:dispatch-notifications')->everyMinute()->withoutOverlapping();
+
+Schedule::command('telegram:prune-controls')->daily()->withoutOverlapping();

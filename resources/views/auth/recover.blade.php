@@ -15,5 +15,8 @@
         <x-button type="submit">{{ __('Восстановить доступ') }}</x-button>
     </form>
     <p class="form-footer"><a href="{{ route('login') }}">{{ __('Вернуться ко входу') }}</a></p>
+    @if($telegramAvailable)
+        <form method="post" action="{{ route('telegram.login.store') }}" class="form-footer" data-submit-lock>@csrf<x-button type="submit" variant="quiet">{{ __('Войти через Telegram') }}</x-button></form>
+    @endif
 </x-card>
 @endsection

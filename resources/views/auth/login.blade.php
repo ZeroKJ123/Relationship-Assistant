@@ -13,5 +13,8 @@
     </form>
     <p class="form-footer"><a href="{{ route('recover') }}">{{ __('Забыли пароль?') }}</a></p>
     <p class="form-footer">{{ __('Пока нет аккаунта?') }} <a href="{{ route('register') }}">{{ __('Создать') }}</a></p>
+    @if($telegramAvailable)
+        <form method="post" action="{{ route('telegram.login.store') }}" class="form-footer" data-submit-lock>@csrf<x-button type="submit" variant="quiet">{{ __('Войти через Telegram') }}</x-button></form>
+    @endif
 </x-card>
 @endsection

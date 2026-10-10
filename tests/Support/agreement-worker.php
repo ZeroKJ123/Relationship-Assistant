@@ -37,6 +37,7 @@ use App\Data\Reminders\ReminderData;
 use App\Data\Requests\GuestVisitData;
 use App\Data\Requests\NewRequestData;
 use App\Data\Requests\RequestResponseData;
+use App\Data\Telegram\IncomingUpdate;
 use App\Enums\ConditionType;
 use App\Enums\Currency;
 use App\Enums\DeclineReason;
@@ -54,11 +55,13 @@ use App\Models\Friend;
 use App\Models\NotificationDelivery;
 use App\Models\PartnerReminder;
 use App\Models\PartnerRequest;
+use App\Models\TelegramAccount;
 use App\Models\User;
 use App\Services\Hearts\EconomySettingsStore;
 use App\Services\Hearts\Ledger;
 use App\Services\Notifications\DeliveryLifecycle;
 use App\Services\Scheduling\DueCare;
+use App\Services\Telegram\WebhookHandler;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Console\Kernel;
@@ -95,6 +98,7 @@ while (! file_exists($barrier)) {
 }
 try {
     match ($operation) {
+        'telegram_callback' => $app->make(WebhookHandler::class)->execute(new IncomingUpdate($limit, TelegramAccount::query()->where('user_id', $actor->id)->sole()->telegram_id, '', null, sprintf('act:%s', str_pad((string) $value, 40, 'x')), null), hash('sha256', (string) $limit)),
         'notification_claim' => $app->make(DeliveryLifecycle::class)->claim(NotificationDelivery::query()->findOrFail($value)) ?? throw ValidationException::withMessages(['notification' => 'Unavailable']),
         'care_process' => $app->make(DueCare::class)->execute(),
         'mood_record' => $app->make(RecordMood::class)->execute($actor, $couple, new MoodData(MoodLevel::Good, sprintf('00000000-0000-4000-8000-%012d', $value))),

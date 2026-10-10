@@ -179,7 +179,7 @@ Before relying on a package's API, confirm its installed version:
 | Products | docs/dishes-wishlist-money.md | Кухня, желания и денежные просьбы |
 | Friends and dates | docs/friends-guests-dates.md | Личные друзья, гости и свидания |
 | Mood and reminders | docs/mood-and-reminders.md | Настроение, расписание и напоминания |
-| Telegram and scheduling | docs/telegram-and-scheduling.md | Доставка, очередь, расписание и повторные попытки |
+| Telegram and scheduling | docs/telegram-and-scheduling.md | Вход, привязка, кнопки, доставка и расписание |
 
 ## Project entry points
 
@@ -215,5 +215,10 @@ Before relying on a package's API, confirm its installed version:
 - `app/Actions/Reminders/`, `app/Services/Reminders/ReminderLifecycle.php`, `routes/care.php`: разовые напоминания, отмена и подготовка доставки; отправитель и scheduler запускаются отдельными процессами.
 
 - `app/Services/Notifications/`, `app/Actions/Notifications/`, `app/Jobs/SendTelegramNotificationJob.php`: транзакционный outbox, проверка источника/пары/привязки, lease и итоги Telegram.
-- `app/Services/Telegram/BotClient.php`, `config/services.php`: выключаемый транспорт без секретов в логах; пользовательский вход/webhook ещё не реализованы.
+- `app/Services/Telegram/BotClient.php`, `config/services.php`: выключаемый транспорт и секрет защищённого webhook без секретов в логах.
 - `app/Services/Scheduling/DueCare.php`, `care:process-due`, `telegram:dispatch-notifications`: локальные часы пары, ограниченный catch-up и восстановление очереди; необязательный `compose.workers.yaml` и отдельные процессы описаны в `docs/telegram-and-scheduling.md`.
+
+- `app/Actions/Auth/Telegram/`, `app/Http/Controllers/Telegram/WebhookController.php`: одноразовая привязка к исходному браузеру и защищённый вход.
+- `app/Services/Telegram/CallbackRouter.php`, `KeyboardFactory.php`, `WebhookHandler.php`: двойное подтверждение и общие Actions, атомарный receipt без raw update.
+- `app/Services/Telegram/ProfilePhoto.php`, `app/Http/Controllers/Auth/AvatarController.php`: импорт проверенного фото и закрытая выдача собственнику.
+- `telegram:prune-controls`: ежедневная очистка технических подтверждений через семь суток.

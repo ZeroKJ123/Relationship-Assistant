@@ -2,7 +2,7 @@
 @section('title', __('Мой профиль · Наша пара'))
 @section('content')
 <x-card class="auth-card">
-    <x-avatar :name="$user->name" />
+    <x-avatar :name="$user->name" :src="$user->avatar_path !== null ? route('profile.avatar') : null" />
     <h1 class="form-title">{{ __('Привет, :name', ['name' => $user->name]) }}</h1>
     <p>{{ __('Здесь начинается ваше личное пространство.') }}</p>
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
@@ -25,6 +25,8 @@
         </div>
         <x-button type="submit">{{ __('Сохранить профиль') }}</x-button>
     </form>
+    @if($hasTelegram)<p>{{ __('Telegram привязан к вашему аккаунту.') }}</p>
+    @elseif($telegramAvailable)<form method="post" action="{{ route('telegram.login.store') }}" class="form-footer" data-submit-lock>@csrf<x-button type="submit" variant="quiet">{{ __('Привязать Telegram') }}</x-button></form>@endif
     <p class="form-footer"><a href="{{ route('couples.index') }}">{{ __('Мои пары') }}</a></p>
     @if($pendingInvitationUrl)<p class="form-footer"><a href="{{ $pendingInvitationUrl }}">{{ __('Продолжить принятие приглашения') }}</a></p>@endif
     <form method="post" action="{{ route('logout') }}" class="form-footer">@csrf<x-button type="submit" variant="quiet">{{ __('Выйти') }}</x-button></form>

@@ -6,11 +6,13 @@ namespace App\Providers;
 
 use App\Jobs\SendTelegramNotificationJob;
 use App\Models\User;
+use App\Services\Telegram\BotClient;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\View;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -39,6 +41,9 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\View::composer(['auth.login', 'auth.register', 'auth.recover', 'profile.show'], function (View $view): void {
+            $view->with('telegramAvailable', app(BotClient::class)->isLoginAvailable());
+        });
         Gate::define('manage-system-settings', fn (User $user): bool => $user->is_admin);
         RateLimiter::for('telegram', fn (SendTelegramNotificationJob $job): array => [
             Limit::perSecond(self::TELEGRAM_MESSAGES_PER_SECOND)->by('telegram-global'),

@@ -31,7 +31,7 @@ final class ProfileController extends Controller
         $intended = $request->session()->get('url.intended');
         $invitationUrl = is_string($intended) && str_starts_with($intended, sprintf('%s/', url('invitations'))) ? $intended : null;
 
-        return view('profile.show', ['user' => $user, 'recoveryCodes' => $codes, 'pendingInvitationUrl' => $invitationUrl]);
+        return view('profile.show', ['user' => $user, 'recoveryCodes' => $codes, 'pendingInvitationUrl' => $invitationUrl, 'hasTelegram' => $user->telegramAccount()->exists()]);
     }
 
     public function update(UpdateProfileRequest $request): RedirectResponse

@@ -33,6 +33,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property ?CarbonImmutable $reported_at
  * @property ?CarbonImmutable $reviewed_at
  * @property ?CarbonImmutable $overdue_at
+ * @property PartnerRequest $partnerRequest
+ * @property ?RequestCondition $requestCondition
  * @property Couple $couple
  * @property User $executor
  * @property User $reviewer
@@ -41,6 +43,18 @@ final class Duty extends Model
 {
     /** @use HasFactory<DutyFactory> */
     use HasFactory;
+
+    /** @return BelongsTo<PartnerRequest, $this> */
+    public function partnerRequest(): BelongsTo
+    {
+        return $this->belongsTo(PartnerRequest::class);
+    }
+
+    /** @return BelongsTo<RequestCondition, $this> */
+    public function requestCondition(): BelongsTo
+    {
+        return $this->belongsTo(RequestCondition::class);
+    }
 
     /** @return BelongsTo<Couple,$this> */
     public function couple(): BelongsTo
