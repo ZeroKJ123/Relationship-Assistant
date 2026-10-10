@@ -19,6 +19,14 @@ final class EconomySettingController extends Controller
 {
     private const PAGE_SIZE = 10;
 
+    private const GROUPS = [
+        'Баланс' => ['starting_bonus', 'positive_cap'],
+        'Награды за дела' => ['reward', 'reward_daily', 'reward_weekly'],
+        'Благодарности партнёру' => ['manual_thanks_daily', 'manual_thanks_weekly'],
+        'Ручные списания' => ['manual_deduction_daily', 'manual_deduction_weekly'],
+        'Штрафы' => ['refusal_tariff', 'overdue_penalty', 'false_report_penalty'],
+    ];
+
     public function __construct(private readonly EconomySettingsStore $store, private readonly UpdateEconomySettings $updateSettings) {}
 
     public function index(): View
@@ -26,7 +34,7 @@ final class EconomySettingController extends Controller
         Gate::authorize('manage-system-settings');
         $current = $this->store->initialize();
 
-        return view('admin.economy.index', ['current' => $current, 'labels' => $this->store->labels(), 'history' => EconomySettingsVersion::query()->latest('version')->paginate(self::PAGE_SIZE)]);
+        return view('admin.economy.index', ['current' => $current, 'groups' => self::GROUPS, 'labels' => $this->store->labels(), 'history' => EconomySettingsVersion::query()->latest('version')->paginate(self::PAGE_SIZE)]);
     }
 
     public function update(UpdateEconomySettingsRequest $request): RedirectResponse
