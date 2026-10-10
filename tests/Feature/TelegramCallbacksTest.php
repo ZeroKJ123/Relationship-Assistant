@@ -6,11 +6,14 @@ use App\Actions\Couples\Agreements\AcceptProposal;
 use App\Actions\Couples\EndCouple;
 use App\Actions\Duties\ReportDuty;
 use App\Actions\Money\CreateMoneyRequest;
+use App\Actions\Mood\AddMoodEmoji;
 use App\Actions\Mood\CreateMoodPrompt;
+use App\Actions\Mood\RecordMood;
 use App\Actions\Mood\RequestPartnerMood;
 use App\Actions\Requests\CreatePartnerRequest;
 use App\Actions\Requests\RespondToRequest;
 use App\Data\Money\MoneyRequestData;
+use App\Data\Mood\MoodData;
 use App\Data\Requests\NewRequestData;
 use App\Data\Requests\RequestResponseData;
 use App\Enums\ConditionType;
@@ -169,7 +172,7 @@ it('reports and verifies a duty with a single reward even after repeated button 
     expect($scenario->duty->refresh()->status)->toBe(DutyStatus::Confirmed)->and(DutyConfirmation::query()->count())->toBe(2)->and(HeartTransaction::query()->where('type', '!=', 'starting_bonus')->count())->toBe(1);
 });
 
-it('records Telegram mood only after confirmation and prevents another answer to the prompt', function (): void {
+it('records Telegram mood immediately and offers an optional emoji without confirmation', function (): void {
     $this->travelTo(CarbonImmutable::parse('2026-10-11 06:10:00', 'UTC'));
     $pair = AgreementScenario::create();
     $pair->couple->members()->update(['joined_at' => CarbonImmutable::now()->subDay()]);
@@ -177,10 +180,16 @@ it('records Telegram mood only after confirmation and prevents another answer to
     $prompt = app(CreateMoodPrompt::class)->execute($pair->first, $pair->couple, CarbonImmutable::parse('2026-10-11 06:00:00', 'UTC'));
     $button = app(KeyboardFactory::class)->createButton($account, $pair->couple->id, 'mood', $prompt->id, 1, TelegramOperation::MoodGood);
     $reply = callbackResponse($this, 80, $account, $button['callback_data'])->json();
-    expect(MoodEntry::query()->count())->toBe(0);
-    $confirm = $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'];
-    callbackResponse($this, 81, $account, $confirm);
-    callbackResponse($this, 82, $account, $confirm);
+    expect(MoodEntry::query()->count())->toBe(1);
+    expect($reply['text'])->toContain('Какой эмоджи');
+    expect(collect($reply['reply_markup']['inline_keyboard'])->flatten(1)->pluck('text')->all())->toBe([...AddMoodEmoji::EMOJIS, 'Пропустить']);
+    callbackResponse($this, 80, $account, $button['callback_data'])->assertExactJson($reply);
+    $emoji = $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'];
+    callbackResponse($this, 81, $account, $emoji)->assertJsonMissingPath('reply_markup');
+    callbackResponse($this, 82, $account, $emoji);
+    callbackResponse($this, 83, $account, $button['callback_data']);
+    expect(MoodEntry::query()->sole()->emoji)->toBe('😊');
+    expect(NotificationDelivery::query()->where('kind', NotificationKind::MoodEmoji)->count())->toBe(1);
     expect(MoodEntry::query()->sole()->source)->toBe(MoodSource::Telegram)->and($prompt->refresh()->answered_at)->not->toBeNull();
 });
 
@@ -236,7 +245,7 @@ it('marks a money request paid without issuing hearts or exposing payment detail
     expect($duty->refresh()->status)->toBe(DutyStatus::Confirmed)->and(HeartTransaction::query()->where('type', 'reward')->count())->toBe(0);
 });
 
-it('offers neutral mood as the middle Telegram answer and records its confirmed selection once', function (): void {
+it('offers neutral mood as the middle Telegram answer and records its immediate selection once', function (): void {
     $pair = AgreementScenario::create();
     $account = TelegramAccount::factory()->create(['user_id' => $pair->first->id]);
     $prompt = app(RequestPartnerMood::class)->execute($pair->second, $pair->couple);
@@ -246,9 +255,31 @@ it('offers neutral mood as the middle Telegram answer and records its confirmed 
     $buttons = array_map(fn (array $row): array => $row[0], $message->keyboard['inline_keyboard']);
     expect(array_column($buttons, 'text'))->toBe(['Отлично', 'Хорошо', 'Нейтрально', 'Не очень', 'Плохо']);
     $reply = callbackResponse($this, 910, $account, $buttons[2]['callback_data'])->json();
-    expect(MoodEntry::query()->count())->toBe(0);
-    $confirm = $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'];
-    callbackResponse($this, 911, $account, $confirm);
-    callbackResponse($this, 912, $account, $confirm);
+    expect(MoodEntry::query()->count())->toBe(1);
+    $skip = $reply['reply_markup']['inline_keyboard'][3][0]['callback_data'];
+    callbackResponse($this, 911, $account, $skip)->assertJsonFragment(['text' => 'Настроение сохранено без эмоджи.']);
+    callbackResponse($this, 912, $account, $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'])->assertJsonMissingPath('reply_markup');
+    expect(MoodEntry::query()->sole()->emoji)->toBeNull();
     expect(MoodEntry::query()->sole()->level)->toBe(MoodLevel::Neutral)->and(MoodEntry::query()->sole()->source)->toBe(MoodSource::Telegram)->and($prompt->refresh()->answered_at)->not->toBeNull();
 });
+
+it('rejects foreign stale expired and ended-pair emoji buttons', function (string $case): void {
+    $pair = AgreementScenario::create();
+    $account = TelegramAccount::factory()->create(['user_id' => $pair->first->id]);
+    $entry = app(RecordMood::class)->execute($pair->first, $pair->couple, new MoodData(MoodLevel::Good, Str::uuid()->toString()));
+    $keyboard = app(KeyboardFactory::class)->createMoodEmoji($entry, $account);
+    if ($case === 'foreign') {
+        $account = TelegramAccount::factory()->create(['user_id' => $pair->second->id]);
+    }
+    if ($case === 'stale') {
+        app(RecordMood::class)->execute($pair->first, $pair->couple, new MoodData(MoodLevel::Neutral, Str::uuid()->toString()));
+    }
+    if ($case === 'expired') {
+        $this->travelTo(TelegramCallbackAction::query()->firstOrFail()->expires_at);
+    }
+    if ($case === 'ended') {
+        app(EndCouple::class)->execute($pair->first, $pair->couple);
+    }
+    callbackResponse($this, 920, $account, $keyboard['inline_keyboard'][0][0]['callback_data'])->assertJsonMissingPath('reply_markup');
+    expect($entry->refresh()->emoji)->toBeNull()->and(NotificationDelivery::query()->where('kind', NotificationKind::MoodEmoji)->count())->toBe(0);
+})->with(['foreign', 'stale', 'expired', 'ended']);

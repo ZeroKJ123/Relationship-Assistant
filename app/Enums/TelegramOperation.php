@@ -20,12 +20,15 @@ enum TelegramOperation: string
     case MoodNeutral = 'mood_neutral';
     case MoodLow = 'mood_low';
     case MoodBad = 'mood_bad';
+    case MoodEmoji = 'mood_emoji';
+    case MoodEmojiSkip = 'mood_emoji_skip';
 
     public function getSourceKind(): string
     {
         return match ($this) {
             self::Agree, self::Decline, self::NoFoodMoney, self::AcceptCondition, self::DeclineCondition => 'request',
             self::Done, self::NotDone, self::Verify, self::Dispute => 'duty',
+            self::MoodEmoji, self::MoodEmojiSkip => 'mood_emoji',
             default => 'mood',
         };
     }
@@ -41,6 +44,7 @@ enum TelegramOperation: string
             self::MoodGreat => __('Отлично'), self::MoodGood => __('Хорошо'),
             self::MoodNeutral => __('Нейтрально'),
             self::MoodLow => __('Не очень'), self::MoodBad => __('Плохо'),
+            self::MoodEmoji => __('Дополнить эмоджи'), self::MoodEmojiSkip => __('Пропустить'),
         };
     }
 }

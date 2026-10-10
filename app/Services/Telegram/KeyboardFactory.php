@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Telegram;
 
+use App\Actions\Mood\AddMoodEmoji;
 use App\Enums\ConditionType;
 use App\Enums\DutyStatus;
 use App\Enums\MoodLevel;
@@ -14,12 +15,14 @@ use App\Enums\TelegramActionStage;
 use App\Enums\TelegramOperation;
 use App\Models\Duty;
 use App\Models\DutyConfirmation;
+use App\Models\MoodEntry;
 use App\Models\MoodPrompt;
 use App\Models\NotificationDelivery;
 use App\Models\PartnerRequest;
 use App\Models\RequestEvent;
 use App\Models\TelegramAccount;
 use App\Models\TelegramCallbackAction;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use LogicException;
@@ -29,6 +32,8 @@ final class KeyboardFactory
     public const TOKEN_LENGTH = 40;
 
     private const LIFETIME_HOURS = 24;
+
+    private const EMOJIS_PER_ROW = 4;
 
     /** @return array{inline_keyboard: list<list<array{text: string, callback_data: string}|array{text: string, url: string}>>} */
     public function create(NotificationDelivery $delivery, TelegramAccount $account): array
@@ -53,6 +58,16 @@ final class KeyboardFactory
         (new TelegramCallbackAction)->forceFill(['telegram_account_id' => $account->id, 'couple_id' => $coupleId, 'token_hash' => hash('sha256', $token), 'source_kind' => $sourceKind, 'source_id' => $sourceId, 'source_version' => $sourceVersion, 'operation' => $operation, 'operation_key' => Str::uuid()->toString(), 'stage' => TelegramActionStage::Ready, 'expires_at' => now()->addHours(self::LIFETIME_HOURS)])->save();
 
         return ['text' => $label ?? $operation->label(), 'callback_data' => sprintf('act:%s', $token)];
+    }
+
+    /** @return array{inline_keyboard: list<list<array{text: string, callback_data: string}>>} */
+    public function createMoodEmoji(MoodEntry $entry, TelegramAccount $account): array
+    {
+        $buttons = collect(AddMoodEmoji::EMOJIS)->map(fn (string $emoji, int $index): array => $this->createButton($account, $entry->couple_id, 'mood_emoji', $entry->id, $index, TelegramOperation::MoodEmoji, $emoji));
+        $rows = array_values($buttons->chunk(self::EMOJIS_PER_ROW)->map(fn (Collection $row): array => array_values($row->all()))->all());
+        $rows[] = [$this->createButton($account, $entry->couple_id, 'mood_emoji', $entry->id, 0, TelegramOperation::MoodEmojiSkip)];
+
+        return ['inline_keyboard' => $rows];
     }
 
     /** @return list<list<array{text: string, callback_data: string}|array{text: string, url: string}>> */

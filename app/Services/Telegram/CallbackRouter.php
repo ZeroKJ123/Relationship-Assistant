@@ -6,7 +6,9 @@ namespace App\Services\Telegram;
 
 use App\Data\Telegram\IncomingUpdate;
 use App\Enums\TelegramActionStage;
+use App\Enums\TelegramOperation;
 use App\Models\Couple;
+use App\Models\MoodEntry;
 use App\Models\TelegramAccount;
 use App\Models\TelegramCallbackAction;
 use App\Models\User;
@@ -19,7 +21,7 @@ final class CallbackRouter
 {
     private const CONFIRMATION_MINUTES = 10;
 
-    public function __construct(private readonly RequestContext $context, private readonly CallbackOperations $operations) {}
+    public function __construct(private readonly RequestContext $context, private readonly CallbackOperations $operations, private readonly KeyboardFactory $keyboards) {}
 
     /** @return array<string, mixed> */
     public function execute(IncomingUpdate $update): array
@@ -54,15 +56,25 @@ final class CallbackRouter
             return ['text' => __('Действие отменено.')];
         }
         $this->operations->requireCurrent($action, $actor, $couple);
-        if ($action->stage === TelegramActionStage::Ready) {
+        $isMood = in_array($action->source_kind, ['mood', 'mood_emoji'], true);
+        if ($action->stage === TelegramActionStage::Ready && ! $isMood) {
             return $this->askConfirmation($action);
         }
-        if ($action->stage !== TelegramActionStage::Confirm) {
+        if ($action->stage !== TelegramActionStage::Confirm && ! ($isMood && $action->stage === TelegramActionStage::Ready)) {
             $this->deny('invalid_stage');
         }
         $this->operations->execute($action, $actor, $couple);
         $action->forceFill(['stage' => TelegramActionStage::Consumed])->save();
         Log::info('telegram.action_completed', ['action_id' => $action->id, 'actor_id' => $actor->id, 'operation' => $action->operation->value]);
+
+        if ($action->source_kind === 'mood') {
+            $entry = MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->where('operation_key', $action->operation_key)->sole();
+
+            return ['text' => __('Настроение сохранено. Какой эмоджи подробнее описывает ваше настроение? Выберите его или нажмите «Пропустить».'), 'reply_markup' => $this->keyboards->createMoodEmoji($entry, $currentAccount)];
+        }
+        if ($action->source_kind === 'mood_emoji') {
+            return ['text' => $action->operation === TelegramOperation::MoodEmojiSkip ? __('Настроение сохранено без эмоджи.') : __('Эмоджи сохранён и виден партнёру.')];
+        }
 
         return ['text' => __('Готово. Результат сохранён в приложении.')];
     }

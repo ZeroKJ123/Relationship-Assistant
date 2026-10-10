@@ -6,6 +6,7 @@ namespace App\Services\Telegram;
 
 use App\Actions\Duties\ReportDuty;
 use App\Actions\Duties\VerifyDuty;
+use App\Actions\Mood\AddMoodEmoji;
 use App\Actions\Mood\RecordMood;
 use App\Actions\Requests\ResolveCondition;
 use App\Actions\Requests\RespondToRequest;
@@ -18,9 +19,11 @@ use App\Enums\MoodSource;
 use App\Enums\RequestResponse;
 use App\Enums\RequestStatus;
 use App\Enums\RequestType;
+use App\Enums\TelegramActionStage;
 use App\Enums\TelegramOperation;
 use App\Models\Couple;
 use App\Models\Duty;
+use App\Models\MoodEntry;
 use App\Models\MoodPrompt;
 use App\Models\PartnerRequest;
 use App\Models\TelegramCallbackAction;
@@ -30,12 +33,20 @@ use Illuminate\Validation\ValidationException;
 
 final class CallbackOperations
 {
-    public function __construct(private readonly RespondToRequest $respond, private readonly ResolveCondition $condition, private readonly ReportDuty $report, private readonly VerifyDuty $verify, private readonly RecordMood $mood) {}
+    public function __construct(private readonly RespondToRequest $respond, private readonly ResolveCondition $condition, private readonly ReportDuty $report, private readonly VerifyDuty $verify, private readonly RecordMood $mood, private readonly AddMoodEmoji $addEmoji) {}
 
     public function requireCurrent(TelegramCallbackAction $action, User $actor, Couple $couple): void
     {
         if ($action->source_kind !== $action->operation->getSourceKind()) {
             $this->deny();
+        }
+        if ($action->source_kind === 'mood_emoji') {
+            $entry = MoodEntry::query()->whereKey($action->source_id)->where('couple_id', $couple->id)->where('user_id', $actor->id)->lockForUpdate()->firstOrFail();
+            if ($entry->emoji !== null || MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->where('id', '>', $entry->id)->exists()) {
+                $this->deny();
+            }
+
+            return;
         }
         if ($action->source_kind === 'request') {
             $request = PartnerRequest::query()->whereKey($action->source_id)->where('couple_id', $couple->id)->lockForUpdate()->firstOrFail();
@@ -69,6 +80,21 @@ final class CallbackOperations
 
     public function execute(TelegramCallbackAction $action, User $actor, Couple $couple): void
     {
+        if ($action->operation === TelegramOperation::MoodEmojiSkip) {
+            TelegramCallbackAction::query()->where('telegram_account_id', $action->telegram_account_id)->where('source_kind', 'mood_emoji')->where('source_id', $action->source_id)->where('couple_id', $couple->id)->update(['stage' => TelegramActionStage::Cancelled]);
+
+            return;
+        }
+        if ($action->operation === TelegramOperation::MoodEmoji) {
+            $emoji = AddMoodEmoji::EMOJIS[$action->source_version] ?? null;
+            if ($emoji === null) {
+                $this->deny();
+            }
+            $entry = MoodEntry::query()->whereKey($action->source_id)->where('couple_id', $couple->id)->where('user_id', $actor->id)->firstOrFail();
+            $this->addEmoji->execute($actor, $couple, $entry, $emoji);
+
+            return;
+        }
         $request = fn (): PartnerRequest => PartnerRequest::query()->whereKey($action->source_id)->where('couple_id', $couple->id)->firstOrFail();
         $duty = fn (): Duty => Duty::query()->whereKey($action->source_id)->where('couple_id', $couple->id)->firstOrFail();
         match ($action->operation) {
