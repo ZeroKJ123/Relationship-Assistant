@@ -19,6 +19,7 @@ use Illuminate\Validation\ValidationException;
 uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
+    $this->withoutVite();
     config(['services.telegram.enabled' => true, 'services.telegram.bot_token' => '123456789:fake-test-token', 'services.telegram.bot_username' => 'HomeAssistTestBot', 'services.telegram.webhook_secret' => str_repeat('test-secret-', 4)]);
     Http::fake(['*/answerCallbackQuery' => Http::response(['ok' => true, 'result' => true])]);
 });
