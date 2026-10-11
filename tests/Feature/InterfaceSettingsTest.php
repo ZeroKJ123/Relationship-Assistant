@@ -9,6 +9,10 @@ use Tests\Support\AgreementScenario;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function (): void {
+    $this->withoutVite();
+});
+
 it('shows cars on the home screen only when the current user has added a car', function (): void {
     $pair = AgreementScenario::create();
     Car::factory()->create(['user_id' => $pair->second->id]);

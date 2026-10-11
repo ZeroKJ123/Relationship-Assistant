@@ -28,6 +28,7 @@ use Tests\Support\AgreementScenario;
 uses(DatabaseMigrations::class);
 
 beforeEach(function (): void {
+    $this->withoutVite();
     config(['services.telegram.enabled' => true, 'services.telegram.bot_token' => '123456789:fake-test-token']);
     Storage::fake(MoodStickers::DISK);
 });
