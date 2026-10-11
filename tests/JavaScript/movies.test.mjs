@@ -9,7 +9,7 @@ function fixture() {
     const form = { requestSubmit(button) { submitted.push(button.name); } };
     const like = { name: 'like', disabled: false, form };
     const skip = { name: 'skip', disabled: false, form };
-    const card = {
+    const card = { dataset: {},
         addEventListener(name, callback) { handlers[name] = callback; },
         querySelector(selector) { return selector === '[data-movie-like]' ? like : skip; },
         setPointerCapture(id) { capture.push(id); },

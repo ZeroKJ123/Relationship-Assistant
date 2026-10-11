@@ -8,8 +8,9 @@
     <x-form-feedback />
     <form method="post" action="{{ route('dates.store', $couple) }}" class="form-stack" data-submit-lock>
         @csrf
+        <x-request-topic :couple="$couple" selected="event" />
         <input type="hidden" name="operation_key" value="{{ old('operation_key', $operationKey) }}">
-        <input type="hidden" name="request_template_id" value="{{ old('request_template_id', $preset?->id) }}">
+        id) }}">
         <fieldset class="settings-group">
             <legend>{{ __('Что запланируем') }}</legend>
             <div class="field">
@@ -25,8 +26,8 @@
         </fieldset>
         <fieldset class="settings-group">
             <legend>{{ __('Когда встретимся') }}</legend>
-            <x-field name="starts_at" :label="__('Дата и время')" type="datetime-local" :value="old('starts_at', '')" :error="$errors->first('starts_at')" aria-describedby="starts-at-hint" required />
-            <p class="field-hint" id="starts-at-hint">{{ __('Часовой пояс: :zone', ['zone' => $couple->timezone]) }}</p>
+            <x-field name="starts_at" :label="__('Дата и время')" type="datetime-local" :value="old('starts_at', '')" :error="$errors->first('starts_at')"  required />
+
             <p class="field-hint">{{ __('Принятие приглашения не означает выполнение. Время нельзя изменить односторонне: используйте общую отмену и новое приглашение. Срок выполнения — время события.') }}</p>
         </fieldset>
         <label class="confirmation-check"><input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю приглашение и время') }}</label>

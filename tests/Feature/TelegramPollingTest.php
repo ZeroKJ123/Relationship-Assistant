@@ -20,7 +20,7 @@ uses(DatabaseMigrations::class);
 
 it('sends a free emoji reply prompt through the Telegram transport', function (): void {
     Http::fake(['*/sendMessage' => Http::response(['ok' => true, 'result' => ['message_id' => 22]])]);
-    $markup = ['force_reply' => true, 'input_field_placeholder' => 'Ваш эмоджи'];
+    $markup = ['force_reply' => true, 'input_field_placeholder' => 'Эмоджи или стикер'];
     expect(app(BotClient::class)->sendMessage('123456', 'Напишите эмоджи', $markup)->status)->toBe(DeliveryStatus::Sent);
     Http::assertSent(fn (Request $request): bool => $request['reply_markup'] === $markup && $request['chat_id'] === '123456');
 });

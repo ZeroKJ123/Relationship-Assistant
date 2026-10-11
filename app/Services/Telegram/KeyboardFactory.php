@@ -62,7 +62,7 @@ final class KeyboardFactory
         $button = $this->createButton($account, $entry->couple_id, 'mood_emoji', $entry->id, 0, TelegramOperation::MoodEmoji);
         TelegramCallbackAction::query()->where('token_hash', hash('sha256', substr($button['callback_data'], 4)))->update(['stage' => TelegramActionStage::Awaiting]);
 
-        return ['force_reply' => true, 'input_field_placeholder' => __('Ваш эмоджи')];
+        return ['force_reply' => true, 'input_field_placeholder' => __('Эмоджи или стикер')];
     }
 
     /** @return list<list<array{text: string, callback_data: string}|array{text: string, url: string}>> */

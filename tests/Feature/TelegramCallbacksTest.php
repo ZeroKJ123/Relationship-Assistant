@@ -70,16 +70,16 @@ function callbackResponse(TestCase $test, int $id, TelegramAccount $account, str
     return $test->postJson(route('telegram.webhook'), telegramCallbackPayload($id, $account->telegram_id, $data), ['X-Telegram-Bot-Api-Secret-Token' => config('services.telegram.webhook_secret')])->assertOk();
 }
 
-it('applies a request only on confirmation and deduplicates updates and repeated confirmations', function (): void {
+it('applies a request on the first click and deduplicates updates and repeated clicks', function (): void {
     $pair = AgreementScenario::create();
     $account = TelegramAccount::factory()->create(['user_id' => $pair->second->id]);
     $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(RequestType::Service, 'Помощь', CarbonImmutable::now()->addDay()));
     $button = DB::transaction(fn (): array => app(KeyboardFactory::class)->createButton($account, $pair->couple->id, 'request', $request->id, 0, TelegramOperation::Agree));
     $reply = callbackResponse($this, 10, $account, $button['callback_data'])->json();
-    expect($request->refresh()->status)->toBe(RequestStatus::Pending)->and($request->duties()->count())->toBe(0);
+    expect($request->refresh()->status)->toBe(RequestStatus::Accepted)->and($request->duties()->count())->toBe(1);
     callbackResponse($this, 10, $account, $button['callback_data'])->assertExactJson($reply);
-    expect(TelegramCallbackAction::query()->count())->toBe(2);
-    $confirm = $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'];
+    expect(TelegramCallbackAction::query()->count())->toBe(1);
+    $confirm = $button['callback_data'];
     $done = callbackResponse($this, 11, $account, $confirm)->json();
     callbackResponse($this, 11, $account, $confirm)->assertExactJson($done);
     callbackResponse($this, 12, $account, $confirm)->assertJsonFragment(['text' => 'Эта кнопка уже использована. Проверьте результат в приложении.']);
@@ -92,8 +92,8 @@ it('cancels a confirmation without changing the request or heart balance', funct
     $account = TelegramAccount::factory()->create(['user_id' => $pair->second->id]);
     $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(RequestType::Service, 'Помощь', CarbonImmutable::now()->addDay()));
     $button = app(KeyboardFactory::class)->createButton($account, $pair->couple->id, 'request', $request->id, 0, TelegramOperation::Decline);
-    $reply = callbackResponse($this, 20, $account, $button['callback_data'])->json();
-    $cancel = $reply['reply_markup']['inline_keyboard'][0][1]['callback_data'];
+    TelegramCallbackAction::query()->sole()->forceFill(['stage' => TelegramActionStage::Confirm])->save();
+    $cancel = str_replace('act:', 'cancel:', $button['callback_data']);
     callbackResponse($this, 21, $account, $cancel)->assertJsonFragment(['text' => 'Действие отменено.']);
     callbackResponse($this, 22, $account, str_replace('cancel:', 'act:', $cancel));
     expect($request->refresh()->status)->toBe(RequestStatus::Pending)->and(HeartTransaction::query()->where('type', '!=', 'starting_bonus')->count())->toBe(0)->and(TelegramCallbackAction::query()->latest('id')->first()->stage)->toBe(TelegramActionStage::Cancelled);
@@ -125,14 +125,13 @@ it('rejects confirmations after the website changed the state or the couple ende
     $account = TelegramAccount::factory()->create(['user_id' => $pair->second->id]);
     $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(RequestType::Service, 'Помощь', CarbonImmutable::now()->addDay()));
     $button = app(KeyboardFactory::class)->createButton($account, $pair->couple->id, 'request', $request->id, 0, TelegramOperation::Agree);
-    $reply = callbackResponse($this, 40, $account, $button['callback_data'])->json();
     if ($case === 'website') {
         app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(RequestResponse::Agree, 0));
     }
     if ($case === 'ended') {
         app(EndCouple::class)->execute($pair->first, $pair->couple);
     }
-    callbackResponse($this, 41, $account, $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'])->assertJsonMissingPath('reply_markup');
+    callbackResponse($this, 41, $account, $button['callback_data'])->assertJsonMissingPath('reply_markup');
     expect($request->refresh()->status)->toBe($case === 'website' ? RequestStatus::Accepted : RequestStatus::Pending)->and($request->version)->toBe($case === 'website' ? 1 : 0);
 })->with(['website', 'ended']);
 
@@ -145,7 +144,7 @@ it('uses shared refusal penalties and the no-food-money exception once', functio
     $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData($type, 'Помощь', CarbonImmutable::now()->addDay(), isVeryWanted: true));
     $button = app(KeyboardFactory::class)->createButton($account, $pair->couple->id, 'request', $request->id, 0, $operation);
     $reply = callbackResponse($this, 50, $account, $button['callback_data'])->json();
-    $confirm = $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'];
+    $confirm = $button['callback_data'];
     callbackResponse($this, 51, $account, $confirm);
     callbackResponse($this, 52, $account, $confirm);
     expect($request->refresh()->status)->toBe(RequestStatus::Declined)->and($request->decline_penalty)->toBe($penalty)->and(HeartTransaction::query()->where('type', '!=', 'starting_bonus')->count())->toBe($penalty > 0 ? 1 : 0);
@@ -158,7 +157,7 @@ it('accepts a condition independently through the shared action', function (): v
     app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(RequestResponse::Conditional, 0, conditionType: ConditionType::Custom, description: 'Встречная помощь', dueAt: CarbonImmutable::now()->addDay()));
     $button = app(KeyboardFactory::class)->createButton($account, $pair->couple->id, 'request', $request->id, 1, TelegramOperation::AcceptCondition);
     $reply = callbackResponse($this, 60, $account, $button['callback_data'])->json();
-    callbackResponse($this, 61, $account, $reply['reply_markup']['inline_keyboard'][0][0]['callback_data']);
+    callbackResponse($this, 61, $account, $button['callback_data']);
     expect($request->refresh()->status)->toBe(RequestStatus::Accepted)->and($request->duties()->count())->toBe(2)->and(HeartTransaction::query()->where('type', '!=', 'starting_bonus')->count())->toBe(0);
 });
 
@@ -168,11 +167,11 @@ it('reports and verifies a duty with a single reward even after repeated button 
     $reviewer = TelegramAccount::factory()->create(['user_id' => $scenario->pair->first->id]);
     $button = app(KeyboardFactory::class)->createButton($executor, $scenario->pair->couple->id, 'duty', $scenario->duty->id, 0, TelegramOperation::Done);
     $reply = callbackResponse($this, 70, $executor, $button['callback_data'])->json();
-    callbackResponse($this, 71, $executor, $reply['reply_markup']['inline_keyboard'][0][0]['callback_data']);
+    callbackResponse($this, 71, $executor, $button['callback_data']);
     expect($scenario->duty->refresh()->status)->toBe(DutyStatus::Reported)->and(HeartTransaction::query()->where('type', '!=', 'starting_bonus')->count())->toBe(0);
     $button = app(KeyboardFactory::class)->createButton($reviewer, $scenario->pair->couple->id, 'duty', $scenario->duty->id, 1, TelegramOperation::Verify);
     $reply = callbackResponse($this, 72, $reviewer, $button['callback_data'])->json();
-    $confirm = $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'];
+    $confirm = $button['callback_data'];
     callbackResponse($this, 73, $reviewer, $confirm);
     callbackResponse($this, 74, $reviewer, $confirm);
     expect($scenario->duty->refresh()->status)->toBe(DutyStatus::Confirmed)->and(DutyConfirmation::query()->count())->toBe(2)->and(HeartTransaction::query()->where('type', '!=', 'starting_bonus')->count())->toBe(1);
@@ -187,7 +186,7 @@ it('records Telegram mood immediately and offers an optional emoji without confi
     $button = app(KeyboardFactory::class)->createButton($account, $pair->couple->id, 'mood', $prompt->id, 1, TelegramOperation::MoodGood);
     $reply = callbackResponse($this, 80, $account, $button['callback_data'])->json();
     expect(MoodEntry::query()->count())->toBe(1);
-    expect($reply['text'])->toContain('Напишите в ответ один эмоджи');
+    expect($reply['text'])->toContain('Ответьте одним эмоджи или стикером');
     expect($reply['reply_markup']['force_reply'])->toBeTrue();
     callbackResponse($this, 80, $account, $button['callback_data'])->assertExactJson($reply);
     emojiResponse($this, 79, $account, 'Просто текст')->assertJsonPath('reply_markup.force_reply', true);
@@ -224,7 +223,7 @@ it('records a negative report or dispute through the shared duty rules', functio
     }
     $button = app(KeyboardFactory::class)->createButton($account, $scenario->pair->couple->id, 'duty', $scenario->duty->id, $case === 'dispute' ? 1 : 0, $case === 'dispute' ? TelegramOperation::Dispute : TelegramOperation::NotDone);
     $reply = callbackResponse($this, 90, $account, $button['callback_data'])->json();
-    $confirm = $reply['reply_markup']['inline_keyboard'][0][0]['callback_data'];
+    $confirm = $button['callback_data'];
     callbackResponse($this, 91, $account, $confirm);
     callbackResponse($this, 92, $account, $confirm);
     expect($scenario->duty->refresh()->status)->toBe($case === 'dispute' ? DutyStatus::Disputed : DutyStatus::Pending);
@@ -242,13 +241,13 @@ it('marks a money request paid without issuing hearts or exposing payment detail
     $keyboard = app(KeyboardFactory::class)->create($delivery, $account);
     expect($keyboard['inline_keyboard'][0][0]['text'])->toContain('Оплачено')->not->toContain('Private bank details');
     $reply = callbackResponse($this, 100, $account, $keyboard['inline_keyboard'][0][0]['callback_data'])->json();
-    callbackResponse($this, 101, $account, $reply['reply_markup']['inline_keyboard'][0][0]['callback_data']);
+    callbackResponse($this, 101, $account, $keyboard['inline_keyboard'][0][0]['callback_data']);
     expect($request->duties()->sole()->status)->toBe(DutyStatus::Reported);
     $reviewer = TelegramAccount::factory()->create(['user_id' => $pair->first->id]);
     $duty = $request->duties()->sole();
     $button = app(KeyboardFactory::class)->createButton($reviewer, $pair->couple->id, 'duty', $duty->id, $duty->version, TelegramOperation::Verify);
     $reply = callbackResponse($this, 102, $reviewer, $button['callback_data'])->json();
-    callbackResponse($this, 103, $reviewer, $reply['reply_markup']['inline_keyboard'][0][0]['callback_data']);
+    callbackResponse($this, 103, $reviewer, $button['callback_data']);
     expect($duty->refresh()->status)->toBe(DutyStatus::Confirmed)->and(HeartTransaction::query()->where('type', 'reward')->count())->toBe(0);
 });
 

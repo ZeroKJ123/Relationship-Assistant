@@ -6,6 +6,7 @@ namespace App\Services\Couples;
 
 use App\Enums\DutyStatus;
 use App\Enums\RequestStatus;
+use App\Models\Car;
 use App\Models\Couple;
 use App\Models\Duty;
 use App\Models\MoodEntry;
@@ -39,6 +40,6 @@ final class DashboardData
         })->with(['author:id,name', 'recipient:id,name'])->latest('id')->first();
         Log::debug('dashboard.loaded', ['user_id' => $actor->id, 'couple_id' => $couple?->id, 'duty_count' => $duties->count(), 'elapsed_ms' => (hrtime(true) - $started) / 1_000_000]);
 
-        return new DashboardViewModel($actor, $couple, $partner, $days, $wallet, $couple === null ? new Collection : $this->moods->getLatest($couple)->filter(fn (MoodEntry $entry): bool => $entry->user_id !== $actor->id)->values(), $duties, $incoming, $couple !== null && $couple->agreement?->active_version === null, $couple === null ? null : $this->timeline->getDuration($couple), $couple === null ? null : $this->moods->getPendingPrompt($actor, $couple));
+        return new DashboardViewModel($actor, $couple, $partner, $days, $wallet, $couple === null ? new Collection : $this->moods->getLatest($couple)->filter(fn (MoodEntry $entry): bool => $entry->user_id !== $actor->id)->values(), $duties, $incoming, $couple !== null && $couple->agreement?->active_version === null, $couple === null ? null : $this->timeline->getDuration($couple), $couple === null ? null : $this->moods->getPendingPrompt($actor, $couple), Car::query()->where('user_id', $actor->id)->exists());
     }
 }

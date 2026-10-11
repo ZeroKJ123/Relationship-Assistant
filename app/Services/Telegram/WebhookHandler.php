@@ -58,6 +58,10 @@ final class WebhookHandler
 
         $emojiReply = $update->callbackData === null ? $this->emojiReplies->execute($update) : null;
 
+        if ($emojiReply === null && $update->sticker !== null) {
+            return ['text' => __('Сначала ответьте на вопрос о настроении, затем отправьте стикер.')];
+        }
+
         return $emojiReply ?? $this->login->execute($update);
     }
 }

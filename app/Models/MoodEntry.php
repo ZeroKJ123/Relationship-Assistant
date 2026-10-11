@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Enums\MoodLevel;
 use App\Enums\MoodSource;
+use App\Enums\MoodStickerFormat;
+use App\Enums\MoodStickerStatus;
 use Carbon\CarbonImmutable;
 use Database\Factories\MoodEntryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +15,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property ?string $sticker_path
+ * @property ?MoodStickerFormat $sticker_format
+ * @property ?MoodStickerStatus $sticker_status
  * @property ?string $emoji
  * @property int $id
  * @property int $couple_id
@@ -47,6 +52,6 @@ final class MoodEntry extends Model
     /** @return array<string,string> */
     protected function casts(): array
     {
-        return ['couple_id' => 'integer', 'user_id' => 'integer', 'level' => MoodLevel::class, 'source' => MoodSource::class, 'mood_prompt_id' => 'integer', 'recorded_at' => 'immutable_datetime'];
+        return ['sticker_format' => MoodStickerFormat::class, 'sticker_status' => MoodStickerStatus::class, 'couple_id' => 'integer', 'user_id' => 'integer', 'level' => MoodLevel::class, 'source' => MoodSource::class, 'mood_prompt_id' => 'integer', 'recorded_at' => 'immutable_datetime'];
     }
 }

@@ -1,5 +1,7 @@
+import { initializeMood } from './modules/mood.js';
+import { initializeRealtime } from './modules/realtime.js';
 import { initializeMovies } from './modules/movies.js';
-import { initializePwa } from './modules/pwa.js';
+import { initializePwa, initializeOfflineForms } from './modules/pwa.js';
 import { initializeDuties } from './modules/duties.js';
 import { initializeWishlist } from './modules/wishlist.js';
 import { initializeProductPhotos } from './modules/photos.js';
@@ -8,16 +10,23 @@ import { initializeDishes } from './modules/dishes.js';
 import { initializeRequests } from './modules/requests.js';
 import { initializeDialogs, initializeTabs } from './modules/dialogs.js';
 
-initializeMovies(document);
+function initializeInterface(root) {
+    initializeOfflineForms(root);
+    initializeMovies(root);
+    initializeDialogs(root);
+    initializeTabs(root);
+    initializeDashboard(root);
+    initializeDishes(root);
+    initializeRequests(root);
+    initializeDuties(root);
+    initializeWishlist(root);
+    initializeProductPhotos(root);
+    initializeMood(root);
+    lockForms(root);
+}
 initializePwa(document);
-initializeDialogs(document);
-initializeTabs(document);
-initializeDashboard(document);
-initializeDishes(document);
-initializeRequests(document);
-initializeDuties(document);
-initializeWishlist(document);
-initializeProductPhotos(document);
+initializeInterface(document);
+initializeRealtime(document, initializeInterface);
 
 function unlockForms() {
     document.querySelectorAll('[data-submit-lock]').forEach((form) => {
@@ -26,7 +35,10 @@ function unlockForms() {
         form.querySelectorAll('button[type="submit"]').forEach((button) => { button.disabled = false; });
     });
 }
-document.querySelectorAll('[data-submit-lock]').forEach((form) => {
+function lockForms(root) {
+root.querySelectorAll('[data-submit-lock]').forEach((form) => {
+    if (form.dataset.lockInitialized) return;
+    form.dataset.lockInitialized = 'true';
     form.addEventListener('submit', (event) => {
         if (event.defaultPrevented) { return; }
         if (form.dataset.submitting === 'true') { event.preventDefault(); return; }
@@ -43,4 +55,5 @@ document.querySelectorAll('[data-submit-lock]').forEach((form) => {
         form.querySelectorAll('button[type="submit"]').forEach((button) => { button.disabled = true; });
     });
 });
+}
 window.addEventListener('pageshow', unlockForms);

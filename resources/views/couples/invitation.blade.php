@@ -20,6 +20,6 @@
     @else
         <p>{{ __('Приглашение уже использовано, отменено или срок его действия истёк. Попросите партнёра выпустить новую ссылку.') }}</p>
     @endif
-    <p class="form-footer"><a href="{{ route('couples.index') }}">{{ __('Мои пары') }}</a></p>
+    <p class="form-footer"></p>
 </x-card>
 @endsection

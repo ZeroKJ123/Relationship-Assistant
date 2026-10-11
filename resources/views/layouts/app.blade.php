@@ -9,19 +9,24 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="{{ __('Наша пара') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @auth @if(config('realtime.enabled'))
+    <meta name="realtime-key" content="{{ config('broadcasting.connections.reverb.key') }}">
+    <meta name="realtime-port" content="{{ config('realtime.public_port') }}">
+    @endif @endauth
     <title>@yield('title', __('Наша пара'))</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body data-authenticated="{{ auth()->check() ? 'true' : 'false' }}">
+<body data-user-id="{{ auth()->id() }}" data-authenticated="{{ auth()->check() ? 'true' : 'false' }}">
     <a class="skip-link" href="#main-content">{{ __('Перейти к содержимому') }}</a>
     <div class="app-shell">
         <header class="app-header">
             <a class="brand" href="{{ route('home') }}"><span aria-hidden="true">♥</span> {{ __('Наша пара') }}</a>
-            @auth<a class="pill" href="{{ route('couples.index') }}">{{ __('Мои пары') }}</a>@else<span class="pill">{{ __('Начало истории') }}</span>@endauth
+            @guest<span class="pill">{{ __('Начало истории') }}</span>@endguest
         </header>
         <p class="connection-status" role="status" tabindex="-1" data-connection-status hidden>{{ __('Нет соединения. Действия требуют интернета. Если связь пропала после отправки, проверьте результат после подключения.') }}</p>
         <main id="main-content" tabindex="-1">@yield('content')</main>
         @yield('navigation')
     </div>
+    <div class="toast" role="status" aria-live="polite" hidden data-toast @if(session('toast')) data-initial-message="{{ session('toast') }}" @endif></div>
 </body>
 </html>

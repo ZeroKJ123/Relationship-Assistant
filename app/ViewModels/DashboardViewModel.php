@@ -31,5 +31,6 @@ final readonly class DashboardViewModel
         public bool $isAgreementPending,
         public ?string $togetherDuration = null,
         public ?MoodPrompt $pendingMoodPrompt = null,
+        public bool $hasCar = false,
     ) {}
 }

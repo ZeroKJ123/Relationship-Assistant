@@ -8,6 +8,7 @@ use App\Actions\Profiles\UpdateProfile;
 use App\Enums\Currency;
 use App\Enums\Gender;
 use App\Http\Requests\UpdateProfileRequest;
+use App\Models\Car;
 use App\Models\Couple;
 use App\Models\CoupleMember;
 use App\Models\User;
@@ -42,7 +43,7 @@ final class ProfileController extends Controller
         $username = config('services.telegram.bot_username');
         $botUrl = is_string($username) && preg_match('/^[A-Za-z0-9_]{5,32}$/D', $username) === 1 ? sprintf('https://t.me/%s', $username) : null;
 
-        return view('profile.show', ['user' => $user, 'couple' => $couple, 'currencies' => Currency::cases(), 'recoveryCodes' => $codes, 'pendingInvitationUrl' => $invitationUrl, 'hasTelegram' => $user->telegramAccount()->exists(), 'telegramLinkAvailable' => $this->bot->isEnabled(), 'telegramBotUrl' => $botUrl]);
+        return view('profile.show', ['cars' => Car::query()->where('user_id', $user->id)->orderBy('id')->limit(10)->get(), 'user' => $user, 'couple' => $couple, 'currencies' => Currency::cases(), 'recoveryCodes' => $codes, 'pendingInvitationUrl' => $invitationUrl, 'hasTelegram' => $user->telegramAccount()->exists(), 'telegramLinkAvailable' => $this->bot->isEnabled(), 'telegramBotUrl' => $botUrl]);
     }
 
     public function update(UpdateProfileRequest $request): RedirectResponse

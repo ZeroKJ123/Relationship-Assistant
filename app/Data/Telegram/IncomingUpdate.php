@@ -6,7 +6,7 @@ namespace App\Data\Telegram;
 
 final readonly class IncomingUpdate
 {
-    public function __construct(public int $updateId, public string $telegramId, public string $name, public ?string $text, public ?string $callbackData, public ?string $callbackId) {}
+    public function __construct(public int $updateId, public string $telegramId, public string $name, public ?string $text, public ?string $callbackData, public ?string $callbackId, public ?IncomingSticker $sticker = null) {}
 
     /** @param array<string, mixed> $payload */
     public static function fromArray(array $payload): ?self
@@ -31,6 +31,6 @@ final readonly class IncomingUpdate
         $callbackData = is_array($callback) ? ($callback['data'] ?? null) : null;
         $callbackId = is_array($callback) ? ($callback['id'] ?? null) : null;
 
-        return new self($updateId, (string) $actorId, is_string($name) ? mb_substr(trim($name), 0, 80) : '', is_string($text) ? $text : null, is_string($callbackData) ? $callbackData : null, is_string($callbackId) ? $callbackId : null);
+        return new self($updateId, (string) $actorId, is_string($name) ? mb_substr(trim($name), 0, 80) : '', is_string($text) ? $text : null, is_string($callbackData) ? $callbackData : null, is_string($callbackId) ? $callbackId : null, ! is_array($callback) && is_array($message['sticker'] ?? null) ? IncomingSticker::fromArray($message['sticker']) : null);
     }
 }

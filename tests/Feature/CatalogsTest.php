@@ -46,13 +46,13 @@ it('seeds the agreed catalogs idempotently without creating duties or heart oper
     expect(HeartTransaction::query()->count())->toBe(0);
     $pair = AgreementScenario::create();
     $this->asUser($pair->first)->get(route('catalogs.index'))->assertOk()->assertSee('Транспорт и поездки');
-    $this->get(route('catalogs.index', ['templates_page' => 2]))->assertOk()->assertSee('Посмотреть все присланные TikTok');
+    $this->get(route('catalogs.index', ['templates_page' => 2]))->assertOk()->assertDontSee('Посмотреть все присланные TikTok');
 });
-it('prefills a template and saves catalog snapshots without letting a later rename alter the request', function (): void {
+it('hides legacy templates while preserving catalog snapshots against later renames', function (): void {
     $this->seed(CatalogSeeder::class);
     $pair = AgreementScenario::create();
     $template = RequestTemplate::query()->where('code', 'watch-tiktok')->sole();
-    $this->asUser($pair->first)->get(route('requests.create', ['couple' => $pair->couple, 'request_template_id' => $template->id]))->assertOk()->assertSee('Посмотреть все присланные TikTok');
+    $this->asUser($pair->first)->get(route('requests.create', ['couple' => $pair->couple, 'request_template_id' => $template->id]))->assertOk()->assertDontSee('Посмотреть все присланные TikTok');
     $data = new NewRequestData(type: RequestType::Service, description: 'Видео за эту неделю', dueAt: CarbonImmutable::now()->addDays(3), templateId: $template->id);
     $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, $data);
     expect($request->template_name)->toBe('Посмотреть все присланные TikTok');

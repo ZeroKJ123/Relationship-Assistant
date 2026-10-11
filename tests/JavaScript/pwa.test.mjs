@@ -145,7 +145,7 @@ it('asset eviction preserves the offline page and the most recent fifty files', 
     assert.equal(urls.has(`${origin}/build/assets/app-abcdefgh54.js`), true);
 });
 
-const moduleSource = (await readFile(new URL('../../resources/js/modules/pwa.js', import.meta.url), 'utf8')).replace('export function', 'function').replaceAll('import.meta.env.DEV', 'false');
+const moduleSource = (await readFile(new URL('../../resources/js/modules/pwa.js', import.meta.url), 'utf8')).replaceAll('export function', 'function').replaceAll('import.meta.env.DEV', 'false');
 
 function page({ online = true, authenticated = false, standalone = false } = {}) {
     const events = new Map();

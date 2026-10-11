@@ -1,6 +1,11 @@
+const dutyLifecycles = new Set();
+
 export function initializeDuties(root) {
+    for (const item of dutyLifecycles) { if (!item.form.isConnected) { item.controller.abort(); dutyLifecycles.delete(item); } }
     if (typeof HTMLDialogElement === 'undefined') return;
     root.querySelectorAll('[data-duty-confirmation]').forEach((form) => {
+        if (form.dataset.dutiesInit1) return;
+        form.dataset.dutiesInit1 = 'true';
         const checkbox = form.elements.namedItem('confirmation');
         const content = form.querySelector('[data-duty-confirmation-content]');
         if (!checkbox || !content) return;
@@ -37,10 +42,12 @@ export function initializeDuties(root) {
             if (!approved) checkbox.checked = false;
             submitter?.focus();
         });
+        const controller = new AbortController();
+        dutyLifecycles.add({ form, controller });
         window.addEventListener('pageshow', () => {
             approved = false;
             checkbox.checked = false;
             dialog.querySelector('[data-duty-send]').disabled = false;
-        });
+        }, { signal: controller.signal });
     });
 }

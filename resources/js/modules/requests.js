@@ -1,5 +1,7 @@
 export function initializeRequests(root) {
     root.querySelectorAll('[data-condition-form]').forEach((form) => {
+        if (form.dataset.requestsInit1) return;
+        form.dataset.requestsInit1 = 'true';
         const type = form.elements.namedItem('condition_type');
         const method = form.elements.namedItem('settlement_method_id');
         if (!type || !method) return;
@@ -48,6 +50,8 @@ export function initializeRequests(root) {
         updateFields(false);
     });
     root.querySelectorAll('[data-request-editor]').forEach((form) => {
+        if (form.dataset.requestsInit2) return;
+        form.dataset.requestsInit2 = 'true';
         const type = form.elements.namedItem('type');
         if (!type || type.type === 'hidden') return;
         function updateRequestFields() {

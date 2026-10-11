@@ -15,7 +15,7 @@ function editor(value = 'service') {
         '[data-request-very-wanted]': { hidden: false },
         '[data-request-rating-hint]': { hidden: true },
     };
-    const form = { elements: { namedItem(name) { return fields[name]; } }, querySelector(selector) { return groups[selector]; } };
+    const form = { dataset: {}, elements: { namedItem(name) { return fields[name]; } }, querySelector(selector) { return groups[selector]; } };
     initializeRequests({ querySelectorAll(selector) { return selector === '[data-request-editor]' ? [form] : []; } });
     return { fields, groups, change(value) { fields.type.value = value; events.change(); } };
 }

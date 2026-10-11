@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\MoodController;
+use App\Http\Controllers\MoodStickerController;
 use App\Http\Controllers\PartnerMoodPromptController;
 use App\Http\Controllers\PartnerReminderController;
 use App\Http\Middleware\EnsureCoupleAccess;
@@ -19,3 +20,5 @@ Route::middleware(['auth', 'auth.session', EnsureCoupleAccess::class])->prefix('
     Route::post('reminders', [PartnerReminderController::class, 'store'])->middleware('throttle:couple-actions')->name('reminders.store');
     Route::delete('reminders/{partnerReminder}', [PartnerReminderController::class, 'destroy'])->whereNumber('partnerReminder')->middleware('throttle:couple-actions')->name('reminders.destroy');
 });
+
+Route::get('moods/{moodEntry}/sticker', MoodStickerController::class)->whereNumber('moodEntry')->middleware(['auth', 'auth.session'])->name('mood.sticker');

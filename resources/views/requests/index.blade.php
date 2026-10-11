@@ -1,7 +1,6 @@
 @extends('layouts.app')
 @section('title', __('Наши просьбы'))
 @section('content')
-@can('update',$couple)<a class="button button--quiet section-space" href="{{ route('money.create',$couple) }}">{{ __('Попросить деньги') }}</a>@endcan
 <x-card class="start-card">
 <h1 class="screen-title">{{ __('Наши просьбы') }}</h1>
 <p>{{ __('Ответ и встречное условие сохраняются отдельно от выполнения.') }}</p>
@@ -22,7 +21,7 @@
 </x-card>
 @endforelse
 {{ $requests->links() }}
-<a class="button button--quiet section-space" href="{{ route('couples.show',$couple) }}">{{ __('Наша пара') }}</a>
+
 @endsection
 
 @section('navigation')<x-bottom-navigation :couple="$couple" />@endsection

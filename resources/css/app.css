@@ -17,7 +17,7 @@
 :root { --shadow-card: 0 8px 26px #5223950c; --shadow-button: 0 5px 14px #7035ce26; --touch-target: 44px; }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
-body { margin: 0; color: var(--color-ink); font-family: var(--font-sans); line-height: 1.6; background: radial-gradient(ellipse at 90% 8%, #d9c7ff 0, transparent 35%), radial-gradient(ellipse at 5% 45%, #fff9de 0, transparent 28%), #f4eeff; }
+body { margin: 0; color: var(--color-ink); font-family: var(--font-sans); line-height: 1.6; background: #f1eaff url('/images/clouds-hearts-v1.png') center top / max(100%, 700px) auto repeat-y; background-attachment: fixed; }
 button, input { font: inherit; }
 a { color: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -183,3 +183,29 @@ p { color: var(--color-muted); }
 .partner-mood { display: grid; gap: .5rem; }
 .partner-mood__emoji { font-size: 3rem; line-height: 1.2; }
 .partner-mood__level { font-size: 1.5rem; font-weight: 800; }
+
+.illustration { display: inline-block; width: 5rem; height: 5rem; flex-shrink: 0; background-image: url('/images/love-icons-v1.png'); background-repeat: no-repeat; background-size: 300% 300%; }
+.illustration--kitchen { background-position: 0% 0%; }
+.illustration--request { background-position: 50% 0%; }
+.illustration--date { background-position: 100% 0%; }
+.illustration--gift { background-position: 0% 50%; }
+.illustration--movies { background-position: 50% 50%; }
+.illustration--car { background-position: 100% 50%; }
+.illustration--rating { background-position: 0% 100%; }
+.illustration--home { background-position: 50% 100%; }
+.illustration--bell { background-position: 100% 100%; }
+.bottom-navigation .illustration, .bottom-navigation .avatar { width: 2.2rem; height: 2.2rem; margin-bottom: .2rem; }
+.bottom-navigation .avatar { border-radius: 50%; object-fit: cover; font-size: 1rem; }
+.mood-card { margin: 0; padding: 0; overflow: hidden; }
+.mood-card__button { display: flex; width: 100%; height: 100%; flex-direction: column; align-items: flex-start; gap: .5rem; border: 0; padding: 1.1rem; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.mood-card__button:disabled { cursor: default; }
+.mood-card__button:hover:not(:disabled) { background: #ffffff33; }
+.mood-card__heading { font-weight: 900; font-size: clamp(1rem, 3.5vw, 1.4rem); line-height: 1.3; }
+.mood-card .partner-mood__level { font-size: clamp(1.15rem, 4.5vw, 1.7rem); font-weight: 900; line-height: 1.25; color: var(--color-violet); }
+.mood-card__time, .mood-card__hint { font-size: .75rem; color: var(--color-muted); }
+.mood-sticker { display: inline-block; width: 4rem; height: 4rem; flex-shrink: 0; object-fit: contain; vertical-align: middle; }
+.toast { position: fixed; left: 50%; bottom: calc(6rem + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 100; max-width: calc(100% - 2rem); padding: .8rem 1.2rem; border-radius: 1.2rem; background: var(--color-ink); color: white; box-shadow: var(--shadow-card); text-align: center; font-size: .9rem; pointer-events: none; }
+.advanced-settings > summary { cursor: pointer; font-weight: 800; }
+@media (max-width: 380px) { .mood-card__button { padding: .8rem; }.partner-mood { flex-wrap: wrap; }.mood-sticker { width: 3rem; height: 3rem; } }
+
+.dashboard-summary .mood-card { padding: 0; }

@@ -10,8 +10,8 @@
         @csrf
         <input type="hidden" name="operation_key" value="{{ old('operation_key', $operationKey) }}">
         <x-textarea-field name="text" :label="__('Текст напоминания')" :value="old('text')" :error="$errors->first('text')" maxlength="2000" rows="4" required />
-        <x-field name="due_at" :label="__('Когда напомнить')" type="datetime-local" :value="old('due_at')" :error="$errors->first('due_at')" aria-describedby="due-at-hint" required />
-        <p class="field-hint" id="due-at-hint">{{ __('Часовой пояс: :zone', ['zone' => $couple->timezone]) }}</p>
+        <x-field name="due_at" :label="__('Когда напомнить')" type="datetime-local" :value="old('due_at')" :error="$errors->first('due_at')"  required />
+
         <x-card tone="yellow"><p>{{ __('Запись сохранится в приложении. Доставка в Telegram требует подключённого чата партнёра и работающей отправки уведомлений. Запланировано — ещё не значит доставлено. Опоздавшие больше чем на сутки напоминания не отправляются.') }}</p></x-card>
         <label class="confirmation-check"><input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю текст и время') }}</label>
         <x-button type="submit">{{ __('Запланировать') }}</x-button>

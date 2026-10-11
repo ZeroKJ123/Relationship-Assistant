@@ -31,7 +31,7 @@ it('defaults ordinary requests to a service and keeps the optional settings fold
     $xpath = new DOMXPath($document);
     expect($xpath->query('//select[@name="type"]/option[@selected]')->item(0)?->getAttribute('value'))->toBe('service');
     expect($xpath->query('//input[@name="heart_price"]/ancestor::details[not(@open)]')->length)->toBe(1);
-    expect($xpath->query('//select[@name="type"]/option[@value="guests" or @value="event"]')->length)->toBe(0);
+    expect($xpath->query('//select[@name="type"]/option[@value="guests" or @value="event"]')->length)->toBe(2);
     $this->get(route('requests.create', [$pair->couple, 'type' => 'rating']))->assertViewHas('selectedType', 'rating');
 });
 

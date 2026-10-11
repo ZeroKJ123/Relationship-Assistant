@@ -1,5 +1,7 @@
 export function initializeMovies(root) {
     root.querySelectorAll('[data-movie-swipe]').forEach((card) => {
+        if (card.dataset.moviesInit1) return;
+        card.dataset.moviesInit1 = 'true';
         let start = null;
         card.addEventListener('pointerdown', (event) => {
             if (!event.isPrimary || event.target.closest('button,input,a,label')) return;

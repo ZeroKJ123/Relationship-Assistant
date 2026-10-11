@@ -37,6 +37,7 @@ return [
     */
 
     'disks' => [
+        'mood_stickers' => ['driver' => 'local', 'root' => storage_path('app/private/mood-stickers'), 'serve' => false, 'throw' => true, 'report' => false],
         'catalog_photos' => ['driver' => 'local', 'root' => storage_path('app/private/catalog-photos'), 'serve' => false, 'throw' => true, 'report' => false],
 
         'local' => [

@@ -8,11 +8,10 @@
     <form method="post" action="{{ route('invitations.store') }}" class="form-stack" data-submit-lock>
         @csrf
         <x-field name="started_on" type="date" :label="__('Вместе с')" :value="old('started_on')" :error="$errors->first('started_on')" required />
-        <x-field name="timezone" :label="__('Часовой пояс')" :value="old('timezone', $defaultTimezone)" :error="$errors->first('timezone')" required maxlength="64" aria-describedby="zone-help" />
-        <p id="zone-help" class="field-hint">{{ __('Например, Europe/Minsk или Asia/Almaty. Он определяет даты вашей пары.') }}</p>
+        <input type="hidden" name="timezone" value="{{ $defaultTimezone }}">
         @error('couple')<p class="field-error" role="alert">{{ $message }}</p>@enderror
         <x-button type="submit">{{ __('Создать ссылку') }}</x-button>
     </form>
-    <p class="form-footer"><a href="{{ route('couples.index') }}">{{ __('Мои пары') }}</a></p>
+    <p class="form-footer"></p>
 </x-card>
 @endsection

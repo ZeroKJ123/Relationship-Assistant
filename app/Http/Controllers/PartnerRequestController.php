@@ -57,7 +57,7 @@ final class PartnerRequestController extends Controller
             return redirect()->route('dates.create', [$couple, 'request_template_id' => $preset->id]);
         }
 
-        return view('requests.create', ['dish' => $dish, 'preset' => $preset, 'templates' => RequestTemplate::query()->where('type', '!=', RequestType::Money)->with('category')->orderBy('sort_order')->get(), 'expenses' => ExpenseCategory::query()->orderBy('sort_order')->get(), 'couple' => $couple, 'types' => [RequestType::Service, RequestType::Gift, RequestType::Food, RequestType::Rating], 'selectedType' => $request->query('type') === 'rating' ? RequestType::Rating->value : ($preset?->type->value ?? RequestType::Service->value), 'defaultDueAt' => CarbonImmutable::now($couple->timezone)->addDay()->format('Y-m-d\\TH:i'), 'operationKey' => Str::uuid()->toString()]);
+        return view('requests.create', ['dish' => $dish, 'preset' => $preset, 'expenses' => ExpenseCategory::query()->orderBy('sort_order')->get(), 'couple' => $couple, 'selectedType' => in_array($request->query('type'), ['service', 'gift', 'food', 'rating'], true) ? $request->query('type') : RequestType::Service->value, 'defaultDueAt' => CarbonImmutable::now($couple->timezone)->addDay()->format('Y-m-d\\TH:i'), 'operationKey' => Str::uuid()->toString()]);
     }
 
     public function store(StorePartnerRequest $request, Couple $couple): RedirectResponse

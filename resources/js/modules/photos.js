@@ -1,5 +1,10 @@
+const photoLifecycles = new Set();
+
 export function initializeProductPhotos(root) {
+    for (const item of photoLifecycles) { if (!item.form.isConnected) { item.release(); item.controller.abort(); photoLifecycles.delete(item); } }
     root.querySelectorAll('[data-product-photo]').forEach((container) => {
+        if (container.dataset.photosInit1) return;
+        container.dataset.photosInit1 = 'true';
         const image = container.querySelector('img');
         const fallback = container.querySelector('[data-photo-fallback]');
         if (!image || !fallback) return;
@@ -11,6 +16,8 @@ export function initializeProductPhotos(root) {
 
 export function initializePhotoEditors(root, selector) {
     root.querySelectorAll(selector).forEach((form) => {
+        if (form.dataset.photosInit2) return;
+        form.dataset.photosInit2 = 'true';
         const photo = form.elements.namedItem('photo');
         const status = form.querySelector('[data-photo-status]');
         const preview = form.querySelector('[data-photo-preview]');
@@ -44,6 +51,8 @@ export function initializePhotoEditors(root, selector) {
             photo.setCustomValidity(status.textContent);
             releasePreview();
         });
-        window.addEventListener('pagehide', releasePreview);
+        const controller = new AbortController();
+        photoLifecycles.add({ form, controller, release: releasePreview });
+        window.addEventListener('pagehide', releasePreview, { signal: controller.signal });
     });
 }

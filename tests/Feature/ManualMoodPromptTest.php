@@ -38,11 +38,11 @@ afterEach(function (): void {
 it('asks only the partner and reuses the pending request without duplicate delivery', function (): void {
     $pair = AgreementScenario::create();
     app(SetMoodSchedule::class)->execute($pair->second, $pair->couple, false, 0);
-    $this->asUser($pair->first)->post(route('mood.prompts.store', $pair->couple), ['user_id' => $pair->first->id])->assertRedirect(route('home'))->assertSessionHas('status', 'Запрос настроения создан. Уведомление будет отправлено в подключённый Telegram партнёра.');
+    $this->asUser($pair->first)->post(route('mood.prompts.store', $pair->couple), ['user_id' => $pair->first->id])->assertRedirect(route('home'))->assertSessionHas('toast', 'Запрос отправлен');
     $prompt = MoodPrompt::query()->sole();
     expect($prompt->user_id)->toBe($pair->second->id)->and($prompt->is_manual)->toBeTrue();
     CarbonImmutable::setTestNow(CarbonImmutable::now()->addSeconds(RequestPartnerMood::RESEND_COOLDOWN_SECONDS - 1));
-    $this->post(route('mood.prompts.store', $pair->couple))->assertRedirect(route('home'))->assertSessionHas('status', 'Запрос уже создан. Отправить его повторно можно через минуту после предыдущего нажатия.');
+    $this->post(route('mood.prompts.store', $pair->couple))->assertRedirect(route('home'))->assertSessionHas('toast', 'Запрос уже отправлен. Повторить можно через минуту.');
     expect(MoodPrompt::query()->count())->toBe(1)->and(NotificationDelivery::query()->where('kind', NotificationKind::MoodPrompt)->count())->toBe(1);
     $delivery = NotificationDelivery::query()->sole();
     expect(app(DeliveryContent::class)->getText($delivery))->toContain('Партнёр хочет узнать ваше настроение')->not->toContain('http');

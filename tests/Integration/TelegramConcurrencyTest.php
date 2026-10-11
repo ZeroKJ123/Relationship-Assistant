@@ -64,7 +64,7 @@ it('deduplicates concurrent callback updates atomically with the shared request 
     $pair = AgreementScenario::create();
     $account = TelegramAccount::factory()->create(['user_id' => $pair->second->id]);
     $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(RequestType::Service, 'Race request', CarbonImmutable::tomorrow()));
-    $action = TelegramCallbackAction::factory()->create(['telegram_account_id' => $account->id, 'couple_id' => $pair->couple->id, 'source_id' => $request->id, 'source_version' => 0, 'stage' => TelegramActionStage::Confirm, 'operation' => TelegramOperation::Agree]);
+    $action = TelegramCallbackAction::factory()->create(['telegram_account_id' => $account->id, 'couple_id' => $pair->couple->id, 'source_id' => $request->id, 'source_version' => 0, 'stage' => TelegramActionStage::Ready, 'operation' => TelegramOperation::Agree]);
     $action->forceFill(['token_hash' => hash('sha256', str_pad((string) $action->id, 40, 'x'))])->save();
     $arguments = [(string) $pair->second->id, (string) $pair->couple->id, 'telegram_callback', (string) $action->id, '987654'];
     $results = (new ConcurrentOperations)->run('agreement-worker.php', [$arguments, $arguments]);
@@ -75,7 +75,7 @@ it('serializes website and bot responses without duplicate duties or events', fu
     $pair = AgreementScenario::create();
     $account = TelegramAccount::factory()->create(['user_id' => $pair->second->id]);
     $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(RequestType::Service, 'Race request', CarbonImmutable::tomorrow()));
-    $action = TelegramCallbackAction::factory()->create(['telegram_account_id' => $account->id, 'couple_id' => $pair->couple->id, 'source_id' => $request->id, 'source_version' => 0, 'stage' => TelegramActionStage::Confirm, 'operation' => TelegramOperation::Agree]);
+    $action = TelegramCallbackAction::factory()->create(['telegram_account_id' => $account->id, 'couple_id' => $pair->couple->id, 'source_id' => $request->id, 'source_version' => 0, 'stage' => TelegramActionStage::Ready, 'operation' => TelegramOperation::Agree]);
     $action->forceFill(['token_hash' => hash('sha256', str_pad((string) $action->id, 40, 'x'))])->save();
     (new ConcurrentOperations)->run('agreement-worker.php', [[(string) $pair->second->id, (string) $pair->couple->id, 'telegram_callback', (string) $action->id, '987655'], [(string) $pair->second->id, (string) $pair->couple->id, 'request_agree', (string) $request->id, '0']]);
     expect($request->refresh()->status)->toBe(RequestStatus::Accepted)->and($request->version)->toBe(1)->and($request->duties()->count())->toBe(1)->and($request->events()->count())->toBe(2);

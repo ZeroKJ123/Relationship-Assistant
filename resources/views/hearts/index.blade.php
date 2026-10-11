@@ -29,7 +29,7 @@
     @empty<p>{{ __('История пока пуста.') }}</p>@endforelse
 </x-card>
 {{ $history->links() }}
-<a class="button button--quiet section-space" href="{{ route('couples.index') }}">{{ __('Мои пары') }}</a>
+
 @endsection
 
 @section('navigation')<x-bottom-navigation :couple="$couple" />@endsection

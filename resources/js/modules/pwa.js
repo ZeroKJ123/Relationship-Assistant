@@ -4,15 +4,7 @@ export function initializePwa(root) {
     updateConnection();
     window.addEventListener('online', updateConnection);
     window.addEventListener('offline', updateConnection);
-    root.querySelectorAll('form[method="post"]').forEach((form) => {
-        form.addEventListener('submit', (event) => {
-            if (navigator.onLine) { return; }
-            event.preventDefault();
-            updateConnection();
-            banner?.scrollIntoView({ block: 'center' });
-            banner?.focus();
-        });
-    });
+    initializeOfflineForms(root);
     if (root.body?.dataset.authenticated === 'true') {
         window.addEventListener('pagehide', () => { root.body.hidden = true; });
         window.addEventListener('pageshow', (event) => {
@@ -57,4 +49,20 @@ export function initializePwa(root) {
             if (import.meta.env.DEV) { console.debug('pwa.update_found'); }
         });
     }).catch(() => { console.warn('pwa.registration_failed'); });
+}
+
+const offlineForms = new WeakSet();
+export function initializeOfflineForms(root) {
+    const banner = root.querySelector('[data-connection-status]');
+    root.querySelectorAll('form[method="post"]').forEach((form) => {
+        if (offlineForms.has(form)) return;
+        offlineForms.add(form);
+        form.addEventListener('submit', (event) => {
+            if (navigator.onLine) { return; }
+            event.preventDefault();
+            if (banner) banner.hidden = false;
+            banner?.scrollIntoView({ block: 'center' });
+            banner?.focus();
+        });
+    });
 }

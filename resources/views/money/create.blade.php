@@ -9,7 +9,8 @@
     <x-form-feedback />
     <form method="post" action="{{ route('money.store', $couple) }}" class="form-stack" data-submit-lock>
         @csrf
-        <input type="hidden" name="request_template_id" value="{{ old('request_template_id', $preset?->id) }}">
+        <x-request-topic :couple="$couple" selected="money" />
+        id) }}">
         <input type="hidden" name="operation_key" value="{{ old('operation_key', $operationKey) }}">
         <fieldset class="settings-group">
             <legend>{{ __('Сумма и назначение') }}</legend>
@@ -28,13 +29,13 @@
         </fieldset>
         <fieldset class="settings-group">
             <legend>{{ __('Срок') }}</legend>
-            <x-field name="due_at" :label="__('Оплатить до')" type="datetime-local" :value="old('due_at', '')" :error="$errors->first('due_at')" aria-describedby="due-at-hint" required />
-            <p class="field-hint" id="due-at-hint">{{ __('Часовой пояс: :zone', ['zone' => $couple->timezone]) }}</p>
+            <x-field name="due_at" :label="__('Оплатить до')" type="datetime-local" :value="old('due_at', '')" :error="$errors->first('due_at')"  required />
+
         </fieldset>
         <label class="confirmation-check"><input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю сумму, валюту и срок') }}</label>
         <x-button type="submit">{{ __('Отправить запрос денег') }}</x-button>
     </form>
 </x-card>
-<a class="button button--quiet section-space" href="{{ route('requests.index', $couple) }}">{{ __('Все просьбы') }}</a>
+
 @endsection
 @section('navigation')<x-bottom-navigation :couple="$couple" />@endsection

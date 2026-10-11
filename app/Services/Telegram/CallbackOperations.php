@@ -42,7 +42,7 @@ final class CallbackOperations
         }
         if ($action->source_kind === 'mood_emoji') {
             $entry = MoodEntry::query()->whereKey($action->source_id)->where('couple_id', $couple->id)->where('user_id', $actor->id)->lockForUpdate()->firstOrFail();
-            if ($entry->emoji !== null || MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->where('id', '>', $entry->id)->exists()) {
+            if ($entry->emoji !== null || $entry->sticker_status !== null || MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->where('id', '>', $entry->id)->exists()) {
                 $this->deny();
             }
 

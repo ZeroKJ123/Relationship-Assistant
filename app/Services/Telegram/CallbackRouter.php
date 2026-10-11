@@ -14,13 +14,10 @@ use App\Models\TelegramCallbackAction;
 use App\Models\User;
 use App\Services\Requests\RequestContext;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 final class CallbackRouter
 {
-    private const CONFIRMATION_MINUTES = 10;
-
     public function __construct(private readonly RequestContext $context, private readonly CallbackOperations $operations, private readonly KeyboardFactory $keyboards) {}
 
     /** @return array<string, mixed> */
@@ -56,11 +53,7 @@ final class CallbackRouter
             return ['text' => __('Действие отменено.')];
         }
         $this->operations->requireCurrent($action, $actor, $couple);
-        $isMood = in_array($action->source_kind, ['mood', 'mood_emoji'], true);
-        if ($action->stage === TelegramActionStage::Ready && ! $isMood) {
-            return $this->askConfirmation($action);
-        }
-        if ($action->stage !== TelegramActionStage::Confirm && ! ($isMood && $action->stage === TelegramActionStage::Ready)) {
+        if (! in_array($action->stage, [TelegramActionStage::Ready, TelegramActionStage::Confirm], true)) {
             $this->deny('invalid_stage');
         }
         $this->operations->execute($action, $actor, $couple);
@@ -70,25 +63,13 @@ final class CallbackRouter
         if ($action->source_kind === 'mood') {
             $entry = MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->where('operation_key', $action->operation_key)->sole();
 
-            return ['text' => __('Настроение сохранено. Напишите в ответ один эмоджи, который подробнее описывает ваше настроение. Чтобы пропустить, отправьте /skip.'), 'reply_markup' => $this->keyboards->createMoodEmoji($entry, $currentAccount)];
+            return ['text' => __('Настроение сохранено. Ответьте одним эмоджи или стикером, который подробнее описывает ваше настроение. Чтобы пропустить, отправьте /skip.'), 'reply_markup' => $this->keyboards->createMoodEmoji($entry, $currentAccount)];
         }
         if ($action->source_kind === 'mood_emoji') {
             return ['text' => $action->operation === TelegramOperation::MoodEmojiSkip ? __('Настроение сохранено без эмоджи.') : __('Эмоджи сохранён и виден партнёру.')];
         }
 
         return ['text' => __('Готово. Результат сохранён в приложении.')];
-    }
-
-    /** @return array<string, mixed> */
-    private function askConfirmation(TelegramCallbackAction $action): array
-    {
-        $token = Str::random(KeyboardFactory::TOKEN_LENGTH);
-        $confirmation = $action->replicate();
-        $confirmation->forceFill(['token_hash' => hash('sha256', $token), 'stage' => TelegramActionStage::Confirm, 'expires_at' => min($action->expires_at, now()->toImmutable()->addMinutes(self::CONFIRMATION_MINUTES))])->save();
-        $action->forceFill(['stage' => TelegramActionStage::Awaiting])->save();
-        Log::debug('telegram.action_confirmation_requested', ['action_id' => $action->id, 'confirmation_id' => $confirmation->id]);
-
-        return ['text' => sprintf('%s: «%s»? %s', __('Подтвердить действие'), $action->operation->label(), __('Применятся обычные правила, награды и штрафы приложения.')), 'reply_markup' => ['inline_keyboard' => [[['text' => __('Подтвердить'), 'callback_data' => sprintf('act:%s', $token)], ['text' => __('Отмена'), 'callback_data' => sprintf('cancel:%s', $token)]]]]];
     }
 
     private function deny(string $reason): never

@@ -8,7 +8,6 @@ use App\Actions\Catalogs\CreateSettlementMethod;
 use App\Http\Requests\StoreSettlementMethodRequest;
 use App\Models\ExpenseCategory;
 use App\Models\RequestCategory;
-use App\Models\RequestTemplate;
 use App\Models\SettlementMethod;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -28,7 +27,7 @@ final class CatalogController extends Controller
         $owner = $request->user();
         abort_unless($owner instanceof User, Response::HTTP_UNAUTHORIZED);
 
-        return view('catalogs.index', ['expenses' => ExpenseCategory::query()->orderBy('sort_order')->get(), 'categories' => RequestCategory::query()->orderBy('sort_order')->get(), 'templates' => RequestTemplate::query()->with('category')->orderBy('sort_order')->paginate(self::PAGE_SIZE, ['*'], 'templates_page'), 'methods' => SettlementMethod::query()->whereNull('user_id')->orWhere('user_id', $owner->id)->orderBy('sort_order')->orderBy('id')->paginate(self::PAGE_SIZE, ['*'], 'methods_page'), 'operationKey' => Str::uuid()->toString()]);
+        return view('catalogs.index', ['expenses' => ExpenseCategory::query()->orderBy('sort_order')->get(), 'categories' => RequestCategory::query()->orderBy('sort_order')->get(), 'methods' => SettlementMethod::query()->whereNull('user_id')->orWhere('user_id', $owner->id)->orderBy('sort_order')->orderBy('id')->paginate(self::PAGE_SIZE, ['*'], 'methods_page'), 'operationKey' => Str::uuid()->toString()]);
     }
 
     public function store(StoreSettlementMethodRequest $request): RedirectResponse

@@ -72,7 +72,6 @@
         <a href="{{ route('dishes.index') }}">{{ __('Моя кухня') }} <span aria-hidden="true">→</span></a>
         <a href="{{ route('wishlist.index') }}">{{ __('Мой виш-лист') }} <span aria-hidden="true">→</span></a>
         <a href="{{ route('friends.index') }}">{{ __('Мои друзья') }} <span aria-hidden="true">→</span></a>
-        <a href="{{ route('couples.index') }}">{{ __('Мои пары') }} <span aria-hidden="true">→</span></a>
         @if($couple)
             <a href="{{ route('mood.index', $couple) }}">{{ __('Настроение и расписание') }} <span aria-hidden="true">→</span></a>
             <a href="{{ route('reminders.index', $couple) }}">{{ __('Напоминания пары') }} <span aria-hidden="true">→</span></a>
@@ -81,6 +80,21 @@
     </nav>
     <form method="post" action="{{ route('logout') }}" class="form-footer" data-submit-lock>@csrf<x-button type="submit" variant="quiet">{{ __('Выйти') }}</x-button></form>
 </x-card>
+<x-card class="auth-card"><details class="advanced-settings"><summary>{{ __('Подробные настройки') }}</summary>
+    <section class="form-stack"><h2>{{ __('Машины') }}</h2>@foreach($cars as $car)<p>{{ $car->name }} · {{ $car->fuel }}</p>@endforeach
+    <a class="button button--quiet" href="{{ route('cars.index') }}">{{ $cars->isEmpty() ? __('Добавить машину') : __('Управлять машинами') }}</a></section>
+    @if($couple)
+    <section class="form-stack"><h2>{{ __('Настройки пары') }}</h2><a href="{{ route('couples.show',$couple) }}">{{ __('Даты, приглашения и договорённости') }}</a></section>
+    @if($couple->status === \App\Enums\CoupleStatus::Active)
+    <form method="post" action="{{ route('profile.timezone',$couple) }}" class="form-stack" data-submit-lock>@csrf @method('patch')
+    <input type="hidden" name="expected_timezone" value="{{ $couple->timezone }}">
+    <x-field name="timezone" :label="__('Часовой пояс пары')" :value="old('timezone',$couple->timezone)" :error="$errors->first('timezone')" required maxlength="64" />
+    <p class="field-hint">{{ __('Например, Europe/Minsk. Определяет время встреч и напоминаний для вас обоих.') }}</p>
+    <label class="confirmation-check"><input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю изменение времени пары') }}</label>
+    <x-button type="submit" variant="quiet">{{ __('Сохранить часовой пояс') }}</x-button></form>
+    @endif
+    @else<section class="form-stack"><a href="{{ route('couples.create') }}">{{ __('Пригласить партнёра') }}</a></section>@endif
+</details></x-card>
 <x-pwa-help />
 @endsection
 @section('navigation')<x-bottom-navigation :couple="$couple" />@endsection

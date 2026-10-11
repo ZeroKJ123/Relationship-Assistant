@@ -20,17 +20,17 @@
     <x-form-feedback />
     @if($dashboard->pendingMoodPrompt?->is_manual)<x-card tone="purple" class="section-space form-stack"><p>{{ __('Партнёр спрашивает, как вы себя чувствуете.') }}</p><a class="button button--primary" href="{{ route('mood.index',$dashboard->couple) }}">{{ __('Ответить о настроении') }}</a></x-card>@endif
     <div class="dashboard-summary">
-        <x-card tone="purple" class="form-stack">
-            <h2>{{ __('Настроение партнёра') }}</h2>
-            @forelse($dashboard->latestMoods as $entry)
-                <div class="partner-mood">
-                    @if($entry->emoji)<span class="partner-mood__emoji" aria-label="{{ __('Эмоджи настроения партнёра') }}">{{ $entry->emoji }}</span>@endif
-                    <div><p class="partner-mood__level">{{ $entry->level->label() }}</p><p>{{ __('Так сейчас чувствует себя :name', ['name'=>$entry->user->name]) }}</p></div>
-                </div>
-                <p class="field-hint">{{ __('Партнёр поделился настроением :date', ['date'=>$entry->recorded_at->setTimezone($dashboard->couple->timezone)->format('d.m H:i')]) }}</p>
-            @empty<p>{{ __('Партнёр пока не поделился настроением. Спросите, как он себя чувствует.') }}</p>@endforelse
-            @if($dashboard->couple)<x-mood-request :couple="$dashboard->couple" compact />@endif
-        </x-card>
+        <form class="card card--purple mood-card" method="post" action="{{ $dashboard->couple ? route('mood.prompts.store',$dashboard->couple) : '#' }}" data-mood-request>
+            @csrf
+            <button type="submit" class="mood-card__button" @disabled(!$dashboard->partner) aria-label="{{ __('Узнать настроение партнёра') }}">
+                <span class="mood-card__heading">{{ __('Настроение партнёра') }}</span>
+                @forelse($dashboard->latestMoods as $entry)
+                    <span class="partner-mood"><x-mood-decoration :entry="$entry" /><strong class="partner-mood__level">{{ $entry->level->label() }}</strong></span>
+                    <time class="mood-card__time" datetime="{{ $entry->recorded_at->toIso8601String() }}">{{ $entry->recorded_at->setTimezone($dashboard->couple->timezone)->format('d.m.Y H:i') }}</time>
+                @empty<strong class="partner-mood__level">{{ __('Пока не известно') }}</strong>@endforelse
+                @if($dashboard->partner)<span class="mood-card__hint">{{ __('Нажмите, чтобы спросить') }}</span>@endif
+            </button>
+        </form>
         <x-card tone="yellow" class="form-stack">
             <h2>{{ __('Мои сердечки') }}</h2><a class="wallet-total" href="{{ route('hearts.index') }}" aria-label="{{ __('Баланс :amount сердечек. Открыть историю', ['amount'=>$dashboard->wallet->balance]) }}"><span aria-hidden="true">♥</span> {{ $dashboard->wallet->balance }}</a>
             <p>{{ __('Свободно: :amount', ['amount'=>$dashboard->wallet->available]) }}<br>{{ __('В резерве: :amount', ['amount'=>$dashboard->wallet->reserved]) }}</p>
@@ -39,13 +39,13 @@
     </div>
     @if(!$dashboard->couple || !$dashboard->partner)<x-card class="section-space form-stack"><h2>{{ __('Начните вашу историю') }}</h2><p>{{ __('Создайте пару или отправьте приглашение. Личные блюда и желания можно добавлять уже сейчас.') }}</p><a class="button button--primary" href="{{ $dashboard->couple ? route('couples.show',$dashboard->couple) : route('couples.index') }}">{{ $dashboard->couple ? __('Пригласить партнёра') : __('Создать пару') }}</a></x-card>@endif
     <nav class="dashboard-tiles" aria-label="{{ __('Быстрые действия') }}">
-        <a class="card card--yellow" href="{{ route('dishes.index',$dashboard->partner ? ['owner_id'=>$dashboard->partner->id] : []) }}"><span aria-hidden="true">♨</span><strong>{{ __('Кухня') }}</strong></a>
-        <a class="card card--purple" href="{{ $dashboard->partner ? route('requests.create',$dashboard->couple) : route('couples.index') }}"><span aria-hidden="true">☏</span><strong>{{ __('Попросить') }}</strong></a>
-        <a class="card card--pink" href="{{ $dashboard->partner ? route('dates.create',$dashboard->couple) : route('couples.index') }}"><span aria-hidden="true">♥</span><strong>{{ __('Свидание') }}</strong></a>
-        <a class="card card--yellow" href="{{ route('wishlist.index') }}"><span aria-hidden="true">♧</span><strong>{{ __('Виш-лист') }}</strong></a>
-        <a class="card card--purple" href="{{ route('movies.index') }}"><span aria-hidden="true">🎬</span><strong>{{ __('Фильмы') }}</strong></a>
-        <a class="card card--yellow" href="{{ route('cars.index') }}"><span aria-hidden="true">🚗</span><strong>{{ __('Мои машины') }}</strong></a>
-        @if($dashboard->partner)<a class="card card--pink" href="{{ route('requests.create',[$dashboard->couple, 'type'=>'rating']) }}"><span aria-hidden="true">⭐</span><strong>{{ __('Оценить поступок') }}</strong></a>@endif
+        <a class="card card--yellow" href="{{ route('dishes.index',$dashboard->partner ? ['owner_id'=>$dashboard->partner->id] : []) }}"><x-illustration name="kitchen" /><strong>{{ __('Кухня') }}</strong></a>
+        <a class="card card--purple" href="{{ $dashboard->partner ? route('requests.create',$dashboard->couple) : route('couples.index') }}"><x-illustration name="request" /><strong>{{ __('Попросить') }}</strong></a>
+        <a class="card card--pink" href="{{ $dashboard->partner ? route('dates.create',$dashboard->couple) : route('couples.index') }}"><x-illustration name="date" /><strong>{{ __('Свидание') }}</strong></a>
+        <a class="card card--yellow" href="{{ route('wishlist.index') }}"><x-illustration name="gift" /><strong>{{ __('Виш-лист') }}</strong></a>
+        <a class="card card--purple" href="{{ route('movies.index') }}"><x-illustration name="movies" /><strong>{{ __('Фильмы') }}</strong></a>
+        @if($dashboard->hasCar)<a class="card card--yellow" href="{{ route('cars.index') }}"><x-illustration name="car" /><strong>{{ __('Мои машины') }}</strong></a>@endif
+        @if($dashboard->partner)<a class="card card--pink" href="{{ route('requests.create',[$dashboard->couple, 'type'=>'rating']) }}"><x-illustration name="rating" /><strong>{{ __('Оценить поступок') }}</strong></a>@endif
     </nav>
     @if($dashboard->isAgreementPending && $dashboard->partner)<x-card class="section-space form-stack"><h2>{{ __('Осталось согласовать недельный лимит') }}</h2><p>{{ __('Обычные просьбы уже доступны. Для «Очень хочу» нужно общее решение.') }}</p><a href="{{ route('agreements.show',$dashboard->couple) }}">{{ __('Согласовать лимит') }}</a></x-card>@endif
     <section class="section-space" aria-labelledby="my-duties-title"><div class="section-heading"><h2 id="my-duties-title">{{ __('Мои дела') }}</h2>@if($dashboard->couple)<a href="{{ route('duties.index',$dashboard->couple) }}">{{ __('Все') }} →</a>@endif</div>

@@ -1,6 +1,8 @@
 export function initializeDialogs(root) {
     const openers = new WeakMap();
     root.querySelectorAll('[data-open-dialog]').forEach((button) => {
+        if (button.dataset.dialogsInit1) return;
+        button.dataset.dialogsInit1 = 'true';
         button.addEventListener('click', () => {
             const dialog = document.getElementById(button.dataset.openDialog);
             if (!(dialog instanceof HTMLDialogElement)) {
@@ -12,6 +14,8 @@ export function initializeDialogs(root) {
         });
     });
     root.querySelectorAll('dialog').forEach((dialog) => {
+        if (dialog.dataset.dialogsInit2) return;
+        dialog.dataset.dialogsInit2 = 'true';
         dialog.querySelectorAll('[data-close-dialog]').forEach((button) => {
             button.addEventListener('click', () => dialog.close());
         });
@@ -32,6 +36,8 @@ export function initializeDialogs(root) {
 
 export function initializeTabs(root) {
     root.querySelectorAll('[data-tabs]').forEach((group) => {
+        if (group.dataset.dialogsInit3) return;
+        group.dataset.dialogsInit3 = 'true';
         const tabs = [...group.querySelectorAll('[role="tab"]')];
         function selectTab(selected) {
             tabs.forEach((tab) => {

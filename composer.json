@@ -12,6 +12,7 @@
         "php": "^8.3",
         "brick/math": "^1.0",
         "laravel/framework": "^13.17",
+        "laravel/reverb": "^1.12",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {

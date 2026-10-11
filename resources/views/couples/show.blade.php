@@ -5,7 +5,7 @@
     <x-status>{{ __($couple->status->label()) }}</x-status>
     <h1 class="form-title">@foreach($couple->members as $member){{ $member->user?->name }}@unless($loop->last) {{ __('и') }} @endunless @endforeach</h1>
     <p>{{ __('Вместе с :date · дней вместе: :days', ['date' => $couple->started_on->format('d.m.Y'), 'days' => $daysTogether]) }} ({{ $durationTogether }})</p>@if($couple->married_on)<p>{{ __('Свадьба: :date', ['date'=>$couple->married_on->format('d.m.Y')]) }}</p>@endif
-    <p>{{ __('Часовой пояс: :zone', ['zone' => $couple->timezone]) }}</p>
+
     @if(session('status'))<p role="status">{{ session('status') }}</p>@endif
     @error('invitation')<p class="field-error" role="alert">{{ $message }}</p>@enderror
     @error('couple')<p class="field-error" role="alert">{{ $message }}</p>@enderror
@@ -43,7 +43,7 @@
     <a class="button button--quiet" href="{{ route('hearts.index') }}">{{ __('Мои сердечки') }}</a>
     <a class="button button--primary" href="{{ route('requests.index', $couple) }}">{{ __('Наши просьбы') }}</a>
     <a class="button button--primary" href="{{ route('agreements.show', $couple) }}">{{ __('Наши договорённости') }}</a>
-    <a class="button button--quiet" href="{{ route('couples.index') }}">{{ __('Все мои пары') }}</a>
+
     @can('update', $couple)<a class="button button--danger" href="{{ route('couples.end', $couple) }}">{{ __('Завершить пару') }}</a>@endcan
 </div>
 @if($couple->status === \App\Enums\CoupleStatus::Active)

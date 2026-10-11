@@ -220,7 +220,7 @@ Before relying on a package's API, confirm its installed version:
 - `app/Services/Scheduling/DueCare.php`, `care:process-due`, `telegram:dispatch-notifications`: локальные часы пары, ограниченный catch-up и восстановление очереди; необязательный `compose.workers.yaml` и отдельные процессы описаны в `docs/telegram-and-scheduling.md`.
 
 - `app/Actions/Auth/Telegram/`, `app/Http/Controllers/Telegram/WebhookController.php`: одноразовая привязка к исходному браузеру и защищённый вход.
-- `app/Services/Telegram/CallbackRouter.php`, `KeyboardFactory.php`, `WebhookHandler.php`: двойное подтверждение и общие Actions, атомарный receipt без raw update.
+- `app/Services/Telegram/CallbackRouter.php`, `KeyboardFactory.php`, `WebhookHandler.php`: одно нажатие с проверкой прав/версий и общие Actions, атомарный receipt без raw update.
 - `app/Services/Telegram/ProfilePhoto.php`, `app/Http/Controllers/Auth/AvatarController.php`: импорт проверенного фото и закрытая выдача собственнику.
 - `telegram:prune-controls`: ежедневная очистка технических подтверждений через семь суток.
 
@@ -230,3 +230,7 @@ Before relying on a package's API, confirm its installed version:
 
 - `app/Actions/Auth/Telegram/IssueTelegramLinkCode.php`, `ConsumeTelegramLinkCode.php`, `profile.telegram.link`: одноразовая привязка по UUID из `/start`.
 - `app/Services/Telegram/PollTelegramUpdates.php`, `telegram:poll-updates`, профиль Compose `telegram-polling`: приём сообщений без публичного webhook; токен не выводить.
+
+- `app/Services/Realtime/ApplicationChanges.php`, `app/Events/ApplicationUpdated.php`, `routes/channels.php`, `resources/js/modules/realtime.js`: Reverb, закрытый сигнал без личных данных, обновление страниц с сохранением черновиков; отдельный сервис `realtime` в Compose.
+- `app/Services/Telegram/MoodStickers.php`, `app/Jobs/DownloadMoodStickerJob.php`, `app/Http/Controllers/MoodStickerController.php`: приватные WEBP/TGS/WEBM для настроения, загрузка вне транзакций.
+- `profile.timezone`, `app/Actions/Couples/UpdateTimezone.php`: общий часовой пояс только в подробных настройках профиля.

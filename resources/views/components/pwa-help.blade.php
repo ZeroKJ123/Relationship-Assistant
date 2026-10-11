@@ -1,4 +1,4 @@
-<x-card class="auth-card" data-pwa-help>
+<x-card class="auth-card" data-pwa-help data-live-preserve="pwa-help">
     <h2>{{ __('Приложение на телефоне') }}</h2>
     <p>{{ __('Добавьте «Нашу пару» на главный экран, чтобы открывать её как приложение.') }}</p>
     <x-button type="button" class="section-space" data-pwa-install hidden>{{ __('Установить приложение') }}</x-button>

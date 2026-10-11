@@ -37,7 +37,7 @@ final class MoodController extends Controller
         $member = $couple->members()->where('user_id', $actor->id)->firstOrFail();
         $prompt = $request->filled('prompt_id') ? MoodPrompt::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->whereNull('answered_at')->where('expires_at', '>', now())->findOrFail($request->integer('prompt_id')) : $this->history->getPendingPrompt($actor, $couple);
 
-        $emojiEntry = $request->filled('emoji_entry') ? MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->whereNull('emoji')->find($request->integer('emoji_entry')) : null;
+        $emojiEntry = $request->filled('emoji_entry') ? MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->whereNull('emoji')->whereNull('sticker_status')->find($request->integer('emoji_entry')) : null;
 
         return view('mood.index', ['emojiEntry' => $emojiEntry, 'emojis' => AddMoodEmoji::EMOJIS, 'couple' => $couple, 'member' => $member, 'prompt' => $prompt, 'latestMoods' => $this->history->getLatest($couple), 'levels' => MoodLevel::cases(), 'operationKey' => Str::uuid()->toString(), 'entries' => MoodEntry::query()->where('couple_id', $couple->id)->where('recorded_at', '>=', now()->subDays(MoodEntry::HISTORY_DAYS))->with('user:id,name')->latest('id')->paginate(self::PAGE_SIZE)]);
     }

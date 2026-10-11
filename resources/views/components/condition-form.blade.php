@@ -25,7 +25,7 @@
 <textarea id="description" name="description" rows="3" maxlength="2000" required>{{ old('description') }}</textarea>
 </div>
 <x-field name="due_at" :label="__('Выполнить условие до')" type="datetime-local" :value="old('due_at',$partnerRequest->due_at->setTimezone($couple->timezone)->format('Y-m-d\TH:i'))" required />
-<p>{{ __('Автор просьбы примет условие отдельно. Время пары: :zone.', ['zone'=>$couple->timezone]) }}</p>
+<p>{{ __('Автор просьбы примет условие отдельно.') }}</p>
 <label class="confirmation-check">
 <input type="checkbox" name="confirmation" value="1" required>{{ __('Подтверждаю предложение условия') }}</label>
 <x-button type="submit">{{ __('Отправить условие') }}</x-button>

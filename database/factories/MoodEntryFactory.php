@@ -18,6 +18,6 @@ final class MoodEntryFactory extends Factory
     /** @return array<string,mixed> */
     public function definition(): array
     {
-        return ['couple_id' => Couple::factory(), 'user_id' => User::factory(), 'level' => MoodLevel::Good, 'source' => MoodSource::Web, 'operation_key' => fake()->uuid(), 'recorded_at' => CarbonImmutable::now(), 'mood_prompt_id' => null];
+        return ['couple_id' => Couple::factory(), 'user_id' => User::factory(), 'level' => MoodLevel::Good, 'source' => MoodSource::Web, 'operation_key' => fake()->uuid(), 'recorded_at' => CarbonImmutable::now(), 'mood_prompt_id' => null, 'emoji' => null, 'sticker_path' => null, 'sticker_format' => null, 'sticker_status' => null];
     }
 }

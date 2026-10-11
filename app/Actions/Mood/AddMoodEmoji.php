@@ -32,7 +32,7 @@ final class AddMoodEmoji
             if ($current->emoji === $emoji) {
                 return;
             }
-            if ($current->emoji !== null || MoodEntry::query()->where('couple_id', $currentCouple->id)->where('user_id', $actor->id)->where('id', '>', $current->id)->exists()) {
+            if ($current->emoji !== null || $current->sticker_status !== null || MoodEntry::query()->where('couple_id', $currentCouple->id)->where('user_id', $actor->id)->where('id', '>', $current->id)->exists()) {
                 $this->context->deny('outdated_mood');
             }
             $current->forceFill(['emoji' => $emoji])->save();
