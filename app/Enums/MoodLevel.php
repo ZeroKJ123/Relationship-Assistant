@@ -18,4 +18,18 @@ enum MoodLevel: string
             self::Great => __('Отлично'), self::Good => __('Хорошо'), self::Neutral => __('Нейтрально'), self::Low => __('Не очень'), self::Bad => __('Плохо')
         };
     }
+
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Great => 'mood-great', self::Good => 'mood-good', self::Neutral => 'mood-neutral', self::Low => 'mood-low', self::Bad => 'mood-bad'
+        };
+    }
+
+    public function emoji(): string
+    {
+        return match ($this) {
+            self::Great => '😄', self::Good => '🙂', self::Neutral => '😐', self::Low => '🙁', self::Bad => '😞'
+        };
+    }
 }

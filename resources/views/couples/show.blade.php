@@ -34,18 +34,18 @@
     <x-card class="section-space"><h2>{{ __('История сохранена') }}</h2><p>{{ __('Пара завершена. История доступна только её прежним участникам. Новые совместные действия закрыты.') }}</p></x-card>
 @endif
 <x-mood-summary :couple="$couple" :latest-moods="$latestMoods" />
-<div class="confirmation-actions section-space">
-<a class="button button--quiet" href="{{ route('reminders.index',$couple) }}">{{ __('Напоминания') }}</a>
-<a class="button button--quiet" href="{{ route('friends.index') }}">{{ __('Мои друзья') }}</a>@can('update',$couple)<a class="button button--primary" href="{{ route('guests.create',$couple) }}">{{ __('Позвать гостей') }}</a><a class="button button--quiet" href="{{ route('dates.create',$couple) }}">{{ __('Свидание / мероприятие') }}</a>@endcan
-<a class="button button--quiet" href="{{ route('dishes.index') }}">{{ __('Кухня') }}</a><a class="button button--quiet" href="{{ route('wishlist.index') }}">{{ __('Виш-лист') }}</a>@can('update',$couple)<a class="button button--primary" href="{{ route('money.create',$couple) }}">{{ __('Попросить деньги') }}</a>@endcan
-    <a class="button button--quiet" href="{{ route('catalogs.index') }}">{{ __('Каталоги') }}</a>
-    <a class="button button--primary" href="{{ route('duties.index', $couple) }}">{{ __('Наши дела') }}</a>
-    <a class="button button--quiet" href="{{ route('hearts.index') }}">{{ __('Мои сердечки') }}</a>
-    <a class="button button--primary" href="{{ route('requests.index', $couple) }}">{{ __('Наши просьбы') }}</a>
-    <a class="button button--primary" href="{{ route('agreements.show', $couple) }}">{{ __('Наши договорённости') }}</a>
-
-    @can('update', $couple)<a class="button button--danger" href="{{ route('couples.end', $couple) }}">{{ __('Завершить пару') }}</a>@endcan
-</div>
+<h2 class="group-label"><span>{{ __('Разделы пары') }}</span></h2>
+<nav class="settings-links" aria-label="{{ __('Разделы пары') }}">
+<a href="{{ route('reminders.index',$couple) }}">{{ __('Напоминания') }}</a>
+<a href="{{ route('friends.index') }}">{{ __('Мои друзья') }}</a>@can('update',$couple)<a href="{{ route('guests.create',$couple) }}">{{ __('Позвать гостей') }}</a><a href="{{ route('dates.create',$couple) }}">{{ __('Свидание / мероприятие') }}</a>@endcan
+<a href="{{ route('dishes.index') }}">{{ __('Кухня') }}</a><a href="{{ route('wishlist.index') }}">{{ __('Виш-лист') }}</a>@can('update',$couple)<a href="{{ route('money.create',$couple) }}">{{ __('Попросить деньги') }}</a>@endcan
+    <a href="{{ route('catalogs.index') }}">{{ __('Каталоги') }}</a>
+    <a href="{{ route('duties.index', $couple) }}">{{ __('Наши дела') }}</a>
+    <a href="{{ route('hearts.index') }}">{{ __('Мои сердечки') }}</a>
+    <a href="{{ route('requests.index', $couple) }}">{{ __('Наши просьбы') }}</a>
+    <a href="{{ route('agreements.show', $couple) }}">{{ __('Наши договорённости') }}</a>
+</nav>
+<div class="section-space">@can('update', $couple)<a class="button button--danger" href="{{ route('couples.end', $couple) }}">{{ __('Завершить пару') }}</a>@endcan</div>
 @if($couple->status === \App\Enums\CoupleStatus::Active)
 <x-card class="section-space"><h2>{{ __('Даты нашей истории') }}</h2><p>{{ $daysTogether }} {{ __('дней') }} ({{ $durationTogether }})</p><form method="post" action="{{ route('couples.dates',$couple) }}" class="form-stack" data-submit-lock>@csrf @method('patch')<input type="hidden" name="expected_version" value="{{ $couple->dates_version }}"><x-field name="started_on" type="date" :label="__('Начало отношений')" :value="old('started_on',$couple->started_on->toDateString())" required /><x-field name="married_on" type="date" :label="__('Дата свадьбы — если поженились')" :value="old('married_on',$couple->married_on?->toDateString())" /><p>{{ __('Если пока не поженились, оставьте дату свадьбы пустой.') }}</p><x-button type="submit">{{ __('Сохранить даты') }}</x-button></form></x-card>
 @endif

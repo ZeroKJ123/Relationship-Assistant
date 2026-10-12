@@ -14,6 +14,8 @@ use App\Models\Duty;
 use App\Models\PartnerRequest;
 use App\Models\RequestCondition;
 use App\Models\User;
+use App\ViewModels\DutyGroups;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,7 +36,7 @@ final class DutyController extends Controller
         $duties = Duty::query()->where('couple_id', $couple->id)->whereIn('status', $filter->statuses())->with(['executor:id,name', 'reviewer:id,name'])->orderBy('due_at')->orderBy('id')->paginate(self::PAGE_SIZE)->withQueryString();
         Log::debug('duties.list_loaded', ['couple_id' => $couple->id, 'filter' => $filter->value, 'count' => $duties->count()]);
 
-        return view('duties.index', ['couple' => $couple, 'duties' => $duties, 'filters' => DutyFilter::cases(), 'filter' => $filter]);
+        return view('duties.index', ['couple' => $couple, 'duties' => $duties, 'groups' => (new DutyGroups)->group($duties->getCollection(), CarbonImmutable::now()), 'filters' => DutyFilter::cases(), 'filter' => $filter]);
     }
 
     public function show(Couple $couple, Duty $duty): View

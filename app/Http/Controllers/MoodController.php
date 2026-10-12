@@ -15,7 +15,9 @@ use App\Models\Couple;
 use App\Models\MoodEntry;
 use App\Models\MoodPrompt;
 use App\Models\User;
+use App\Services\Mood\MoodCalendar;
 use App\Services\Mood\MoodHistory;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +29,7 @@ final class MoodController extends Controller
 {
     private const PAGE_SIZE = 20;
 
-    public function __construct(private readonly RecordMood $record, private readonly SetMoodSchedule $schedule, private readonly MoodHistory $history, private readonly AddMoodEmoji $addEmoji) {}
+    public function __construct(private readonly RecordMood $record, private readonly SetMoodSchedule $schedule, private readonly MoodHistory $history, private readonly AddMoodEmoji $addEmoji, private readonly MoodCalendar $calendar) {}
 
     public function index(Request $request, Couple $couple): View
     {
@@ -39,7 +41,7 @@ final class MoodController extends Controller
 
         $emojiEntry = $request->filled('emoji_entry') ? MoodEntry::query()->where('couple_id', $couple->id)->where('user_id', $actor->id)->whereNull('emoji')->whereNull('sticker_status')->find($request->integer('emoji_entry')) : null;
 
-        return view('mood.index', ['emojiEntry' => $emojiEntry, 'emojis' => AddMoodEmoji::EMOJIS, 'couple' => $couple, 'member' => $member, 'prompt' => $prompt, 'latestMoods' => $this->history->getLatest($couple), 'levels' => MoodLevel::cases(), 'operationKey' => Str::uuid()->toString(), 'entries' => MoodEntry::query()->where('couple_id', $couple->id)->with('user:id,name')->latest('id')->paginate(self::PAGE_SIZE)]);
+        return view('mood.index', ['calendar' => $this->calendar->getMonth($couple, $actor, CarbonImmutable::now()), 'emojiEntry' => $emojiEntry, 'emojis' => AddMoodEmoji::EMOJIS, 'couple' => $couple, 'member' => $member, 'prompt' => $prompt, 'latestMoods' => $this->history->getLatest($couple), 'levels' => MoodLevel::cases(), 'operationKey' => Str::uuid()->toString(), 'entries' => MoodEntry::query()->where('couple_id', $couple->id)->with('user:id,name')->latest('id')->paginate(self::PAGE_SIZE)]);
     }
 
     public function store(StoreMoodRequest $request, Couple $couple): RedirectResponse

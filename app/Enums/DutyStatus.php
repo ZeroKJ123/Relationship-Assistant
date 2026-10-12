@@ -25,4 +25,25 @@ enum DutyStatus: string
             self::Overdue => 'Срок прошёл',
         };
     }
+
+    public function tone(): string
+    {
+        return match ($this) {
+            self::Overdue, self::Disputed => 'danger',
+            self::Reported => 'warning',
+            self::Confirmed => 'success',
+            self::Pending, self::Cancelled => 'neutral',
+        };
+    }
+
+    /** Номер текущего шага на шкале «создано → выполнение → проверка»; 0 — дело отменено. */
+    public function progressStep(): int
+    {
+        return match ($this) {
+            self::Cancelled => 0,
+            self::Pending, self::Overdue => 2,
+            self::Reported, self::Disputed => 3,
+            self::Confirmed => 4,
+        };
+    }
 }

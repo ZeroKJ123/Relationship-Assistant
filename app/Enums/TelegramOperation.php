@@ -36,14 +36,14 @@ enum TelegramOperation: string
     public function label(): string
     {
         return match ($this) {
-            self::Agree => __('Согласиться'), self::Decline => __('Отказаться'),
+            self::Agree => __('✅ Согласиться'), self::Decline => __('✖️ Отказаться'),
             self::NoFoodMoney => __('Нет денег на продукты'),
-            self::AcceptCondition => __('Принять условие'), self::DeclineCondition => __('Отклонить условие'),
-            self::Done => __('Сделано'), self::NotDone => __('Не сделано'),
-            self::Verify => __('Подтвердить выполнение'), self::Dispute => __('Оспорить выполнение'),
-            self::MoodGreat => __('Отлично'), self::MoodGood => __('Хорошо'),
-            self::MoodNeutral => __('Нейтрально'),
-            self::MoodLow => __('Не очень'), self::MoodBad => __('Плохо'),
+            self::AcceptCondition => __('✅ Принять'), self::DeclineCondition => __('✖️ Отклонить'),
+            self::Done => __('✅ Сделано'), self::NotDone => __('Пока нет'),
+            self::Verify => __('✅ Подтверждаю'), self::Dispute => __('⚠️ Оспорить'),
+            self::MoodGreat => MoodLevel::Great->emoji(), self::MoodGood => MoodLevel::Good->emoji(),
+            self::MoodNeutral => MoodLevel::Neutral->emoji(),
+            self::MoodLow => MoodLevel::Low->emoji(), self::MoodBad => MoodLevel::Bad->emoji(),
             self::MoodEmoji => __('Дополнить эмоджи'), self::MoodEmojiSkip => __('Пропустить'),
         };
     }

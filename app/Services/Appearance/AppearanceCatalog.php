@@ -25,11 +25,14 @@ final class AppearanceCatalog
 
     public const SINGLETON_ID = 1;
 
+    public const DEFAULT_THEME = 'latte';
+
     /** @return Settings */
     public function defaults(): array
     {
         $base = ['name' => __('Облака и сердечки'), 'primary' => '#7035ce', 'ink' => '#26104d', 'muted' => '#675580', 'lilac' => '#ede2ff', 'butter' => '#fff1b6', 'rose' => '#ffd6e3', 'background' => '#f1eaff', 'gradient' => '#eee6ff', 'angle' => 145, 'decoration' => 'clouds', 'image' => null, 'icons' => []];
         $themes = ['classic' => $base,
+            self::DEFAULT_THEME => $this->latteTheme(),
             'spring' => array_replace($base, ['name' => __('Весенний сад'), 'primary' => '#326841', 'ink' => '#183923', 'muted' => '#43694d', 'lilac' => '#d9f0dc', 'butter' => '#fff2c9', 'rose' => '#ffe0ec', 'background' => '#eff8ea', 'gradient' => '#ffe5ee', 'decoration' => 'flowers']),
             'summer' => array_replace($base, ['name' => __('Летнее солнце'), 'primary' => '#176778', 'ink' => '#163e46', 'muted' => '#4b6770', 'lilac' => '#d8f3f6', 'butter' => '#fff0bc', 'rose' => '#ffe2cc', 'background' => '#fff8db', 'gradient' => '#d5f5ff', 'decoration' => 'sun']),
             'autumn' => array_replace($base, ['name' => __('Тёплая осень'), 'primary' => '#914119', 'ink' => '#462618', 'muted' => '#755547', 'lilac' => '#f9e4d4', 'butter' => '#fff0c9', 'rose' => '#f8d9cf', 'background' => '#fff2e1', 'gradient' => '#f9dbc3', 'decoration' => 'leaves']),
@@ -46,7 +49,13 @@ final class AppearanceCatalog
             $tiles[] = ['id' => $id, 'enabled' => true, 'condition' => $condition, 'tone' => $tone, 'title' => ''];
         }
 
-        return ['themes' => $themes, 'active' => 'classic', 'seasonal' => false, 'seasons' => array_combine(self::SEASONS, self::SEASONS), 'icons' => [], 'layout' => ['columns' => 2, 'blocks' => $blocks, 'tiles' => $tiles]];
+        return ['themes' => $themes, 'active' => self::DEFAULT_THEME, 'seasonal' => false, 'seasons' => array_combine(self::SEASONS, self::SEASONS), 'icons' => [], 'layout' => ['columns' => 2, 'blocks' => $blocks, 'tiles' => $tiles]];
+    }
+
+    /** @return Theme */
+    public function latteTheme(): array
+    {
+        return ['name' => __('Тыквенный латте'), 'primary' => '#c4530f', 'ink' => '#3a2013', 'muted' => '#7d5a42', 'lilac' => '#f6dcb9', 'butter' => '#fbe0b0', 'rose' => '#f7d2c4', 'background' => '#fbf2e4', 'gradient' => '#f8e6cf', 'angle' => 160, 'decoration' => 'leaves', 'image' => null, 'icons' => []];
     }
 
     /** @return array<string,string> */

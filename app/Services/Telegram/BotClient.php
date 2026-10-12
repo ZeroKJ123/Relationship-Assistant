@@ -71,14 +71,14 @@ final class BotClient
     }
 
     /** @param array{inline_keyboard: list<list<array{text: string, callback_data: string}|array{text: string, url: string}|array{text: string, copy_text: array{text: string}}>>}|array{force_reply: true, input_field_placeholder: string}|null $keyboard */
-    public function sendMessage(string $chatId, string $text, ?array $keyboard = null, bool $protectContent = true): SendResult
+    public function sendMessage(string $chatId, string $text, ?array $keyboard = null, bool $protectContent = true, bool $isHtml = false): SendResult
     {
         if (! $this->isEnabled()) {
             return new SendResult(DeliveryStatus::Pending, 'disabled', retryAfter: NotificationDelivery::UNAVAILABLE_RETRY_SECONDS);
         }
         $token = config()->string('services.telegram.bot_token');
         try {
-            $response = Http::connectTimeout(self::CONNECT_TIMEOUT_SECONDS)->timeout(self::TIMEOUT_SECONDS)->withoutRedirecting()->post(sprintf(self::API_URL, $token, 'sendMessage'), ['chat_id' => $chatId, 'text' => $text, 'protect_content' => $protectContent, 'link_preview_options' => ['is_disabled' => true], ...($keyboard !== null && (($keyboard['force_reply'] ?? false) || ($keyboard['inline_keyboard'] ?? []) !== []) ? ['reply_markup' => $keyboard] : [])]);
+            $response = Http::connectTimeout(self::CONNECT_TIMEOUT_SECONDS)->timeout(self::TIMEOUT_SECONDS)->withoutRedirecting()->post(sprintf(self::API_URL, $token, 'sendMessage'), ['chat_id' => $chatId, 'text' => $text, ...($isHtml ? ['parse_mode' => 'HTML'] : []), 'protect_content' => $protectContent, 'link_preview_options' => ['is_disabled' => true], ...($keyboard !== null && (($keyboard['force_reply'] ?? false) || ($keyboard['inline_keyboard'] ?? []) !== []) ? ['reply_markup' => $keyboard] : [])]);
         } catch (ConnectionException) {
             Log::warning('telegram.transport_failed', ['reason' => 'connection_uncertain']);
 

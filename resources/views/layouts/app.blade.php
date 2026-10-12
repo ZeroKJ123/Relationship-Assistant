@@ -20,7 +20,8 @@
     <a class="skip-link" href="#main-content">{{ __('Перейти к содержимому') }}</a>
     <div class="app-shell">
         <header class="app-header">
-            <a class="brand" href="{{ route('home') }}"><span aria-hidden="true">♥</span> {{ __('Наша пара') }}</a>
+            @if(auth()->check() && ! request()->routeIs('home'))<a class="app-back" href="@yield('back', route('home'))"><x-icon name="back" />@yield('back-label', __('Главная'))</a>@endif
+            <a class="brand" href="{{ route('home') }}"><x-icon name="heart" /> {{ __('Наша пара') }}</a>
             @guest<span class="pill">{{ __('Начало истории') }}</span>@endguest
         </header>
         <p class="connection-status" role="status" tabindex="-1" data-connection-status hidden>{{ __('Нет соединения. Действия требуют интернета. Если связь пропала после отправки, проверьте результат после подключения.') }}</p>

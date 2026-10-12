@@ -31,6 +31,8 @@ final class KeyboardFactory
 
     private const LIFETIME_HOURS = 24;
 
+    private const BUTTONS_IN_ROW = 2;
+
     /** @return array{inline_keyboard: list<list<array{text: string, callback_data: string}|array{text: string, url: string}>>} */
     public function create(NotificationDelivery $delivery, TelegramAccount $account): array
     {
@@ -80,9 +82,10 @@ final class KeyboardFactory
         if ($request->status === RequestStatus::Conditional && $account->user_id === $request->author_id) {
             $operations = [TelegramOperation::AcceptCondition, TelegramOperation::DeclineCondition];
         }
-        $rows = array_map(fn (TelegramOperation $operation): array => [$this->createButton($account, $delivery->couple_id, 'request', $request->id, $request->version, $operation)], $operations);
-        foreach ($request->duties()->with(['partnerRequest', 'requestCondition'])->lockForUpdate()->get() as $duty) {
-            $rows = [...$rows, ...$this->getDutyRows($duty, $account)];
+        $rows = array_chunk(array_map(fn (TelegramOperation $operation): array => $this->createButton($account, $delivery->couple_id, 'request', $request->id, $request->version, $operation), $operations), self::BUTTONS_IN_ROW);
+        $duties = $request->duties()->with(['partnerRequest', 'requestCondition'])->lockForUpdate()->get();
+        foreach ($duties as $duty) {
+            $rows = [...$rows, ...$this->getDutyRows($duty, $account, hasKindLabel: $duties->count() > 1)];
         }
 
         return $rows;
@@ -98,7 +101,7 @@ final class KeyboardFactory
     }
 
     /** @return list<list<array{text: string, callback_data: string}|array{text: string, url: string}>> */
-    private function getDutyRows(Duty $duty, TelegramAccount $account): array
+    private function getDutyRows(Duty $duty, TelegramAccount $account, bool $hasKindLabel = false): array
     {
         $operations = [];
         if (in_array($duty->status, [DutyStatus::Pending, DutyStatus::Overdue], true) && $duty->executor_id === $account->user_id) {
@@ -112,7 +115,14 @@ final class KeyboardFactory
             ? $duty->partnerRequest->type === RequestType::Money
             : $duty->requestCondition?->type === ConditionType::Money;
 
-        return array_map(fn (TelegramOperation $operation): array => [$this->createButton($account, $duty->couple_id, 'duty', $duty->id, $duty->version, $operation, sprintf('%s: %s', $duty->kind->label(), $isPayment && $operation === TelegramOperation::Done ? __('Оплачено') : $operation->label()))], $operations);
+        $label = function (TelegramOperation $operation) use ($duty, $isPayment, $hasKindLabel): string {
+            $action = $isPayment && $operation === TelegramOperation::Done ? __('✅ Оплачено') : $operation->label();
+
+            return $hasKindLabel ? sprintf('%s: %s', __($duty->kind->label()), $action) : $action;
+        };
+        $buttons = array_map(fn (TelegramOperation $operation): array => $this->createButton($account, $duty->couple_id, 'duty', $duty->id, $duty->version, $operation, $label($operation)), $operations);
+
+        return array_chunk($buttons, $hasKindLabel ? 1 : self::BUTTONS_IN_ROW);
     }
 
     /** @return list<list<array{text: string, callback_data: string}|array{text: string, url: string}>> */
@@ -120,6 +130,8 @@ final class KeyboardFactory
     {
         $prompt = MoodPrompt::query()->whereKey($delivery->source_id)->where('couple_id', $delivery->couple_id)->where('user_id', $account->user_id)->lockForUpdate()->firstOrFail();
 
-        return array_map(fn (MoodLevel $level): array => [$this->createButton($account, $delivery->couple_id, 'mood', $prompt->id, 1, TelegramOperation::from(sprintf('mood_%s', $level->value)))], MoodLevel::cases());
+        $buttons = array_map(fn (MoodLevel $level): array => $this->createButton($account, $delivery->couple_id, 'mood', $prompt->id, 1, TelegramOperation::from(sprintf('mood_%s', $level->value))), array_reverse(MoodLevel::cases()));
+
+        return [$buttons];
     }
 }

@@ -150,15 +150,15 @@ it('delivers detailed request condition and mood texts without generated links',
     $request = app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(RequestType::Service, 'Принеси чай с лимоном', CarbonImmutable::now()->addDay()));
     $delivery = NotificationDelivery::query()->sole();
     $text = app(DeliveryContent::class)->getText($delivery);
-    expect($text)->toContain("Вам просьба от партнёра:\nПринеси чай с лимоном", 'Вид просьбы: Услуга', 'Ответить или выполнить до:')->not->toContain('http', 'Просьба обновлена', '\\n');
+    expect($text)->toContain(sprintf("<b>%s просит</b>\nПринеси чай с лимоном", e($pair->first->name)), '🕒 до завтра')->not->toContain('http', 'Просьба обновлена', 'Вид просьбы', '\\n');
     $keyboard = DB::transaction(fn () => app(KeyboardFactory::class)->create($delivery, $account));
     foreach ($keyboard['inline_keyboard'] as $row) {
         expect($row[0])->not->toHaveKey('url');
     }
     app(RespondToRequest::class)->execute($pair->second, $pair->couple, $request, new RequestResponseData(RequestResponse::Conditional, 0, conditionType: ConditionType::Kisses, description: 'Три поцелуя', dueAt: CarbonImmutable::now()->addDay()));
     $response = NotificationDelivery::query()->where('recipient_id', $pair->first->id)->sole();
-    expect(app(DeliveryContent::class)->getText($response))->toContain('Партнёр предлагает встречное условие', 'Три поцелуя')->not->toContain('http');
+    expect(app(DeliveryContent::class)->getText($response))->toContain('но с условием', '<i>Ваша просьба:</i> Принеси чай с лимоном', '<i>Условие:</i> Три поцелуя')->not->toContain('http');
     $entry = MoodEntry::factory()->create(['couple_id' => $pair->couple->id, 'user_id' => $pair->first->id, 'emoji' => '😊', 'level' => MoodLevel::Good]);
     $mood = NotificationDelivery::factory()->create(['couple_id' => $pair->couple->id, 'recipient_id' => $pair->second->id, 'kind' => NotificationKind::MoodEntry, 'source_id' => $entry->id]);
-    expect(app(DeliveryContent::class)->getText($mood))->toBe('Настроение партнёра: Хорошо 😊');
+    expect(app(DeliveryContent::class)->getText($mood))->toBe(sprintf('🙂 <b>%s: хорошо</b> 😊', e($pair->first->name)));
 });

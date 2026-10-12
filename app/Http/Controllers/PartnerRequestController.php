@@ -31,11 +31,22 @@ final class PartnerRequestController extends Controller
 {
     private const PAGE_SIZE = 10;
 
+    private const DUE_FIELD_FORMAT = 'Y-m-d\\TH:i';
+
+    private const EVENING_HOUR = 21;
+
+    private const DAYS_IN_WEEK = 7;
+
     public function __construct(private readonly CreatePartnerRequest $createRequest) {}
 
-    public function index(Couple $couple): View
+    public function index(Request $request, Couple $couple): View
     {
-        return view('requests.index', ['progress' => new RequestProgress, 'couple' => $couple, 'requests' => PartnerRequest::query()->where('couple_id', $couple->id)->with(['author:id,name', 'recipient:id,name', 'duties'])->latest('id')->paginate(self::PAGE_SIZE)]);
+        $viewer = $request->user();
+        abort_unless($viewer instanceof User, Response::HTTP_UNAUTHORIZED);
+        $progress = new RequestProgress;
+        $requests = PartnerRequest::query()->where('couple_id', $couple->id)->with(['author:id,name', 'recipient:id,name', 'duties'])->latest('id')->paginate(self::PAGE_SIZE);
+
+        return view('requests.index', ['progress' => $progress, 'viewer' => $viewer, 'couple' => $couple, 'requests' => $requests, 'groups' => $progress->group($requests->getCollection())]);
     }
 
     public function create(Request $request, Couple $couple): View|RedirectResponse
@@ -58,7 +69,19 @@ final class PartnerRequestController extends Controller
             return redirect()->route('dates.create', [$couple, 'request_template_id' => $preset->id]);
         }
 
-        return view('requests.create', ['dish' => $dish, 'preset' => $preset, 'expenses' => ExpenseCategory::query()->orderBy('sort_order')->get(), 'couple' => $couple, 'selectedType' => in_array($request->query('type'), ['service', 'gift', 'food', 'rating'], true) ? $request->query('type') : RequestType::Service->value, 'defaultDueAt' => CarbonImmutable::now($couple->timezone)->addDay()->format('Y-m-d\\TH:i'), 'operationKey' => Str::uuid()->toString()]);
+        return view('requests.create', ['dish' => $dish, 'preset' => $preset, 'expenses' => ExpenseCategory::query()->orderBy('sort_order')->get(), 'couple' => $couple, 'selectedType' => in_array($request->query('type'), ['service', 'gift', 'food', 'rating'], true) ? $request->query('type') : RequestType::Service->value, 'defaultDueAt' => CarbonImmutable::now($couple->timezone)->addDay()->format(self::DUE_FIELD_FORMAT), 'dueShortcuts' => $this->getDueShortcuts(CarbonImmutable::now($couple->timezone)), 'operationKey' => Str::uuid()->toString()]);
+    }
+
+    /** @return array<string,string> подпись быстрой кнопки и значение поля срока */
+    private function getDueShortcuts(CarbonImmutable $now): array
+    {
+        $evening = $now->setTime(self::EVENING_HOUR, 0);
+
+        return [
+            __('Сегодня') => ($evening->greaterThan($now) ? $evening : $now->endOfDay())->format(self::DUE_FIELD_FORMAT),
+            __('Завтра') => $now->addDay()->format(self::DUE_FIELD_FORMAT),
+            __('Через неделю') => $now->addDays(self::DAYS_IN_WEEK)->format(self::DUE_FIELD_FORMAT),
+        ];
     }
 
     public function store(StorePartnerRequest $request, Couple $couple): RedirectResponse

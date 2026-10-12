@@ -28,4 +28,17 @@ enum RequestType: string
             self::Money => 'Денежная просьба',
         };
     }
+
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Rating => 'rating',
+            self::Gift => 'gift',
+            self::Service => 'request',
+            self::Food => 'kitchen',
+            self::Guests => 'users',
+            self::Event => 'date',
+            self::Money => 'coin',
+        };
+    }
 }

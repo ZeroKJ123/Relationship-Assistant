@@ -1,7 +1,9 @@
 @extends('layouts.app')
 @section('title', __('Новая просьба'))
+@section('back', route('requests.index',$couple))
+@section('back-label', __('Просьбы'))
 @section('content')
-<x-card class="auth-card">
+<div class="auth-card">
     <h1 class="form-title">{{ __('Новая просьба') }}</h1>
     <x-form-feedback />
     <form method="post" action="{{ route('requests.store',$couple) }}" class="form-stack section-space" data-submit-lock data-request-editor>
@@ -16,20 +18,21 @@
         @endif
         <div class="field"><label for="description">{{ __('Ваша просьба') }}</label><textarea id="description" name="description" required maxlength="2000" rows="3">{{ old('description',$dish?->title) }}</textarea></div>
         <x-field name="due_at" :label="__('Ответить и выполнить до')" type="datetime-local" :value="old('due_at',$defaultDueAt)" required />
+        <div class="quick-dates" data-due-shortcuts="due_at" hidden>@foreach($dueShortcuts as $label => $value)<button type="button" data-due-value="{{ $value }}">{{ $label }}</button>@endforeach</div>
 
-        <details @if($errors->hasAny(['heart_price','expense_category_id','is_very_wanted','partner_request'])) open @endif>
-            <summary>{{ __('Дополнительно') }}</summary>
-            <div class="form-stack section-space">
+        <details class="settings-section" @if($errors->hasAny(['heart_price','expense_category_id','is_very_wanted','partner_request'])) open @endif>
+            <summary><span class="row__body"><span class="row__title">{{ __('Дополнительно') }}</span><span class="row__meta">{{ __('Цена, «Очень хочу», категория расходов') }}</span></span></summary>
+            <div class="form-stack">
                 @unless($dish)
-                    <div data-request-price @if(old('type',$selectedType) !== 'service') hidden @endif><x-field name="heart_price" :label="__('Цена услуги в сердечках')" type="number" :value="old('heart_price',0)" min="0" max="1000" step="1" /><p>{{ __('0 — бесплатно. Сердечки спишутся только после проверки выполнения.') }}</p></div>
+                    <div data-request-price @if(old('type',$selectedType) !== 'service') hidden @endif><x-field name="heart_price" :label="__('Цена услуги в сердечках')" type="number" :value="old('heart_price',0)" min="0" max="1000" step="1" /><p class="field-hint">{{ __('0 — бесплатно. Сердечки спишутся только после проверки выполнения.') }}</p></div>
                 @endunless
-                <div data-request-very-wanted @if(old('type',$selectedType) === 'rating') hidden @endif><label class="confirmation-check"><input type="checkbox" name="is_very_wanted" value="1" @checked(old('is_very_wanted'))>{{ __('Очень хочу') }}</label><p>{{ __('Обычный отказ уменьшает сердечки партнёра. Нужны согласованный недельный лимит и баланс без минуса.') }} <a href="{{ route('agreements.show',$couple) }}">{{ __('Наш лимит') }}</a></p></div>
+                <div data-request-very-wanted @if(old('type',$selectedType) === 'rating') hidden @endif><label class="confirmation-check"><input type="checkbox" name="is_very_wanted" value="1" @checked(old('is_very_wanted'))>{{ __('Очень хочу') }}</label><p class="field-hint">{{ __('Обычный отказ уменьшает сердечки партнёра. Нужны согласованный недельный лимит и баланс без минуса.') }} <a href="{{ route('agreements.show',$couple) }}">{{ __('Наш лимит') }}</a></p></div>
                 <div class="field"><label for="expense_category_id">{{ __('Категория расходов') }}</label><select id="expense_category_id" name="expense_category_id"><option value="">{{ __('Без категории') }}</option>@foreach($expenses as $category)<option value="{{ $category->id }}" @selected((string)old('expense_category_id') === (string)$category->id)>{{ __($category->name) }}</option>@endforeach</select></div>
             </div>
         </details>
-        <x-button type="submit">{{ __('Отправить просьбу') }}</x-button>
+        <div class="sticky-action"><x-button type="submit" class="button--wide">{{ __('Отправить просьбу') }}</x-button><small>{{ __('Партнёр получит уведомление и ответит отдельно.') }}</small></div>
     </form>
-</x-card>
+</div>
 @endsection
 
 @section('navigation')<x-bottom-navigation :couple="$couple" />@endsection

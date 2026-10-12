@@ -113,7 +113,7 @@ it('uses global icons before theme icons and restores the theme when the overrid
     $owner = User::factory()->create(['login' => 'panel-owner']);
     $record = AppearanceSetting::query()->sole();
     $settings = $record->settings;
-    $settings['themes']['classic']['icons']['home'] = '🌸';
+    $settings['themes'][AppearanceCatalog::DEFAULT_THEME]['icons']['home'] = '🌸';
     $record->forceFill(['settings' => $settings])->save();
     $this->asUser($owner)->post(route('admin.panel.unlock'), ['password' => 'test-panel-password'])->assertRedirect();
     $this->get('/')->assertOk()->assertSee('🌸');

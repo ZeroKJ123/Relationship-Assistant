@@ -71,10 +71,25 @@ export function initializeRequests(root) {
             if (ratingHint) ratingHint.hidden = !isRating;
         }
         updateRequestFields();
-        type.addEventListener('change', () => {
+        const handleTypeChange = () => {
             updateRequestFields();
             const preset = form.elements.namedItem('request_template_id');
             if (preset) preset.value = '';
+        };
+        if (typeof type.addEventListener === 'function') type.addEventListener('change', handleTypeChange);
+        else type.forEach((choice) => choice.addEventListener('change', handleTypeChange));
+    });
+    root.querySelectorAll('[data-due-shortcuts]').forEach((shortcuts) => {
+        if (shortcuts.dataset.requestsInit3) return;
+        shortcuts.dataset.requestsInit3 = 'true';
+        const field = document.getElementById(shortcuts.dataset.dueShortcuts);
+        if (!field) return;
+        shortcuts.hidden = false;
+        shortcuts.addEventListener('click', (event) => {
+            const value = event.target.closest('[data-due-value]')?.dataset.dueValue;
+            if (!value) return;
+            field.value = value;
+            field.dispatchEvent(new Event('input', { bubbles: true }));
         });
     });
 }

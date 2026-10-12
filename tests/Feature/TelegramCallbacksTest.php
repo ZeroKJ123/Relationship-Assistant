@@ -204,7 +204,7 @@ it('attaches short opaque buttons to notification deliveries with no personal te
     TelegramAccount::factory()->create(['user_id' => $pair->second->id]);
     app(CreatePartnerRequest::class)->execute($pair->first, $pair->couple, new NewRequestData(RequestType::Service, 'Очень личная просьба', CarbonImmutable::now()->addDay()));
     $message = app(DeliveryLifecycle::class)->claim(NotificationDelivery::query()->sole());
-    expect($message->keyboard['inline_keyboard'])->toHaveCount(2);
+    expect($message->keyboard['inline_keyboard'])->toHaveCount(1)->and($message->keyboard['inline_keyboard'][0])->toHaveCount(2);
     foreach ($message->keyboard['inline_keyboard'] as $row) {
         if (! isset($row[0]['callback_data'])) {
             continue;
@@ -258,8 +258,9 @@ it('offers neutral mood as the middle Telegram answer and records its immediate 
     $delivery = NotificationDelivery::query()->where('kind', NotificationKind::MoodPrompt)->sole();
     $message = app(DeliveryLifecycle::class)->claim($delivery);
     expect($message)->not->toBeNull();
-    $buttons = array_map(fn (array $row): array => $row[0], $message->keyboard['inline_keyboard']);
-    expect(array_column($buttons, 'text'))->toBe(['Отлично', 'Хорошо', 'Нейтрально', 'Не очень', 'Плохо']);
+    expect($message->keyboard['inline_keyboard'])->toHaveCount(1);
+    $buttons = $message->keyboard['inline_keyboard'][0];
+    expect(array_column($buttons, 'text'))->toBe(['😞', '🙁', '😐', '🙂', '😄']);
     $reply = callbackResponse($this, 910, $account, $buttons[2]['callback_data'])->json();
     expect(MoodEntry::query()->count())->toBe(1);
     emojiResponse($this, 911, $account, '/skip')->assertJsonFragment(['text' => 'Настроение сохранено без эмоджи.']);

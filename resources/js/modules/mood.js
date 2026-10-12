@@ -45,12 +45,13 @@ export function initializeMood(root) {
             container.textContent = 'Стикер недоступен';
         }
     });
-    root.querySelectorAll('[data-request-topic]').forEach((select) => {
-        if (select.dataset.topicInitialized) return;
-        select.dataset.topicInitialized = 'true';
-        select.addEventListener('change', () => {
-            if (select.closest('[data-request-editor]') && ['service','gift','food','rating'].includes(select.value)) return;
-            const destination = select.selectedOptions[0]?.dataset.url;
+    root.querySelectorAll('[data-request-topic]').forEach((topics) => {
+        if (topics.dataset.topicInitialized) return;
+        topics.dataset.topicInitialized = 'true';
+        topics.addEventListener('change', (event) => {
+            const choice = event.target;
+            if (topics.closest('[data-request-editor]') && ['service','gift','food','rating'].includes(choice.value)) return;
+            const destination = choice.dataset?.url;
             if (destination) window.location.assign(destination);
         });
     });

@@ -26,7 +26,7 @@ it('sends a self question to the actor and sends the mood answer to the partner 
     $prompt = MoodPrompt::query()->sole();
     expect($prompt->user_id)->toBe($pair->first->id)->and($prompt->is_self_requested)->toBeTrue();
     $question = NotificationDelivery::query()->sole();
-    expect($question->recipient_id)->toBe($pair->first->id)->and(app(DeliveryContent::class)->getText($question))->toContain('Укажите своё настроение')->not->toContain('Партнёр хочет');
+    expect($question->recipient_id)->toBe($pair->first->id)->and(app(DeliveryContent::class)->getText($question))->toContain('Ваше настроение', 'Партнёр её увидит')->not->toContain('Партнёр хочет');
     app(RecordMood::class)->execute($pair->first, $pair->couple, new MoodData(MoodLevel::Good, Str::uuid()->toString(), promptId: $prompt->id));
     expect(NotificationDelivery::query()->where('kind', NotificationKind::MoodEntry)->sole()->recipient_id)->toBe($pair->second->id);
     $this->asUser(User::factory()->create())->postJson(route('mood.self.store', $pair->couple))->assertForbidden();

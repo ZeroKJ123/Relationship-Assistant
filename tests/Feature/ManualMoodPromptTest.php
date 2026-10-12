@@ -45,7 +45,7 @@ it('asks only the partner and reuses the pending request without duplicate deliv
     $this->post(route('mood.prompts.store', $pair->couple))->assertRedirect(route('home'))->assertSessionHas('toast', 'Запрос уже отправлен. Повторить можно через минуту.');
     expect(MoodPrompt::query()->count())->toBe(1)->and(NotificationDelivery::query()->where('kind', NotificationKind::MoodPrompt)->count())->toBe(1);
     $delivery = NotificationDelivery::query()->sole();
-    expect(app(DeliveryContent::class)->getText($delivery))->toContain('Партнёр хочет узнать ваше настроение')->not->toContain('http');
+    expect(app(DeliveryContent::class)->getText($delivery))->toContain(sprintf('%s спрашивает, как вы', e($pair->first->name)))->not->toContain('http');
 });
 
 it('resends a manual question at the cooldown boundary and rejects the superseded answer', function (): void {

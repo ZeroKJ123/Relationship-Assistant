@@ -14,7 +14,7 @@ it('keeps private pages uncached while providing manifest icons and offline guid
         ->assertSee('rel="manifest" href="/manifest.webmanifest"', escape: false)
         ->assertSee('rel="apple-touch-icon"', escape: false)
         ->assertSee('data-authenticated="true"', escape: false)
-        ->assertSee('Как установить')->assertSee('Safari')->assertSee('Android')
+        ->assertDontSee('Как установить')
         ->assertSee('data-connection-status', escape: false);
 });
 
