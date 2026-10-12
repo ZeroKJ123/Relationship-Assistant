@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Appearance;
 
 use App\Models\AppearanceSetting;
+use App\Models\User;
 use App\ViewModels\DashboardViewModel;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -55,12 +57,35 @@ final class AppearanceStore
         return $settings['seasons'][$season];
     }
 
+    /** Тема текущего зрителя: личный выбор, если он ещё доступен, иначе общая тема. */
+    public function currentId(): string
+    {
+        $user = Auth::user();
+        $personal = $user instanceof User ? $user->theme : null;
+
+        return $personal !== null && isset($this->selectableThemes()[$personal]) ? $personal : $this->activeId();
+    }
+
+    /** @return array<string,Theme> темы, доступные для личного выбора, в порядке показа */
+    public function selectableThemes(): array
+    {
+        $themes = $this->get()['themes'];
+        $selectable = [];
+        foreach (AppearanceCatalog::PERSONAL_THEMES as $id) {
+            if (isset($themes[$id])) {
+                $selectable[$id] = $themes[$id];
+            }
+        }
+
+        return $selectable;
+    }
+
     /** @return Theme */
     public function theme(): array
     {
         $settings = $this->get();
 
-        return $settings['themes'][$this->activeId()];
+        return $settings['themes'][$this->currentId()];
     }
 
     /** @return array{kind:string,value:string} */

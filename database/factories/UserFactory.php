@@ -30,6 +30,7 @@ class UserFactory extends Factory
             'login' => fake()->unique()->regexify('[a-z][a-z0-9_]{9}'),
             'gender' => Gender::Unspecified,
             'locale' => 'ru',
+            'theme' => null,
             'currency' => Currency::Byn,
             'is_admin' => false,
             'email' => fake()->unique()->safeEmail(),

@@ -24,6 +24,7 @@ use Illuminate\Notifications\Notifiable;
  * @property ?string $password
  * @property ?Gender $gender
  * @property ?string $locale
+ * @property ?string $theme
  * @property ?Currency $currency
  * @property bool $is_admin
  * @property ?string $avatar_path

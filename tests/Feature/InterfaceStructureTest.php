@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Mood\CreateMoodPrompt;
+use App\Actions\Profiles\SaveCompliments;
 use App\Enums\DutyStatus;
 use App\Enums\MoodLevel;
 use App\Enums\RequestStatus;
@@ -13,6 +14,7 @@ use App\Models\MoodPrompt;
 use App\Models\PartnerRequest;
 use App\Models\User;
 use App\Services\Appearance\AppearanceCatalog;
+use App\Services\Appearance\AppearanceStore;
 use App\Services\Mood\MoodCalendar;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -228,4 +230,42 @@ it('adds the new dashboard shortcuts to a saved layout once and keeps custom til
         ->and($saved->settings['layout']['tiles'][0]['title'])->toBe('Наша кухня')->and($saved->settings['layout']['tiles'][8])->toBe($catalog->tile('reminder'));
     $migration->down();
     expect(AppearanceSetting::query()->findOrFail(AppearanceCatalog::SINGLETON_ID)->settings['layout']['tiles'])->toHaveCount(8);
+});
+
+it('lets each user choose a personal theme that changes only their colours and decoration', function (): void {
+    $pair = AgreementScenario::create();
+    $catalog = new AppearanceCatalog;
+
+    $this->asUser($pair->first)->get(route('profile.show'))->assertOk()->assertSeeInOrder(['Тема оформления', 'Тыквенный латте', 'Белая', 'Любовная', 'Цветочная']);
+    $this->patch(route('profile.theme'), ['theme' => 'classic'])->assertSessionHasErrors('theme');
+    $this->patch(route('profile.theme'), ['theme' => 'love'])->assertRedirect(route('profile.show'))->assertSessionHasNoErrors();
+    expect($pair->first->refresh()->theme)->toBe('love')->and($pair->second->refresh()->theme)->toBeNull();
+
+    $this->get('/')->assertOk()->assertSee(sprintf('--color-violet:%s', $catalog->personalThemes()['love']['primary']), false)->assertSee('data-decoration="hearts"', false)->assertSee('data-layout-tile="kitchen"', false);
+    $this->asUser($pair->second)->get('/')->assertOk()->assertSee(sprintf('--color-violet:%s', $catalog->latteTheme()['primary']), false)->assertSee('data-decoration="leaves"', false);
+});
+
+it('falls back to the shared theme when a chosen personal theme no longer exists', function (): void {
+    $user = User::factory()->create(['theme' => 'floral']);
+    $settings = (new AppearanceCatalog)->defaults();
+    unset($settings['themes']['floral']);
+    AppearanceSetting::query()->whereKey(AppearanceCatalog::SINGLETON_ID)->update(['settings' => $settings]);
+
+    $this->asUser($user)->get(route('profile.show'))->assertOk()->assertSee('data-decoration="leaves"', false)->assertDontSee('Цветочная');
+    $migration = require database_path(sprintf('migrations/%s', basename((string) collect(glob(database_path('migrations/*add_personal_themes_to_appearance_settings.php')))->sole())));
+    $migration->up();
+    $migration->up();
+    expect(AppearanceSetting::query()->findOrFail(AppearanceCatalog::SINGLETON_ID)->revision)->toBe(1);
+    app(AppearanceStore::class)->invalidate();
+    $this->get(route('profile.show'))->assertOk()->assertSee('data-decoration="flowers"', false);
+});
+
+it('shows the partner compliment in the greeting instead of a separate dashboard card', function (): void {
+    $pair = AgreementScenario::create();
+    app(SaveCompliments::class)->execute($pair->second, ['Ты мой уют']);
+
+    $this->asUser($pair->first)->get('/')->assertOk()
+        ->assertSeeInOrder(['id="greeting-title"', 'data-compliment', 'Ты мой уют', 'class="partner-summary"'], false)
+        ->assertDontSee('Забота начинается с маленьких вещей')->assertDontSee('partner-compliment', false)->assertDontSee('Комплимент от партнёра');
+    $this->asUser($pair->second)->get('/')->assertOk()->assertSeeInOrder(['data-compliment', 'Забота начинается с маленьких вещей', 'class="partner-summary"'], false);
 });

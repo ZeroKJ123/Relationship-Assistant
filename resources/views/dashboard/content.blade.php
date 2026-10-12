@@ -6,7 +6,7 @@
     @if($dashboard->choreDraw)<x-card class="section-space"><p>{{ __('Предложена жеребьёвка дела') }}</p><strong>{{ $dashboard->choreDraw->description }}</strong><a class="button button--primary" href="{{ route('chores.show',[$dashboard->couple,$dashboard->choreDraw]) }}">{{ __('Открыть жеребьёвку') }}</a></x-card>@endif
 
 @foreach($appearance->blocks($dashboard) as $block)
-<div data-layout-block="{{ $block['id'] }}" class="dashboard-block @if($block['tone'] !== 'plain') card card--{{ $block['tone'] }} @endif">
+<div data-layout-block="{{ $block['id'] }}" @if($block['type'] === 'compliment') hidden @endif class="dashboard-block @if($block['tone'] !== 'plain') card card--{{ $block['tone'] }} @endif">
 @if($block['title'] !== '' && $block['type'] !== 'text')<h2>{{ $block['title'] }}</h2>@endif
 @include('dashboard.blocks.'.$block['type'])
 </div>

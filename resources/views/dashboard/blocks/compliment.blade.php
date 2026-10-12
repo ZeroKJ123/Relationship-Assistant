@@ -1,1 +1,1 @@
-    <x-card class="section-space partner-compliment" data-compliment data-compliments="{{ json_encode($dashboard->partner?->compliments ?? []) }}"><p>{{ $dashboard->compliment }}</p>@if($dashboard->partner && $dashboard->partner->compliments)<small>{{ __('Комплимент от партнёра') }}</small>@endif</x-card>
+{{-- Комплимент партнёра показывается в приветствии; блок сохранён пустым ради прежних раскладок. --}}

@@ -27,6 +27,11 @@ final class AppearanceCatalog
 
     public const DEFAULT_THEME = 'latte';
 
+    /** Темы, которые участник может выбрать для себя в профиле. */
+    public const PERSONAL_THEMES = [self::DEFAULT_THEME, 'white', 'love', 'floral'];
+
+    public const DECORATIONS = ['none', 'clouds', 'flowers', 'sun', 'leaves', 'snow', 'hearts'];
+
     private const TILE_TONES = ['kitchen' => 'yellow', 'request' => 'purple', 'date' => 'pink', 'gift' => 'yellow', 'movies' => 'purple', 'car' => 'yellow', 'chores' => 'yellow', 'rating' => 'pink', 'reminder' => 'purple', 'compliments' => 'pink'];
 
     private const TILE_CONDITIONS = ['car' => 'has_car', 'chores' => 'has_partner', 'rating' => 'has_partner', 'reminder' => 'has_partner', 'compliments' => 'has_partner'];
@@ -37,6 +42,7 @@ final class AppearanceCatalog
         $base = ['name' => __('Облака и сердечки'), 'primary' => '#7035ce', 'ink' => '#26104d', 'muted' => '#675580', 'lilac' => '#ede2ff', 'butter' => '#fff1b6', 'rose' => '#ffd6e3', 'background' => '#f1eaff', 'gradient' => '#eee6ff', 'angle' => 145, 'decoration' => 'clouds', 'image' => null, 'icons' => []];
         $themes = ['classic' => $base,
             self::DEFAULT_THEME => $this->latteTheme(),
+            ...$this->personalThemes(),
             'spring' => array_replace($base, ['name' => __('Весенний сад'), 'primary' => '#326841', 'ink' => '#183923', 'muted' => '#43694d', 'lilac' => '#d9f0dc', 'butter' => '#fff2c9', 'rose' => '#ffe0ec', 'background' => '#eff8ea', 'gradient' => '#ffe5ee', 'decoration' => 'flowers']),
             'summer' => array_replace($base, ['name' => __('Летнее солнце'), 'primary' => '#176778', 'ink' => '#163e46', 'muted' => '#4b6770', 'lilac' => '#d8f3f6', 'butter' => '#fff0bc', 'rose' => '#ffe2cc', 'background' => '#fff8db', 'gradient' => '#d5f5ff', 'decoration' => 'sun']),
             'autumn' => array_replace($base, ['name' => __('Тёплая осень'), 'primary' => '#914119', 'ink' => '#462618', 'muted' => '#755547', 'lilac' => '#f9e4d4', 'butter' => '#fff0c9', 'rose' => '#f8d9cf', 'background' => '#fff2e1', 'gradient' => '#f9dbc3', 'decoration' => 'leaves']),
@@ -60,6 +66,22 @@ final class AppearanceCatalog
         return ['id' => $id, 'enabled' => true, 'condition' => self::TILE_CONDITIONS[$id] ?? 'always', 'tone' => self::TILE_TONES[$id], 'title' => ''];
     }
 
+    /**
+     * Дополнительные личные темы: меняют только цвета, фон и украшения.
+     *
+     * @return array<string,Theme>
+     */
+    public function personalThemes(): array
+    {
+        $base = $this->latteTheme();
+
+        return [
+            'white' => array_replace($base, ['name' => __('Белая'), 'primary' => '#c8324b', 'ink' => '#1c1b1f', 'muted' => '#6b6871', 'lilac' => '#f1f0f3', 'butter' => '#fdecc8', 'rose' => '#fbdde3', 'background' => '#ffffff', 'gradient' => '#fafafa', 'angle' => 180, 'decoration' => 'none']),
+            'love' => array_replace($base, ['name' => __('Любовная'), 'primary' => '#c2255c', 'ink' => '#4a1230', 'muted' => '#8a4a66', 'lilac' => '#ffd9e6', 'butter' => '#ffe7c2', 'rose' => '#ffc9d9', 'background' => '#fff0f5', 'gradient' => '#ffdfea', 'angle' => 150, 'decoration' => 'hearts']),
+            'floral' => array_replace($base, ['name' => __('Цветочная'), 'primary' => '#2e7550', 'ink' => '#1f3a2b', 'muted' => '#557062', 'lilac' => '#dcefe0', 'butter' => '#fff0c4', 'rose' => '#ffd9e6', 'background' => '#f4faf1', 'gradient' => '#ffeaf1', 'angle' => 150, 'decoration' => 'flowers']),
+        ];
+    }
+
     /** @return Theme */
     public function latteTheme(): array
     {
@@ -69,7 +91,7 @@ final class AppearanceCatalog
     /** @return array<string,string> */
     public function blockLabels(): array
     {
-        return ['greeting' => __('Приветствие и партнёр'), 'summary' => __('Настроение и баланс'), 'start' => __('Приглашение в пару'), 'tiles' => __('Быстрые действия'), 'agreement' => __('Недельный лимит'), 'duties' => __('Мои дела'), 'request' => __('Новая просьба'), 'compliment' => __('Комплимент'), 'text' => __('Текстовая карточка')];
+        return ['greeting' => __('Приветствие и партнёр'), 'summary' => __('Настроение и баланс'), 'start' => __('Приглашение в пару'), 'tiles' => __('Быстрые действия'), 'agreement' => __('Недельный лимит'), 'duties' => __('Мои дела'), 'request' => __('Новая просьба'), 'compliment' => __('Комплимент (теперь в приветствии)'), 'text' => __('Текстовая карточка')];
     }
 
     /** @return array<string,string> */

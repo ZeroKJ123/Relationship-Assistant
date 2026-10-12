@@ -115,7 +115,7 @@ final class AdminAppearanceRequest extends FormRequest
             'theme' => ['required', 'array:name,primary,ink,muted,lilac,butter,rose,background,gradient,angle,decoration,icons'],
             'theme.name' => ['required', 'string', 'max:80'],
             'theme.angle' => ['required', 'integer', 'between:0,360'],
-            'theme.decoration' => ['required', Rule::in(['none', 'clouds', 'flowers', 'sun', 'leaves', 'snow'])],
+            'theme.decoration' => ['required', Rule::in(AppearanceCatalog::DECORATIONS)],
             'theme.icons' => ['required', 'array:'.implode(',', AppearanceCatalog::ICONS)],
             'theme.icons.*' => ['nullable', 'string', 'max:12'],
             'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096', 'dimensions:max_width=4096,max_height=4096'],

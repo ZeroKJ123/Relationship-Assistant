@@ -21,6 +21,9 @@
     --color-coral: #a5321c; --color-success: #4f5e1c; --color-white: #fff;
     --radius-control: .95rem; --spacing-section: 1.5rem; --touch-target: 44px;
     --leaf-maple: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath transform='rotate(22 12 12)' d='M12 1.5l1.7 3.6 3-1.1-.6 4.1 3.7-1-1.3 3.5 3.1 1.3-3.8 2.7.7 2.5-4.9-1-.3 5.4h-1.6l-.3-5.4-4.9 1 .7-2.5-3.8-2.7 3.1-1.3-1.3-3.5 3.7 1-.6-4.1 3 1.1z'/%3E%3C/svg%3E");
+    --shape-heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21S3.5 15.6 3.5 9.2A4.7 4.7 0 0 1 12 6.6a4.7 4.7 0 0 1 8.5 2.6C20.5 15.6 12 21 12 21z'/%3E%3C/svg%3E");
+    --shape-heart-tilted: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath transform='rotate(-18 12 12)' d='M12 21S3.5 15.6 3.5 9.2A4.7 4.7 0 0 1 12 6.6a4.7 4.7 0 0 1 8.5 2.6C20.5 15.6 12 21 12 21z'/%3E%3C/svg%3E");
+    --shape-flower: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg%3E%3Ccircle cx='12' cy='5.6' r='3.7'/%3E%3Ccircle cx='18.1' cy='10' r='3.7'/%3E%3Ccircle cx='15.8' cy='17.2' r='3.7'/%3E%3Ccircle cx='8.2' cy='17.2' r='3.7'/%3E%3Ccircle cx='5.9' cy='10' r='3.7'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/g%3E%3C/svg%3E");
     --leaf-oval: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath transform='rotate(-32 12 12)' d='M12 1.5C6.5 5.5 4.5 11 6.2 16.5c.9 2.3 2.7 3.6 5 4.2V23h1.600v-2.300c2.300-.600 4.100-1.900 5-4.200C19.500 11 17.500 5.500 12 1.500z'/%3E%3C/svg%3E");
 }
 
@@ -62,12 +65,14 @@ small { font-size: .82rem; color: var(--color-muted); }
 
 /* Украшения темы */
 body::before, .theme-live-preview::before { position: fixed; inset: 0; pointer-events: none; opacity: .12; z-index: -1; font-size: 4rem; white-space: pre-wrap; overflow: hidden; word-spacing: 3rem; line-height: 3; }
-[data-decoration="flowers"]::before { content: '✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀ ✿ ❀'; color: var(--color-violet); }
 [data-decoration="sun"]::before { content: '☀ ☀ ☀ ☀ ☀ ☀ ☀ ☀ ☀ ☀ ☀ ☀ ☀ ☀ ☀ ☀'; color: var(--color-violet); }
 [data-decoration="snow"]::before { content: '❄ ❅ ❄ ❅ ❄ ❅ ❄ ❅ ❄ ❅ ❄ ❅ ❄ ❅ ❄ ❅'; color: var(--color-violet); }
-[data-decoration="leaves"]::before { content: ''; opacity: .11; background: var(--color-violet); -webkit-mask: var(--leaf-maple) no-repeat left -2.8rem bottom 22% / 9.5rem, var(--leaf-oval) no-repeat right -1.6rem bottom 7rem / 6.5rem; mask: var(--leaf-maple) no-repeat left -2.8rem bottom 22% / 9.5rem, var(--leaf-oval) no-repeat right -1.6rem bottom 7rem / 6.5rem; }
-[data-decoration="leaves"] .app-header::after { content: ''; position: absolute; inset: -.6rem 0 -.4rem 45%; pointer-events: none; background: linear-gradient(100deg, var(--color-violet), color-mix(in srgb, var(--color-violet) 45%, #f0b040)); -webkit-mask: var(--leaf-maple) no-repeat right 1.6rem top .1rem / 1.9rem, var(--leaf-oval) no-repeat right 4.6rem top 1.7rem / 1.1rem, var(--leaf-maple) no-repeat right 7rem top .2rem / .95rem; mask: var(--leaf-maple) no-repeat right 1.6rem top .1rem / 1.9rem, var(--leaf-oval) no-repeat right 4.6rem top 1.7rem / 1.1rem, var(--leaf-maple) no-repeat right 7rem top .2rem / .95rem; }
-[data-decoration="leaves"] .app-header:has(.app-back, .pill)::after { inset-inline: 25% 8.6rem; }
+[data-decoration="leaves"] { --decoration-large: var(--leaf-maple); --decoration-small: var(--leaf-oval); --decoration-tint: #f0b040; }
+[data-decoration="hearts"] { --decoration-large: var(--shape-heart); --decoration-small: var(--shape-heart-tilted); --decoration-tint: #ff8fb3; }
+[data-decoration="flowers"] { --decoration-large: var(--shape-flower); --decoration-small: var(--leaf-oval); --decoration-tint: #f6b3cd; --decoration-color: #d95c8f; }
+:is([data-decoration="leaves"], [data-decoration="hearts"], [data-decoration="flowers"])::before { content: ''; opacity: .11; background: var(--decoration-color, var(--color-violet)); -webkit-mask: var(--decoration-large) no-repeat left -2.8rem bottom 22% / 9.5rem, var(--decoration-small) no-repeat right -1.6rem bottom 7rem / 6.5rem; mask: var(--decoration-large) no-repeat left -2.8rem bottom 22% / 9.5rem, var(--decoration-small) no-repeat right -1.6rem bottom 7rem / 6.5rem; }
+:is([data-decoration="leaves"], [data-decoration="hearts"], [data-decoration="flowers"]) .app-header::after { content: ''; position: absolute; inset: -.6rem 0 -.4rem 45%; pointer-events: none; background: linear-gradient(100deg, var(--decoration-color, var(--color-violet)), color-mix(in srgb, var(--decoration-color, var(--color-violet)) 45%, var(--decoration-tint))); -webkit-mask: var(--decoration-large) no-repeat right 1.6rem top .1rem / 1.9rem, var(--decoration-small) no-repeat right 4.6rem top 1.7rem / 1.1rem, var(--decoration-large) no-repeat right 7rem top .2rem / .95rem; mask: var(--decoration-large) no-repeat right 1.6rem top .1rem / 1.9rem, var(--decoration-small) no-repeat right 4.6rem top 1.7rem / 1.1rem, var(--decoration-large) no-repeat right 7rem top .2rem / .95rem; }
+:is([data-decoration="leaves"], [data-decoration="hearts"], [data-decoration="flowers"]) .app-header:has(.app-back, .pill)::after { inset-inline: 25% 8.6rem; }
 
 /* Карточки и кнопки */
 .card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-card); padding: 1.1rem; overflow-wrap: anywhere; }
@@ -201,7 +206,6 @@ nav[role="navigation"] { margin-top: var(--spacing-section); }
 /* Главная */
 .dashboard h1 { font-size: clamp(2rem, 8vw, 2.6rem); }
 .dashboard-block + .dashboard-block, .dashboard .section-space { margin-top: var(--spacing-section); }
-.dashboard-greeting > p:last-of-type { margin-top: .4rem; }
 .partner-summary { display: flex; align-items: center; gap: .8rem; margin-top: 1.1rem; padding: .8rem 0; border-block: 1px solid var(--color-line); overflow-wrap: anywhere; }
 .partner-summary__body { flex: 1; min-width: 0; }
 .partner-summary__body strong { display: block; }
@@ -237,8 +241,7 @@ nav[role="navigation"] { margin-top: var(--spacing-section); }
 .dashboard-tiles a:hover strong { color: var(--color-violet); }
 .dashboard-duty { display: flex; align-items: center; justify-content: space-between; gap: .8rem; }
 .dashboard-duty > div { min-width: 0; overflow-wrap: anywhere; }
-.partner-compliment { text-align: center; font-style: italic; }
-.partner-compliment small { display: block; margin-top: .3rem; font-style: normal; }
+.greeting-compliment { margin-top: .4rem; overflow-wrap: anywhere; }
 @media (max-width: 700px) { .dashboard-tiles { grid-template-columns: repeat(min(var(--tile-columns, 2), 2), minmax(0, 1fr)); } }
 
 /* Каталоги, блюда и желания */
@@ -355,6 +358,12 @@ body:has(.admin-shell) .app-shell { max-width: 1450px; }
 .admin-sidebar .brand { font-size: 1.1rem; padding: 0; margin-bottom: .5rem; }
 .admin-content, .builder-controls { min-width: 0; }
 .theme-grid, .theme-colors { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--spacing-page); }
+.theme-choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: .7rem; }
+.theme-choice { display: grid; justify-items: center; gap: .5rem; padding: .8rem .6rem; border: 2px solid var(--color-line); border-radius: var(--radius-card); background: linear-gradient(150deg, var(--swatch-start), var(--swatch-end)); color: var(--swatch-ink); font-weight: 700; text-align: center; cursor: pointer; }
+.theme-choice input { position: absolute; opacity: 0; pointer-events: none; }
+.theme-choice__sample { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--swatch-accent); color: #fff; }
+.theme-choice:has(input:checked) { border-color: var(--swatch-accent); box-shadow: 0 0 0 2px var(--swatch-accent); }
+.theme-choice:has(input:focus-visible) { outline: 3px solid var(--color-violet); outline-offset: 3px; }
 .theme-swatch { display: grid; gap: .5rem; text-decoration: none; background: linear-gradient(145deg, var(--swatch-start), var(--swatch-end)); }
 .theme-swatch__sample { color: var(--swatch-accent); font-size: 2rem; }
 .theme-colors input[type="color"] { width: 100%; height: var(--touch-target); }

@@ -36,6 +36,13 @@
         @can('manage-system-settings')<a href="{{ route('admin.economy.index') }}">{{ __('Экономика приложения') }}</a>@endcan
     </nav>
 <h2 class="group-label"><span>{{ __('Дополнительные настройки') }}</span></h2>
+<details class="settings-section" @if($errors->has('theme')) open @endif><summary><x-icon name="heart" /><span class="row__body"><span class="row__title">{{ __('Тема оформления') }}</span><span class="row__meta">{{ $themeName }}</span></span></summary>
+<form method="post" action="{{ route('profile.theme') }}" class="form-stack" data-submit-lock>@csrf @method('patch')
+<fieldset><legend>{{ __('Выберите тему') }}</legend><div class="theme-choices">@foreach($themes as $id => $theme)<label class="theme-choice" style="--swatch-start:{{ $theme['background'] }};--swatch-end:{{ $theme['gradient'] }};--swatch-accent:{{ $theme['primary'] }};--swatch-ink:{{ $theme['ink'] }}"><input type="radio" name="theme" value="{{ $id }}" @checked(old('theme',$themeId) === $id) required><span class="theme-choice__sample" aria-hidden="true"><x-icon name="heart" /></span><span>{{ $theme['name'] }}</span></label>@endforeach</div></fieldset>
+@error('theme')<p class="field-error" role="alert">{{ $message }}</p>@enderror
+<p class="field-hint">{{ __('Меняются только цвета, фон и украшения — расположение остаётся прежним. Тему видите только вы.') }}</p>
+<x-button type="submit">{{ __('Сохранить тему') }}</x-button></form>
+</details>
 <details class="settings-section settings-history"><summary><x-icon name="user" /><span class="row__body"><span class="row__title">{{ __('Редактировать профиль') }}</span><span class="row__meta">{{ __('Имя, описание, пол') }}</span></span></summary>
 <form method="post" action="{{ route('profile.update') }}" class="form-stack" data-submit-lock>
         @csrf @method('patch')
