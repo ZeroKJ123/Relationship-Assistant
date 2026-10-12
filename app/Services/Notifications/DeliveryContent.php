@@ -14,6 +14,7 @@ use App\Models\ChoreDraw;
 use App\Models\Duty;
 use App\Models\DutyConfirmation;
 use App\Models\DutyReminderBatch;
+use App\Models\MemorableDateNotice;
 use App\Models\MoodEntry;
 use App\Models\MoodPrompt;
 use App\Models\MovieChoice;
@@ -22,6 +23,7 @@ use App\Models\PartnerReminder;
 use App\Models\PartnerRequest;
 use App\Models\RequestEvent;
 use App\Models\User;
+use App\Services\Couples\MemorableDates;
 use Carbon\CarbonImmutable;
 
 final class DeliveryContent
@@ -48,6 +50,7 @@ final class DeliveryContent
             NotificationKind::DutyReminder => $this->getDutyReminderText($delivery),
             NotificationKind::MovieChoice => $this->getSelectionText($delivery, MovieChoice::class),
             NotificationKind::ChoreDraw => $this->getSelectionText($delivery, ChoreDraw::class),
+            NotificationKind::MemorableDate => $this->getMemorableDateText($delivery),
         };
     }
 
@@ -245,6 +248,21 @@ final class DeliveryContent
         }
 
         return $this->message->compose([$this->message->title('🔔', __(':name напоминает', ['name' => $this->getPartnerName($delivery)])), $this->message->text($reminder->text, self::DESCRIPTION_LENGTH)]);
+    }
+
+    private function getMemorableDateText(NotificationDelivery $delivery): ?string
+    {
+        $notice = MemorableDateNotice::query()->whereKey($delivery->source_id)->where('couple_id', $delivery->couple_id)->where('user_id', $delivery->recipient_id)->first();
+        if ($notice === null) {
+            return null;
+        }
+        $title = $notice->days_before === 0 ? $this->message->title('🎉', __('Сегодня: :title', ['title' => $notice->title])) : $this->message->title('🗓', __('Через :days дн.: :title', ['days' => $notice->days_before, 'title' => $notice->title]));
+        $lines = [$title, sprintf('📅 %s', $notice->occurs_on->isoFormat('D MMMM'))];
+        if ($notice->years !== null && in_array($notice->source_key, [MemorableDates::KEY_STARTED, MemorableDates::KEY_MARRIED], true)) {
+            $lines[] = __(':count-я годовщина', ['count' => $notice->years]);
+        }
+
+        return $this->message->compose($lines);
     }
 
     private function getPartnerName(NotificationDelivery $delivery): string

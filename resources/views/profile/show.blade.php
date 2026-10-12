@@ -27,6 +27,7 @@
 <nav class="settings-links" aria-label="{{ __('Разделы профиля') }}">
         <a href="{{ route('hearts.index') }}">{{ __('Сердечки и история') }}</a>
         <a href="{{ route('dishes.index') }}">{{ __('Моя кухня') }}</a>
+        <a href="{{ route('rewards.index') }}">{{ __('Мой магазин наград') }}</a>
         <a href="{{ route('wishlist.index') }}">{{ __('Мой виш-лист') }}</a>
         <a href="{{ route('friends.index') }}">{{ __('Мои друзья') }}</a>
         @if($couple)

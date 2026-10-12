@@ -23,7 +23,7 @@ final class StorePartnerRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
-        return ['dish_id' => ['nullable', 'integer', 'min:1'], 'dish_version' => ['nullable', 'integer', 'min:0'], 'request_template_id' => ['nullable', 'integer', 'min:1'], 'expense_category_id' => ['nullable', 'integer', 'min:1'], 'operation_key' => ['required', 'uuid'], 'type' => ['required', Rule::enum(RequestType::class)], 'description' => ['required', 'string', 'max:2000'], 'due_at' => ['required', 'date_format:Y-m-d\TH:i'], 'is_very_wanted' => ['sometimes', 'boolean'], 'heart_price' => ['sometimes', 'nullable', 'integer', sprintf('between:0,%d', EconomyRules::MAXIMUM_SETTING)]];
+        return ['reward_id' => ['nullable', 'integer', 'min:1'], 'dish_id' => ['nullable', 'integer', 'min:1'], 'dish_version' => ['nullable', 'integer', 'min:0'], 'request_template_id' => ['nullable', 'integer', 'min:1'], 'expense_category_id' => ['nullable', 'integer', 'min:1'], 'operation_key' => ['required', 'uuid'], 'type' => ['required', Rule::enum(RequestType::class)], 'description' => ['required', 'string', 'max:2000'], 'due_at' => ['required', 'date_format:Y-m-d\TH:i'], 'is_very_wanted' => ['sometimes', 'boolean'], 'heart_price' => ['sometimes', 'nullable', 'integer', sprintf('between:0,%d', EconomyRules::MAXIMUM_SETTING)]];
     }
 
     public function getData(Couple $couple): NewRequestData
@@ -33,6 +33,6 @@ final class StorePartnerRequest extends FormRequest
             throw ValidationException::withMessages(['due_at' => __('Укажите срок просьбы.')]);
         }
 
-        return new NewRequestData(dishId: $this->filled('dish_id') ? $this->integer('dish_id') : null, dishVersion: $this->filled('dish_version') ? $this->integer('dish_version') : null, type: RequestType::from($this->string('type')->toString()), description: $this->string('description')->trim()->toString(), dueAt: $dueAt, isVeryWanted: $this->boolean('is_very_wanted'), operationKey: $this->string('operation_key')->toString(), heartPrice: $this->integer('heart_price'), templateId: $this->filled('request_template_id') ? $this->integer('request_template_id') : null, expenseCategoryId: $this->filled('expense_category_id') ? $this->integer('expense_category_id') : null);
+        return new NewRequestData(dishId: $this->filled('dish_id') ? $this->integer('dish_id') : null, dishVersion: $this->filled('dish_version') ? $this->integer('dish_version') : null, type: RequestType::from($this->string('type')->toString()), description: $this->string('description')->trim()->toString(), dueAt: $dueAt, isVeryWanted: $this->boolean('is_very_wanted'), operationKey: $this->string('operation_key')->toString(), heartPrice: $this->integer('heart_price'), templateId: $this->filled('request_template_id') ? $this->integer('request_template_id') : null, expenseCategoryId: $this->filled('expense_category_id') ? $this->integer('expense_category_id') : null, rewardId: $this->filled('reward_id') ? $this->integer('reward_id') : null);
     }
 }

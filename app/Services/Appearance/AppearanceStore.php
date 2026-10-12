@@ -143,6 +143,7 @@ final class AppearanceStore
             'rating' => $dashboard->partner ? route('requests.create', [$dashboard->couple, 'type' => 'rating']) : $coupleFallback,
             'reminder' => $dashboard->partner ? route('reminders.create', $dashboard->couple) : $coupleFallback,
             'compliments' => route('profile.compliments.index'),
+            'rewards' => route('rewards.index', $dashboard->partner ? ['owner_id' => $dashboard->partner->id] : []),
         ];
     }
 

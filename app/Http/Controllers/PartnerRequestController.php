@@ -14,6 +14,7 @@ use App\Models\Dish;
 use App\Models\ExpenseCategory;
 use App\Models\PartnerRequest;
 use App\Models\RequestTemplate;
+use App\Models\Reward;
 use App\Models\SettlementMethod;
 use App\Models\User;
 use App\Models\WishlistItem;
@@ -58,6 +59,11 @@ final class PartnerRequestController extends Controller
             Gate::authorize('view', $dish);
             abort_unless($dish->user_id !== auth()->id() && $couple->members()->where('active_user_id', $dish->user_id)->exists(), Response::HTTP_FORBIDDEN);
         }
+        $reward = $request->filled('reward_id') ? Reward::query()->findOrFail($request->integer('reward_id')) : null;
+        if ($reward !== null) {
+            Gate::authorize('view', $reward);
+            abort_unless($reward->archived_at === null && $reward->user_id !== auth()->id() && $couple->members()->where('active_user_id', $reward->user_id)->exists(), Response::HTTP_FORBIDDEN);
+        }
         $preset = RequestTemplate::query()->whereKey($request->integer('request_template_id'))->first();
         if ($preset?->type === RequestType::Money) {
             return redirect()->route('money.create', [$couple, 'request_template_id' => $preset->id]);
@@ -69,7 +75,7 @@ final class PartnerRequestController extends Controller
             return redirect()->route('dates.create', [$couple, 'request_template_id' => $preset->id]);
         }
 
-        return view('requests.create', ['dish' => $dish, 'preset' => $preset, 'expenses' => ExpenseCategory::query()->orderBy('sort_order')->get(), 'couple' => $couple, 'selectedType' => in_array($request->query('type'), ['service', 'gift', 'food', 'rating'], true) ? $request->query('type') : RequestType::Service->value, 'defaultDueAt' => CarbonImmutable::now($couple->timezone)->addDay()->format(self::DUE_FIELD_FORMAT), 'dueShortcuts' => $this->getDueShortcuts(CarbonImmutable::now($couple->timezone)), 'operationKey' => Str::uuid()->toString()]);
+        return view('requests.create', ['reward' => $reward, 'dish' => $dish, 'preset' => $preset, 'expenses' => ExpenseCategory::query()->orderBy('sort_order')->get(), 'couple' => $couple, 'selectedType' => in_array($request->query('type'), ['service', 'gift', 'food', 'rating'], true) ? $request->query('type') : RequestType::Service->value, 'defaultDueAt' => CarbonImmutable::now($couple->timezone)->addDay()->format(self::DUE_FIELD_FORMAT), 'dueShortcuts' => $this->getDueShortcuts(CarbonImmutable::now($couple->timezone)), 'operationKey' => Str::uuid()->toString()]);
     }
 
     /** @return array<string,string> подпись быстрой кнопки и значение поля срока */

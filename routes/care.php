@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\ChoreDrawController;
+use App\Http\Controllers\MemorableDateController;
 use App\Http\Controllers\MoodController;
 use App\Http\Controllers\MoodDayController;
 use App\Http\Controllers\MoodStickerController;
@@ -25,6 +26,9 @@ Route::middleware(['auth', 'auth.session', EnsureCoupleAccess::class])->prefix('
     Route::post('mood/prompts', PartnerMoodPromptController::class)->middleware('throttle:couple-actions')->name('mood.prompts.store');
     Route::put('mood/{moodEntry}/emoji', [MoodController::class, 'emoji'])->whereNumber('moodEntry')->middleware('throttle:couple-actions')->name('mood.emoji');
     Route::put('mood/schedule', [MoodController::class, 'schedule'])->middleware('throttle:couple-actions')->name('mood.schedule');
+    Route::get('memorable-dates', [MemorableDateController::class, 'index'])->name('memorable_dates.index');
+    Route::post('memorable-dates', [MemorableDateController::class, 'store'])->middleware('throttle:couple-actions')->name('memorable_dates.store');
+    Route::delete('memorable-dates/{memorableDate}', [MemorableDateController::class, 'destroy'])->whereNumber('memorableDate')->middleware('throttle:couple-actions')->name('memorable_dates.destroy');
     Route::get('reminders', [PartnerReminderController::class, 'index'])->name('reminders.index');
     Route::get('reminders/create', [PartnerReminderController::class, 'create'])->name('reminders.create');
     Route::post('reminders', [PartnerReminderController::class, 'store'])->middleware('throttle:couple-actions')->name('reminders.store');

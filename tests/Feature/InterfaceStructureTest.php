@@ -217,7 +217,7 @@ it('offers reminder and compliment shortcuts on the dashboard and keeps complime
 it('adds the new dashboard shortcuts to a saved layout once and keeps custom tiles', function (): void {
     $catalog = new AppearanceCatalog;
     $settings = $catalog->defaults();
-    $settings['layout']['tiles'] = array_values(array_filter($settings['layout']['tiles'], fn (array $tile): bool => ! in_array($tile['id'], ['reminder', 'compliments'], true)));
+    $settings['layout']['tiles'] = array_values(array_filter($settings['layout']['tiles'], fn (array $tile): bool => ! in_array($tile['id'], ['reminder', 'compliments', 'rewards'], true)));
     $settings['layout']['tiles'][0]['title'] = 'Наша кухня';
     AppearanceSetting::query()->whereKey(AppearanceCatalog::SINGLETON_ID)->update(['settings' => $settings, 'revision' => 2]);
     $migration = require database_path('migrations/2026_10_12_145211_add_reminder_and_compliment_tiles_to_appearance_settings.php');

@@ -15,4 +15,5 @@ enum NotificationKind: string
     case DutyReminder = 'duty_reminder';
     case MovieChoice = 'movie_choice';
     case ChoreDraw = 'chore_draw';
+    case MemorableDate = 'memorable_date';
 }

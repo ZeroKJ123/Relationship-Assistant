@@ -15,4 +15,5 @@
             </span>
             @if($dashboard->partner)</a><span class="partner-summary__days" aria-hidden="true"><strong>{{ $dashboard->togetherDays }}</strong><span>{{ __('дней') }}</span></span>@endif
         </div>
+        @if($dashboard->nextDate)<a class="row" href="{{ route('memorable_dates.index',$dashboard->couple) }}"><x-icon name="date" /><span class="row__body"><strong class="row__title">{{ $dashboard->nextDate->title }}</strong><span class="row__meta">{{ $dashboard->nextDate->date->isoFormat('D MMMM') }}@if($dashboard->nextDate->years) · {{ __(':count-я годовщина', ['count'=>$dashboard->nextDate->years]) }}@endif</span></span><x-status :tone="$dashboard->nextDate->daysLeft <= 3 ? 'warning' : 'neutral'">{{ $dashboard->nextDate->getCountdown() }}</x-status></a>@endif
     </section>

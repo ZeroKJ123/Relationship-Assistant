@@ -32,7 +32,7 @@ final class AppearanceCatalog
 
     public const DECORATIONS = ['none', 'clouds', 'flowers', 'sun', 'leaves', 'snow', 'hearts'];
 
-    private const TILE_TONES = ['kitchen' => 'yellow', 'request' => 'purple', 'date' => 'pink', 'gift' => 'yellow', 'movies' => 'purple', 'car' => 'yellow', 'chores' => 'yellow', 'rating' => 'pink', 'reminder' => 'purple', 'compliments' => 'pink'];
+    private const TILE_TONES = ['kitchen' => 'yellow', 'request' => 'purple', 'date' => 'pink', 'gift' => 'yellow', 'movies' => 'purple', 'car' => 'yellow', 'chores' => 'yellow', 'rating' => 'pink', 'reminder' => 'purple', 'compliments' => 'pink', 'rewards' => 'yellow'];
 
     private const TILE_CONDITIONS = ['car' => 'has_car', 'chores' => 'has_partner', 'rating' => 'has_partner', 'reminder' => 'has_partner', 'compliments' => 'has_partner'];
 
@@ -97,7 +97,7 @@ final class AppearanceCatalog
     /** @return array<string,string> */
     public function tileLabels(): array
     {
-        return ['kitchen' => __('Кухня'), 'request' => __('Попросить'), 'date' => __('Свидание'), 'gift' => __('Виш-лист'), 'movies' => __('Фильмы'), 'car' => __('Мои машины'), 'chores' => __('Кто сделает?'), 'rating' => __('Оценить поступок'), 'reminder' => __('Напомнить'), 'compliments' => __('Комплименты')];
+        return ['kitchen' => __('Кухня'), 'request' => __('Попросить'), 'date' => __('Свидание'), 'gift' => __('Виш-лист'), 'movies' => __('Фильмы'), 'car' => __('Мои машины'), 'chores' => __('Кто сделает?'), 'rating' => __('Оценить поступок'), 'reminder' => __('Напомнить'), 'compliments' => __('Комплименты'), 'rewards' => __('Награды')];
     }
 
     /** @return array<string,string> */

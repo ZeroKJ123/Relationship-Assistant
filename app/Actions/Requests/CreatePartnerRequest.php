@@ -16,6 +16,7 @@ use App\Services\Hearts\ServicePayments;
 use App\Services\Requests\RefusalTariff;
 use App\Services\Requests\RequestAttachments;
 use App\Services\Requests\RequestContext;
+use App\Services\Requests\RewardOffers;
 use App\Services\Requests\SocialInvitations;
 use App\Services\Requests\VeryWantedRequests;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ use Illuminate\Support\Str;
 
 final class CreatePartnerRequest
 {
-    public function __construct(private readonly RequestContext $context, private readonly RefusalTariff $tariff, private readonly VeryWantedRequests $veryWanted, private readonly ServicePayments $payments, private readonly RequestCatalog $catalog, private readonly RequestAttachments $attachments, private readonly SocialInvitations $invitations) {}
+    public function __construct(private readonly RequestContext $context, private readonly RefusalTariff $tariff, private readonly VeryWantedRequests $veryWanted, private readonly ServicePayments $payments, private readonly RequestCatalog $catalog, private readonly RequestAttachments $attachments, private readonly SocialInvitations $invitations, private readonly RewardOffers $rewards) {}
 
     public function execute(User $actor, Couple $couple, NewRequestData $data): PartnerRequest
     {
@@ -57,6 +58,7 @@ final class CreatePartnerRequest
             }
             $this->payments->requireAvailability($actor, $data->heartPrice);
             $recipient = $current->members()->where('user_id', '!=', $actor->id)->lockForUpdate()->sole();
+            $this->rewards->requireOffer($recipient->user_id, $data);
             $request = new PartnerRequest;
             $request->forceFill([
                 ...$this->catalog->requestSnapshot($data),

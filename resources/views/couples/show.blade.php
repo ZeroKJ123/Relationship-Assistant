@@ -36,6 +36,7 @@
 <x-mood-summary :couple="$couple" :latest-moods="$latestMoods" />
 <h2 class="group-label"><span>{{ __('Разделы пары') }}</span></h2>
 <nav class="settings-links" aria-label="{{ __('Разделы пары') }}">
+<a href="{{ route('memorable_dates.index',$couple) }}">{{ __('Памятные даты') }}</a>
 <a href="{{ route('reminders.index',$couple) }}">{{ __('Напоминания') }}</a>
 <a href="{{ route('friends.index') }}">{{ __('Мои друзья') }}</a>@can('update',$couple)<a href="{{ route('guests.create',$couple) }}">{{ __('Позвать гостей') }}</a><a href="{{ route('dates.create',$couple) }}">{{ __('Свидание / мероприятие') }}</a>@endcan
 <a href="{{ route('dishes.index') }}">{{ __('Кухня') }}</a><a href="{{ route('wishlist.index') }}">{{ __('Виш-лист') }}</a>@can('update',$couple)<a href="{{ route('money.create',$couple) }}">{{ __('Попросить деньги') }}</a>@endcan

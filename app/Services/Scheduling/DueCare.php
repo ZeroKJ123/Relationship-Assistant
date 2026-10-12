@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Scheduling;
 
+use App\Actions\Couples\CreateDateNotices;
 use App\Actions\Duties\CreateDutyReminders;
 use App\Actions\Mood\CreateMoodPrompt;
 use App\Actions\Reminders\PrepareReminder;
@@ -21,13 +22,14 @@ final class DueCare
 {
     private const CHUNK_SIZE = 100;
 
-    public function __construct(private readonly CreateMoodPrompt $prompts, private readonly PrepareReminder $reminders, private readonly CreateDutyReminders $duties, private readonly MoodSchedule $schedule) {}
+    public function __construct(private readonly CreateMoodPrompt $prompts, private readonly PrepareReminder $reminders, private readonly CreateDutyReminders $duties, private readonly MoodSchedule $schedule, private readonly CreateDateNotices $dates) {}
 
     public function execute(): void
     {
         $this->processMoods();
         $this->processReminders();
         $this->processDuties();
+        $this->processDates();
     }
 
     private function processMoods(): void
@@ -82,6 +84,28 @@ final class DueCare
     {
         PartnerReminder::query()->where('status', ReminderStatus::Scheduled)->where('due_at', '<=', now())->lazyById(self::CHUNK_SIZE)->each(function (PartnerReminder $reminder): void {
             $this->reminders->execute($reminder, $reminder->version);
+        });
+    }
+
+    private function processDates(): void
+    {
+        CoupleMember::query()->whereNotNull('active_user_id')->whereRelation('couple', 'status', CoupleStatus::Active)->with(['couple', 'user'])->lazyById(self::CHUNK_SIZE)->each(function (CoupleMember $member): void {
+            $couple = $member->couple;
+            $user = $member->user;
+            if ($couple === null || $user === null) {
+                Log::error('schedule.member_unavailable', ['member_id' => $member->id]);
+
+                return;
+            }
+            $local = CarbonImmutable::now($couple->timezone);
+            if ($local->hour !== CreateDateNotices::HOUR || $local->minute >= CreateDateNotices::WINDOW_MINUTES) {
+                return;
+            }
+            try {
+                $this->dates->execute($user, $couple, $local->startOfHour()->utc());
+            } catch (AuthorizationException|ValidationException) {
+                Log::warning('schedule.date_skipped', ['member_id' => $member->id, 'reason' => 'couple_changed']);
+            }
         });
     }
 }
