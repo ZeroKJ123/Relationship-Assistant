@@ -29,7 +29,11 @@ final class MoodPrompt extends Model
 
     public const RESPONSE_WINDOW_HOURS = 3;
 
-    public const HOURS = [9, 15, 18, 21];
+    public const DEFAULT_TIMES = ['09:00', '15:00', '18:00', '21:00'];
+
+    public const MAXIMUM_TIMES = 8;
+
+    public const TIME_FORMAT = 'H:i';
 
     /** @return BelongsTo<Couple,$this> */
     public function couple(): BelongsTo

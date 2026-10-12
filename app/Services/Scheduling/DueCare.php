@@ -10,8 +10,8 @@ use App\Actions\Reminders\PrepareReminder;
 use App\Enums\CoupleStatus;
 use App\Enums\ReminderStatus;
 use App\Models\CoupleMember;
-use App\Models\MoodPrompt;
 use App\Models\PartnerReminder;
+use App\Services\Mood\MoodSchedule;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +21,7 @@ final class DueCare
 {
     private const CHUNK_SIZE = 100;
 
-    public function __construct(private readonly CreateMoodPrompt $prompts, private readonly PrepareReminder $reminders, private readonly CreateDutyReminders $duties) {}
+    public function __construct(private readonly CreateMoodPrompt $prompts, private readonly PrepareReminder $reminders, private readonly CreateDutyReminders $duties, private readonly MoodSchedule $schedule) {}
 
     public function execute(): void
     {
@@ -40,7 +40,7 @@ final class DueCare
 
                 return;
             }
-            $slot = $this->getLatestSlot(CarbonImmutable::now(), $couple->timezone);
+            $slot = $this->schedule->getLatestSlot($member, CarbonImmutable::now(), $couple->timezone);
             if ($slot === null || $slot->lessThan($member->joined_at)) {
                 return;
             }
@@ -83,23 +83,5 @@ final class DueCare
         PartnerReminder::query()->where('status', ReminderStatus::Scheduled)->where('due_at', '<=', now())->lazyById(self::CHUNK_SIZE)->each(function (PartnerReminder $reminder): void {
             $this->reminders->execute($reminder, $reminder->version);
         });
-    }
-
-    private function getLatestSlot(CarbonImmutable $now, string $timezone): ?CarbonImmutable
-    {
-        $local = $now->setTimezone($timezone);
-        $day = $local->startOfDay();
-        $latest = null;
-        foreach (MoodPrompt::HOURS as $hour) {
-            $candidate = $day->setTime($hour, 0)->utc();
-            if ($candidate->lessThanOrEqualTo($now)) {
-                $latest = $candidate;
-            }
-        }
-        if ($latest === null || $latest->addHours(MoodPrompt::RESPONSE_WINDOW_HOURS)->lessThanOrEqualTo($now)) {
-            return null;
-        }
-
-        return $latest;
     }
 }

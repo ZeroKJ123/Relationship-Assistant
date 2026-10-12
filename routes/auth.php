@@ -29,6 +29,7 @@ Route::middleware(['auth', 'auth.session'])->group(function (): void {
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('profile/avatar', ProfileAvatarController::class)->middleware('throttle:couple-actions')->name('profile.avatar.store');
     Route::patch('profile/couples/{couple}/timezone', ProfileTimezoneController::class)->whereNumber('couple')->middleware('throttle:couple-actions')->name('profile.timezone');
+    Route::get('profile/compliments', [ComplimentController::class, 'index'])->name('profile.compliments.index');
     Route::post('profile/compliments', [ComplimentController::class, 'store'])->middleware('throttle:couple-actions')->name('profile.compliments.store');
     Route::patch('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('profile/telegram', TelegramLinkController::class)->middleware('throttle:recovery')->name('profile.telegram.link');

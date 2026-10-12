@@ -143,7 +143,7 @@ final class AdminAppearanceRequest extends FormRequest
             'layout.blocks.*.tone' => ['required', Rule::in(AppearanceCatalog::TONES)],
             'layout.blocks.*.title' => ['present', 'nullable', 'string', 'max:100'],
             'layout.blocks.*.text' => ['present', 'nullable', 'string', 'max:2000'],
-            'layout.tiles' => ['required', 'array', 'list', 'size:8'],
+            'layout.tiles' => ['required', 'array', 'list', sprintf('size:%d', count(app(AppearanceCatalog::class)->tileLabels()))],
             'layout.tiles.*' => ['required', 'array:id,enabled,condition,tone,title'],
             'layout.tiles.*.id' => ['required', Rule::in(array_keys(app(AppearanceCatalog::class)->tileLabels())), 'distinct:strict'],
             'layout.tiles.*.enabled' => ['required', 'boolean'],

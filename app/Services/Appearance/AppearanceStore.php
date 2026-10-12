@@ -116,6 +116,8 @@ final class AppearanceStore
             'gift' => route('wishlist.index'), 'movies' => route('movies.index'), 'car' => route('cars.index'),
             'chores' => $dashboard->partner ? route('chores.index', $dashboard->couple) : $coupleFallback,
             'rating' => $dashboard->partner ? route('requests.create', [$dashboard->couple, 'type' => 'rating']) : $coupleFallback,
+            'reminder' => $dashboard->partner ? route('reminders.create', $dashboard->couple) : $coupleFallback,
+            'compliments' => route('profile.compliments.index'),
         ];
     }
 

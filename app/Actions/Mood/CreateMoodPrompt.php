@@ -8,6 +8,7 @@ use App\Enums\NotificationKind;
 use App\Models\Couple;
 use App\Models\MoodPrompt;
 use App\Models\User;
+use App\Services\Mood\MoodSchedule;
 use App\Services\Notifications\NotificationOutbox;
 use App\Services\Requests\RequestContext;
 use Carbon\CarbonImmutable;
@@ -16,15 +17,14 @@ use Illuminate\Support\Facades\Log;
 
 final class CreateMoodPrompt
 {
-    public function __construct(private readonly RequestContext $context, private readonly NotificationOutbox $outbox) {}
+    public function __construct(private readonly RequestContext $context, private readonly NotificationOutbox $outbox, private readonly MoodSchedule $schedule) {}
 
     public function execute(User $actor, Couple $couple, CarbonImmutable $scheduledAt): ?MoodPrompt
     {
         return DB::transaction(function () use ($actor, $couple, $scheduledAt): ?MoodPrompt {
             $current = $this->context->lockCouple($actor, $couple);
             $member = $current->members()->where('user_id', $actor->id)->lockForUpdate()->firstOrFail();
-            $local = $scheduledAt->setTimezone($current->timezone);
-            if (! $member->mood_schedule_enabled || ! in_array($local->hour, MoodPrompt::HOURS, true) || $scheduledAt->lessThan($member->joined_at) || $local->minute !== 0 || $local->second !== 0 || $scheduledAt->isFuture()) {
+            if (! $member->mood_schedule_enabled || ! $this->schedule->isScheduled($member, $scheduledAt, $current->timezone) || $scheduledAt->lessThan($member->joined_at) || $scheduledAt->isFuture()) {
                 return null;
             }
             $expiresAt = $scheduledAt->setMicrosecond(0)->utc()->addHours(MoodPrompt::RESPONSE_WINDOW_HOURS);

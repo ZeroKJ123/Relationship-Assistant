@@ -20,8 +20,7 @@ export function initializeMood(root) {
             try {
                 const response = await fetch(url, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' }, credentials: 'same-origin', signal: AbortSignal.timeout(10000) });
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message ?? 'Не удалось отправить запрос');
-                showToast(data.message);
+                showToast(data.message ?? 'Не удалось отправить запрос. Попробуйте ещё раз.');
             } catch {
                 showToast('Не удалось отправить запрос. Проверьте соединение.');
             } finally {

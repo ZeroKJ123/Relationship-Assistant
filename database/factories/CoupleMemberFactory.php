@@ -16,6 +16,6 @@ final class CoupleMemberFactory extends Factory
     /** @return array<string, mixed> */
     public function definition(): array
     {
-        return ['couple_id' => Couple::factory(), 'user_id' => User::factory(), 'active_user_id' => null, 'slot' => CoupleSlot::First, 'joined_at' => now(), 'ended_at' => now()];
+        return ['couple_id' => Couple::factory(), 'user_id' => User::factory(), 'active_user_id' => null, 'slot' => CoupleSlot::First, 'joined_at' => now(), 'ended_at' => now(), 'mood_schedule_times' => null];
     }
 }

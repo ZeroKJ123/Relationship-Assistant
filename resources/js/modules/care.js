@@ -63,15 +63,16 @@ export function initializeCare(root) {
         playedWheels.add(id);
     });
     root.querySelectorAll('[data-mood-history]').forEach((form) => bindMoodHistory(form));
-    root.querySelectorAll('[data-compliment-editor]').forEach((form) => {
+    root.querySelectorAll('[data-repeat-editor]').forEach((form) => {
         if (form.dataset.careInitialized) return;
         form.dataset.careInitialized='true';
-        form.querySelector('[data-add-compliment]').addEventListener('click',() => {
-            const fields=form.querySelector('[data-compliment-fields]');
-            if(fields.querySelectorAll('input').length>=50) return;
+        const limit=Number(form.dataset.repeatLimit);
+        form.querySelector('[data-repeat-add]').addEventListener('click',() => {
+            const fields=form.querySelector('[data-repeat-fields]');
+            if(fields.querySelectorAll('input').length>=limit) return;
             const field=fields.lastElementChild.cloneNode(true);
             const input=field.querySelector('input');
-            input.value=''; input.id=`compliment-${`${Date.now()}-${fields.querySelectorAll('input').length}`}`;
+            input.value=''; input.id=`repeat-${`${Date.now()}-${fields.querySelectorAll('input').length}`}`;
             field.querySelector('label')?.setAttribute('for',input.id);
             fields.append(field); input.focus();
         });

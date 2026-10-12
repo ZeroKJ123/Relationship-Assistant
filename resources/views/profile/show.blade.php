@@ -89,11 +89,6 @@
         @endif
     </section>
 </details>
-<details class="settings-section settings-history"><summary><x-icon name="heart" /><span class="row__body"><span class="row__title">{{ __('Комплименты партнёру') }}</span><span class="row__meta">{{ __('Слова, которые партнёр видит на главной') }}</span></span></summary>
-<p>{{ __('Эти слова будут появляться у партнёра на главной и меняться каждые пять минут.') }}</p><form method="post" action="{{ route('profile.compliments.store') }}" class="form-stack" data-submit-lock data-compliment-editor>@csrf
-<div data-compliment-fields>@foreach(old('compliments',$user->compliments ?? []) as $text)<x-field name="compliments[]" :id="'compliment-'.$loop->index" :label="__('Комплимент')" :value="$text" maxlength="300" />@endforeach<x-field name="compliments[]" id="compliment-new" :label="__('Новый комплимент')" maxlength="300" /></div>
-<x-button type="button" variant="quiet" data-add-compliment>{{ __('Добавить ещё') }}</x-button><x-button type="submit">{{ __('Сохранить комплименты') }}</x-button></form><p>{{ __('Очистите строку, чтобы удалить комплимент.') }}</p>
-</details>
 <details class="settings-section advanced-settings"><summary><x-icon name="settings" /><span class="row__body"><span class="row__title">{{ __('Подробные настройки') }}</span><span class="row__meta">{{ __('Машины, пара и часовой пояс') }}</span></span></summary>
     <section class="form-stack"><h2>{{ __('Машины') }}</h2>@foreach($cars as $car)<p>{{ $car->name }} · {{ $car->fuel }}</p>@endforeach
     <a class="button button--quiet" href="{{ route('cars.index') }}">{{ $cars->isEmpty() ? __('Добавить машину') : __('Управлять машинами') }}</a></section>

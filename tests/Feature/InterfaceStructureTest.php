@@ -2,13 +2,16 @@
 
 declare(strict_types=1);
 
+use App\Actions\Mood\CreateMoodPrompt;
 use App\Enums\DutyStatus;
 use App\Enums\MoodLevel;
 use App\Enums\RequestStatus;
 use App\Models\AppearanceSetting;
 use App\Models\Duty;
 use App\Models\MoodEntry;
+use App\Models\MoodPrompt;
 use App\Models\PartnerRequest;
+use App\Models\User;
 use App\Services\Appearance\AppearanceCatalog;
 use App\Services\Mood\MoodCalendar;
 use Carbon\CarbonImmutable;
@@ -170,4 +173,59 @@ it('shows a request page in the duty layout with the viewer role and current ste
     $this->asUser($pair->second)->get($page)->assertOk()->assertSee(sprintf('Это ваша просьба. Отвечает %s.', $pair->first->name))->assertDontSee('Подтверждаю выбранный ответ');
     $request->forceFill(['status' => RequestStatus::Declined])->save();
     $this->get($page)->assertOk()->assertDontSee('data-state="current"', false)->assertDontSee('data-state="done"', false);
+});
+
+it('lets a partner choose personal mood question times and schedules prompts only at them', function (): void {
+    $pair = AgreementScenario::create();
+    $pair->couple->members()->update(['joined_at' => CarbonImmutable::now()->subDays(2)]);
+    $route = route('mood.schedule', $pair->couple);
+    $payload = ['enabled' => 1, 'expected_version' => 0, 'confirmation' => 1];
+
+    $this->asUser($pair->first)->put($route, [...$payload, 'times' => ['', '']])->assertSessionHasErrors('times');
+    $this->put($route, [...$payload, 'times' => ['25:00']])->assertSessionHasErrors('times.0');
+    $this->put($route, [...$payload, 'times' => ['01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '08:30']])->assertSessionHasErrors('times');
+    $this->put($route, [...$payload, 'times' => ['21:15', '08:45', '21:15', '']])->assertSessionHasNoErrors()->assertRedirect();
+
+    $members = $pair->couple->members();
+    expect((clone $members)->where('user_id', $pair->first->id)->sole()->mood_schedule_times)->toBe(['08:45', '21:15'])
+        ->and((clone $members)->where('user_id', $pair->second->id)->sole()->mood_schedule_times)->toBeNull();
+    $this->get(route('mood.index', $pair->couple))->assertOk()->assertSee('value="08:45"', false)->assertSee('value="21:15"', false);
+
+    $this->artisan('care:process-due')->assertSuccessful();
+    $own = MoodPrompt::query()->where('user_id', $pair->first->id)->sole();
+    expect($own->scheduled_at->setTimezone('Europe/Minsk')->format('H:i'))->toBe('08:45')
+        ->and(MoodPrompt::query()->where('user_id', $pair->second->id)->sole()->scheduled_at->setTimezone('Europe/Minsk')->format('H:i'))->toBe('09:00')
+        ->and(app(CreateMoodPrompt::class)->execute($pair->first, $pair->couple, CarbonImmutable::parse('2026-10-14 09:00:00', 'Europe/Minsk')->utc()))->toBeNull();
+});
+
+it('offers reminder and compliment shortcuts on the dashboard and keeps compliments on their own page', function (): void {
+    $pair = AgreementScenario::create();
+
+    $this->asUser($pair->first)->get('/')->assertOk()
+        ->assertSee(sprintf('data-layout-tile="reminder" href="%s"', route('reminders.create', $pair->couple)), false)
+        ->assertSee(sprintf('data-layout-tile="compliments" href="%s"', route('profile.compliments.index')), false)
+        ->assertSee('Напомнить')->assertSee('Комплименты');
+    $this->get(route('profile.compliments.index'))->assertOk()->assertSee('Комплименты партнёру')->assertSee('data-repeat-editor', false);
+    $this->get(route('profile.show'))->assertOk()->assertDontSee('Комплименты партнёру');
+    $this->post(route('profile.compliments.store'), ['compliments' => ['Ты солнце', '']])->assertRedirect(route('profile.compliments.index'));
+    expect($pair->first->refresh()->compliments)->toBe(['Ты солнце']);
+    $this->asUser(User::factory()->create())->get('/')->assertOk()->assertDontSee('data-layout-tile="reminder"', false);
+});
+
+it('adds the new dashboard shortcuts to a saved layout once and keeps custom tiles', function (): void {
+    $catalog = new AppearanceCatalog;
+    $settings = $catalog->defaults();
+    $settings['layout']['tiles'] = array_values(array_filter($settings['layout']['tiles'], fn (array $tile): bool => ! in_array($tile['id'], ['reminder', 'compliments'], true)));
+    $settings['layout']['tiles'][0]['title'] = 'Наша кухня';
+    AppearanceSetting::query()->whereKey(AppearanceCatalog::SINGLETON_ID)->update(['settings' => $settings, 'revision' => 2]);
+    $migration = require database_path('migrations/2026_10_12_145211_add_reminder_and_compliment_tiles_to_appearance_settings.php');
+
+    $migration->up();
+    $migration->up();
+
+    $saved = AppearanceSetting::query()->findOrFail(AppearanceCatalog::SINGLETON_ID);
+    expect($saved->revision)->toBe(3)->and(array_column($saved->settings['layout']['tiles'], 'id'))->toBe(['kitchen', 'request', 'date', 'gift', 'movies', 'car', 'chores', 'rating', 'reminder', 'compliments'])
+        ->and($saved->settings['layout']['tiles'][0]['title'])->toBe('Наша кухня')->and($saved->settings['layout']['tiles'][8])->toBe($catalog->tile('reminder'));
+    $migration->down();
+    expect(AppearanceSetting::query()->findOrFail(AppearanceCatalog::SINGLETON_ID)->settings['layout']['tiles'])->toHaveCount(8);
 });

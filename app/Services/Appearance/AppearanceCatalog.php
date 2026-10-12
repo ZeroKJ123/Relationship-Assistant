@@ -27,6 +27,10 @@ final class AppearanceCatalog
 
     public const DEFAULT_THEME = 'latte';
 
+    private const TILE_TONES = ['kitchen' => 'yellow', 'request' => 'purple', 'date' => 'pink', 'gift' => 'yellow', 'movies' => 'purple', 'car' => 'yellow', 'chores' => 'yellow', 'rating' => 'pink', 'reminder' => 'purple', 'compliments' => 'pink'];
+
+    private const TILE_CONDITIONS = ['car' => 'has_car', 'chores' => 'has_partner', 'rating' => 'has_partner', 'reminder' => 'has_partner', 'compliments' => 'has_partner'];
+
     /** @return Settings */
     public function defaults(): array
     {
@@ -41,15 +45,19 @@ final class AppearanceCatalog
         foreach (['greeting', 'summary', 'start', 'tiles', 'agreement', 'duties', 'request', 'compliment'] as $type) {
             $blocks[] = ['id' => $type, 'type' => $type, 'enabled' => true, 'condition' => 'always', 'tone' => 'plain', 'title' => '', 'text' => ''];
         }
-        $tiles = [];
-        foreach (['kitchen' => 'yellow', 'request' => 'purple', 'date' => 'pink', 'gift' => 'yellow', 'movies' => 'purple', 'car' => 'yellow', 'chores' => 'yellow', 'rating' => 'pink'] as $id => $tone) {
-            $condition = match ($id) {
-                'car' => 'has_car', 'chores', 'rating' => 'has_partner', default => 'always'
-            };
-            $tiles[] = ['id' => $id, 'enabled' => true, 'condition' => $condition, 'tone' => $tone, 'title' => ''];
-        }
+        $tiles = array_map($this->tile(...), array_keys(self::TILE_TONES));
 
         return ['themes' => $themes, 'active' => self::DEFAULT_THEME, 'seasonal' => false, 'seasons' => array_combine(self::SEASONS, self::SEASONS), 'icons' => [], 'layout' => ['columns' => 2, 'blocks' => $blocks, 'tiles' => $tiles]];
+    }
+
+    /**
+     * Быстрое действие главной с настройками по умолчанию.
+     *
+     * @return Tile
+     */
+    public function tile(string $id): array
+    {
+        return ['id' => $id, 'enabled' => true, 'condition' => self::TILE_CONDITIONS[$id] ?? 'always', 'tone' => self::TILE_TONES[$id], 'title' => ''];
     }
 
     /** @return Theme */
@@ -67,7 +75,7 @@ final class AppearanceCatalog
     /** @return array<string,string> */
     public function tileLabels(): array
     {
-        return ['kitchen' => __('Кухня'), 'request' => __('Попросить'), 'date' => __('Свидание'), 'gift' => __('Виш-лист'), 'movies' => __('Фильмы'), 'car' => __('Мои машины'), 'chores' => __('Кто сделает?'), 'rating' => __('Оценить поступок')];
+        return ['kitchen' => __('Кухня'), 'request' => __('Попросить'), 'date' => __('Свидание'), 'gift' => __('Виш-лист'), 'movies' => __('Фильмы'), 'car' => __('Мои машины'), 'chores' => __('Кто сделает?'), 'rating' => __('Оценить поступок'), 'reminder' => __('Напомнить'), 'compliments' => __('Комплименты')];
     }
 
     /** @return array<string,string> */

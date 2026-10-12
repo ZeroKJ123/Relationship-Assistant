@@ -117,6 +117,7 @@ details[open] > summary::after { transform: rotate(45deg); }
 .choice-chip--radio input { position: absolute; opacity: 0; pointer-events: none; }
 .choice-chip--radio:has(input:focus-visible) { outline: 3px solid var(--color-violet); outline-offset: 3px; }
 .choice-chip .icon { width: 1.15rem; height: 1.15rem; color: var(--color-violet); }
+.time-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: .8rem; }
 .quick-dates { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: -.4rem; }
 .quick-dates button { min-height: 2.1rem; border: 1.5px solid var(--color-line); border-radius: 999px; padding: .2rem .8rem; background: transparent; color: var(--color-muted); font-size: .85rem; font-weight: 600; cursor: pointer; }
 .sticky-action { position: sticky; bottom: calc(5.4rem + env(safe-area-inset-bottom)); z-index: 2; display: grid; gap: .4rem; margin-inline: calc(var(--spacing-page) * -.5); padding: .7rem; border: 1px solid var(--color-line); border-radius: 1.2rem; background: color-mix(in srgb, var(--color-page-start) 92%, transparent); backdrop-filter: blur(10px); text-align: center; }

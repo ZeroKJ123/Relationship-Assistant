@@ -1,4 +1,4 @@
-const DOUBLE_PRESS_MILLISECONDS = 350;
+const DOUBLE_PRESS_MILLISECONDS = 500;
 
 /**
  * Одно нажатие отправляет запрос партнёру, двойное — вопрос самому себе.
