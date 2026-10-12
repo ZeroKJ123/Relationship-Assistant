@@ -16,6 +16,6 @@ final class ConfirmRequestCancellationRequest extends FormRequest
     /** @return array<string,list<string>> */
     public function rules(): array
     {
-        return ['confirmation' => ['required', 'accepted'], 'expected_version' => ['required', 'integer', 'min:0']];
+        return ['confirmation' => ['required', 'accepted'], 'expected_version' => ['required', 'integer', 'min:0'], 'return_duty' => ['sometimes', 'integer', 'min:1']];
     }
 }

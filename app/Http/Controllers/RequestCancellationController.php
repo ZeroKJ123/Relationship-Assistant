@@ -22,6 +22,12 @@ final class RequestCancellationController extends Controller
         abort_unless($actor instanceof User, Response::HTTP_UNAUTHORIZED);
         $this->cancel->execute($actor, $couple, $partnerRequest, $request->integer('expected_version'));
 
-        return redirect()->route('requests.show', [$couple, $partnerRequest])->with('status', __('Ответ об отмене сохранён. Принятая просьба отменяется после согласия обоих.'));
+        $status = __('Ответ об отмене сохранён. Принятая просьба отменяется после согласия обоих.');
+        $duty = $request->filled('return_duty') ? $partnerRequest->duties()->whereKey($request->integer('return_duty'))->first() : null;
+        if ($duty !== null) {
+            return redirect()->route('duties.show', [$couple, $duty])->with('status', $status);
+        }
+
+        return redirect()->route('requests.show', [$couple, $partnerRequest])->with('status', $status);
     }
 }

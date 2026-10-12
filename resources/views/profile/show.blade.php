@@ -4,7 +4,7 @@
 <div class="profile-summary">
     <form method="post" enctype="multipart/form-data" action="{{ route('profile.avatar.store') }}" data-submit-lock data-avatar-upload>
         @csrf
-        <button type="button" class="profile-avatar-button" data-avatar-choose hidden aria-label="{{ __('Изменить фото профиля') }}"><x-avatar :name="$user->name" :src="$user->avatar_path !== null ? route('profile.avatar', ['v'=>$user->updated_at?->getTimestamp()]) : null" /><span>{{ __('Изменить фото') }}</span></button>
+        <button type="button" class="profile-avatar-button" data-avatar-choose hidden aria-label="{{ __('Изменить фото профиля') }}"><x-avatar :name="$user->name" :src="$user->avatar_path !== null ? route('profile.avatar', ['v'=>$user->updated_at?->getTimestamp()]) : null" /></button>
         <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required data-avatar-file aria-label="{{ __('Фото профиля') }}">
         @error('photo')<p class="field-error" role="alert">{{ $message }}</p>@enderror
         <x-button type="submit" data-avatar-submit>{{ __('Загрузить фото') }}</x-button>

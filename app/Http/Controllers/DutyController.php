@@ -39,11 +39,11 @@ final class DutyController extends Controller
         return view('duties.index', ['couple' => $couple, 'duties' => $duties, 'groups' => (new DutyGroups)->group($duties->getCollection(), CarbonImmutable::now()), 'filters' => DutyFilter::cases(), 'filter' => $filter]);
     }
 
-    public function show(Couple $couple, Duty $duty): View
+    public function show(Request $request, Couple $couple, Duty $duty): View
     {
         abort_unless($duty->couple_id === $couple->id, Response::HTTP_NOT_FOUND);
         Gate::authorize('view', $duty);
-        $duty->load(['executor:id,name', 'reviewer:id,name']);
+        $duty->load(['executor:id,name', 'reviewer:id,name', 'partnerRequest.duties', 'partnerRequest.moneyRequest', 'requestCondition']);
 
         $type = $duty->kind === DutyKind::Service ? PartnerRequest::query()->findOrFail($duty->partner_request_id)->type->value : RequestCondition::query()->findOrFail($duty->request_condition_id)->type->value;
         $reportLabel = match ($type) {
@@ -53,7 +53,7 @@ final class DutyController extends Controller
             'money' => __('Деньги получены'),'gift' => __('Подарок получен'),default => __('Подтвердить выполнение')
         };
 
-        return view('duties.show', ['reportLabel' => $reportLabel, 'verifyLabel' => $verifyLabel, 'couple' => $couple, 'duty' => $duty, 'history' => $duty->confirmations()->latest('version')->paginate(self::PAGE_SIZE)]);
+        return view('duties.show', ['isExecutor' => $request->user()?->id === $duty->executor_id, 'isReviewer' => $request->user()?->id === $duty->reviewer_id, 'partnerRequest' => $duty->partnerRequest, 'reportLabel' => $reportLabel, 'verifyLabel' => $verifyLabel, 'couple' => $couple, 'duty' => $duty, 'history' => $duty->confirmations()->latest('version')->paginate(self::PAGE_SIZE)]);
     }
 
     public function report(ConfirmDutyRequest $request, Couple $couple, Duty $duty): RedirectResponse

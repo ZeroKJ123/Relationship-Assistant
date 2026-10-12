@@ -14,6 +14,7 @@ use App\Services\Mood\MoodCalendar;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Support\AgreementScenario;
+use Tests\Support\DutyScenario;
 
 uses(RefreshDatabase::class);
 beforeEach(function (): void {
@@ -104,4 +105,55 @@ it('adds the default theme to saved appearance settings without discarding custo
     $migration->down();
     $restored = AppearanceSetting::query()->findOrFail(AppearanceCatalog::SINGLETON_ID)->settings;
     expect($restored['themes'])->not->toHaveKey(AppearanceCatalog::DEFAULT_THEME)->and($restored['active'])->toBe('classic')->and($restored['seasons']['autumn'])->toBe('autumn');
+});
+
+it('explains the role on a duty page and keeps the confirmation locked until the partner reports', function (): void {
+    $scenario = DutyScenario::create();
+    $author = $scenario->pair->first;
+    $executor = $scenario->pair->second;
+    $page = route('duties.show', [$scenario->pair->couple, $scenario->duty]);
+
+    $this->asUser($author)->get($page)->assertOk()
+        ->assertSee(sprintf('Это ваша просьба. Выполняет %s.', $executor->name))
+        ->assertSee(sprintf('Кнопка станет доступна, когда %s отметит выполнение.', $executor->name))
+        ->assertSee('aria-describedby="verify-unavailable"', false)
+        ->assertSee('Отменить просьбу')
+        ->assertDontSee('data-duty-confirmation', false)->assertDontSee('К просьбе и условиям')->assertDontSee('Все дела');
+    $this->asUser($executor)->get($page)->assertOk()
+        ->assertSee(sprintf('Вас просит %s. Выполняете вы.', $author->name))
+        ->assertSee('data-duty-confirmation', false)->assertDontSee('verify-unavailable', false);
+});
+
+it('returns to the duty page after a cancellation proposed from it', function (): void {
+    $scenario = DutyScenario::create();
+    $other = DutyScenario::create();
+    $cancel = route('requests.cancel', [$scenario->pair->couple, $scenario->request]);
+    $payload = ['confirmation' => 1, 'expected_version' => $scenario->request->refresh()->version];
+
+    $this->asUser($scenario->pair->first)->post($cancel, [...$payload, 'return_duty' => $scenario->duty->id])->assertRedirect(route('duties.show', [$scenario->pair->couple, $scenario->duty]));
+    expect($scenario->request->refresh()->cancellation_proposed_by_id)->toBe($scenario->pair->first->id);
+    $this->asUser($scenario->pair->second)->post($cancel, ['confirmation' => 1, 'expected_version' => $scenario->request->version, 'return_duty' => $other->duty->id])->assertRedirect(route('requests.show', [$scenario->pair->couple, $scenario->request]));
+});
+
+it('shows the partner mood month with the chosen day and offers a self question from the dashboard card', function (): void {
+    $pair = AgreementScenario::create();
+    MoodEntry::factory()->create(['couple_id' => $pair->couple->id, 'user_id' => $pair->second->id, 'level' => MoodLevel::Low, 'recorded_at' => CarbonImmutable::parse('2026-09-20 10:00:00', 'Europe/Minsk')->utc()]);
+    MoodEntry::factory()->create(['couple_id' => $pair->couple->id, 'user_id' => $pair->first->id, 'level' => MoodLevel::Great, 'recorded_at' => CarbonImmutable::parse('2026-09-21 10:00:00', 'Europe/Minsk')->utc()]);
+
+    $this->asUser($pair->first)->get(route('mood.day', [$pair->couple, 'date' => '2026-09-20']))->assertOk()
+        ->assertSee('Сентябрь 2026')->assertSee('20 сентября 2026')->assertSee('Записей: 1')
+        ->assertSee(route('mood.day', [$pair->couple, 'date' => '2026-10-01']))->assertDontSee('Указать своё настроение')
+        ->assertViewHas('calendar', fn (array $calendar): bool => $calendar['days'][19]['isSelected'] && $calendar['days'][19]['level'] === MoodLevel::Low && $calendar['days'][20]['level'] === null && $calendar['marked'] === 1 && $calendar['next'] === '2026-10-01');
+    $this->get(route('mood.day', $pair->couple))->assertOk()->assertViewHas('calendar', fn (array $calendar): bool => $calendar['next'] === null && $calendar['days'][13]['isSelected']);
+    $this->get('/')->assertOk()->assertSee(sprintf('data-mood-self="%s"', route('mood.self.store', $pair->couple)), false);
+});
+
+it('opens the duty page from the request list once a request has duties', function (): void {
+    $scenario = DutyScenario::create();
+    $pending = PartnerRequest::factory()->create(['couple_id' => $scenario->pair->couple->id, 'author_id' => $scenario->pair->second->id, 'recipient_id' => $scenario->pair->first->id, 'status' => RequestStatus::Pending]);
+
+    $this->asUser($scenario->pair->first)->get(route('requests.index', $scenario->pair->couple))->assertOk()
+        ->assertSee(sprintf('href="%s"', route('duties.show', [$scenario->pair->couple, $scenario->duty])), false)
+        ->assertDontSee(sprintf('href="%s"', route('requests.show', [$scenario->pair->couple, $scenario->request])), false)
+        ->assertSee(sprintf('href="%s"', route('requests.show', [$scenario->pair->couple, $pending])), false);
 });

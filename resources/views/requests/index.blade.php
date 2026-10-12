@@ -10,7 +10,7 @@
 @foreach($groups as $group)
 <h2 class="group-label"><span>{{ $group['label'] }}</span><span @class(['group-label__count--alert' => $group['isAlert']])>{{ $group['requests']->count() }}</span></h2>
 @foreach($group['requests'] as $item)
-<a class="row" href="{{ route('requests.show',[$couple,$item]) }}" aria-label="{{ __('Открыть просьбу') }}: {{ $item->description }}">
+<a class="row" href="{{ ($duty = $progress->getDutyToOpen($item, $viewer)) ? route('duties.show',[$couple,$duty]) : route('requests.show',[$couple,$item]) }}" aria-label="{{ __('Открыть просьбу') }}: {{ $item->description }}">
     <x-icon :name="$item->type->icon()" />
     <span class="row__body">
         <strong class="row__title request-description--primary">{{ $item->description }}</strong>

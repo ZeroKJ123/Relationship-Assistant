@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Couple;
 use App\Models\User;
+use App\Services\Mood\MoodCalendar;
 use App\Services\Mood\MoodDay;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\Gate;
 
 final class MoodDayController extends Controller
 {
-    public function __construct(private readonly MoodDay $days) {}
+    public function __construct(private readonly MoodDay $days, private readonly MoodCalendar $calendar) {}
 
     public function __invoke(Request $request, Couple $couple): View
     {
@@ -29,6 +30,6 @@ final class MoodDayController extends Controller
 
         $summary = $this->days->getSummary($couple, $partner->id, $date);
 
-        return view('mood.day', ['couple' => $couple, 'partner' => $partner, 'date' => $date, 'summary' => $summary, 'chart' => $this->days->getChart($couple, $partner->id, $date, $summary['average']), 'entries' => $this->days->getEntries($couple, $partner->id, $date)->orderByDesc('recorded_at')->orderByDesc('id')->paginate(MoodDay::PAGE_SIZE)->withQueryString()]);
+        return view('mood.day', ['dateTitle' => CarbonImmutable::parse($date, $couple->timezone)->isoFormat('D MMMM YYYY'), 'calendar' => $this->calendar->getMonth($couple, $partner, CarbonImmutable::now(), $date), 'couple' => $couple, 'partner' => $partner, 'date' => $date, 'summary' => $summary, 'chart' => $this->days->getChart($couple, $partner->id, $date, $summary['average']), 'entries' => $this->days->getEntries($couple, $partner->id, $date)->orderByDesc('recorded_at')->orderByDesc('id')->paginate(MoodDay::PAGE_SIZE)->withQueryString()]);
     }
 }

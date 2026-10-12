@@ -6,6 +6,7 @@ namespace App\ViewModels;
 
 use App\Enums\DutyStatus;
 use App\Enums\RequestStatus;
+use App\Models\Duty;
 use App\Models\PartnerRequest;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -44,6 +45,18 @@ final class RequestProgress
             RequestStatus::Conditional => $request->author_id === $viewer->id,
             default => false,
         };
+    }
+
+    /** Дело, которое открывается из списка просьб: сначала то, где нужен ответ зрителя. */
+    public function getDutyToOpen(PartnerRequest $request, User $viewer): ?Duty
+    {
+        $awaiting = $request->duties->first(fn (Duty $duty): bool => match ($duty->status) {
+            DutyStatus::Pending, DutyStatus::Overdue => $duty->executor_id === $viewer->id,
+            DutyStatus::Reported => $duty->reviewer_id === $viewer->id,
+            default => false,
+        });
+
+        return $awaiting ?? $request->duties->first();
     }
 
     public function getLabel(PartnerRequest $request): string

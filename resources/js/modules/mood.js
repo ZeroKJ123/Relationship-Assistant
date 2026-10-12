@@ -1,5 +1,6 @@
 import lottie from 'lottie-web/build/player/lottie_light.min.js';
 
+import { bindMoodRequest } from './mood-request.js';
 import { showToast } from './toast.js';
 
 const animations = new Set();
@@ -11,14 +12,13 @@ export function initializeMood(root) {
     root.querySelectorAll('[data-mood-request]').forEach((form) => {
         if (form.dataset.moodInitialized) return;
         form.dataset.moodInitialized = 'true';
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
+        bindMoodRequest(form, async (url) => {
             if (form.dataset.sending || !navigator.onLine) return;
             form.dataset.sending = 'true';
             const button = form.querySelector('button');
             button.disabled = true;
             try {
-                const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' }, credentials: 'same-origin', signal: AbortSignal.timeout(10000) });
+                const response = await fetch(url, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' }, credentials: 'same-origin', signal: AbortSignal.timeout(10000) });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message ?? 'Не удалось отправить запрос');
                 showToast(data.message);
