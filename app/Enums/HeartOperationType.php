@@ -6,6 +6,8 @@ namespace App\Enums;
 
 enum HeartOperationType: string
 {
+    case AdminAdjustment = 'admin_adjustment';
+
     case BalanceReconciliation = 'balance_reconciliation';
 
     case ServicePayment = 'service_payment';
@@ -21,6 +23,7 @@ enum HeartOperationType: string
     public function label(): string
     {
         return match ($this) {
+            self::AdminAdjustment => 'Изменение администратором',
             self::BalanceReconciliation => 'Сверка тестового баланса',
             self::ServicePayment => 'Оплата услуги сердечками',
             self::StartingBonus => 'Стартовые сердечки',

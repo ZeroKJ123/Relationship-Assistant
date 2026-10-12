@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AppearanceAssetController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Telegram\WebhookController;
 use App\Http\Middleware\VerifyTelegramSecret;
 use Illuminate\Support\Facades\Route;
+
+Route::get('appearance-assets/{asset}', AppearanceAssetController::class)->where('asset', '[a-zA-Z0-9]{40}\\.(?:png|jpg|jpeg|webp)')->name('appearance.asset');
 
 Route::get('/', DashboardController::class)->middleware('auth.session')->name('home');
 

@@ -8,6 +8,7 @@ use App\Enums\HeartOperationType;
 use App\Models\HeartTransaction;
 use App\Models\HeartWallet;
 use App\Models\User;
+use App\Services\Admin\PanelAccess;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -18,7 +19,7 @@ final class Ledger
 {
     private const MAXIMUM_OPERATION = EconomyRules::MAXIMUM_SETTING;
 
-    public function __construct(private readonly EconomyRules $rules) {}
+    public function __construct(private readonly EconomyRules $rules, private readonly PanelAccess $panelAccess) {}
 
     public function getWallet(User $owner): HeartWallet
     {
@@ -55,8 +56,14 @@ final class Ledger
         if ($type === HeartOperationType::BalanceReconciliation) {
             throw new LogicException('Balance reconciliation must use its dedicated action.');
         }
+        if ($type === HeartOperationType::AdminAdjustment) {
+            $actor = $actorId === null ? null : User::query()->find($actorId);
+            if ($actor === null || request()->user()?->getAuthIdentifier() !== $actorId || ! $this->panelAccess->isUnlocked(request(), $actor)) {
+                throw new LogicException('Administrative adjustments require an unlocked panel.');
+            }
+        }
         $isCredit = in_array($type, [HeartOperationType::Reward, HeartOperationType::ManualThanks], true);
-        if (($isCredit && $amount < 0) || (! $isCredit && $amount > 0)) {
+        if ($type !== HeartOperationType::AdminAdjustment && (($isCredit && $amount < 0) || (! $isCredit && $amount > 0))) {
             throw new LogicException('Operation amount has the wrong sign.');
         }
 
@@ -103,7 +110,7 @@ final class Ledger
     private function write(HeartWallet $wallet, int $requestedAmount, HeartOperationType $type, string $key, ?int $coupleId = null, ?int $actorId = null, ?int $dutyId = null, ?string $reason = null): HeartTransaction
     {
         $amount = $requestedAmount;
-        if ($amount > 0) {
+        if ($amount > 0 && $type !== HeartOperationType::AdminAdjustment) {
             $amount = min($amount, max(0, $this->rules->get('positive_cap') - $wallet->balance));
         }
         $wallet->balance += $amount;

@@ -7,6 +7,7 @@ namespace App\Providers;
 use App\Jobs\SendTelegramNotificationJob;
 use App\Models\User;
 use App\Services\Admin\PanelAccess;
+use App\Services\Appearance\AppearanceStore;
 use App\Services\Telegram\BotClient;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->scoped(AppearanceStore::class);
     }
 
     /**
@@ -44,6 +45,9 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Support\Facades\View::composer(['layouts.app', 'components.illustration', 'dashboard.content'], function (View $view): void {
+            $view->with('appearance', app(AppearanceStore::class));
+        });
         \Illuminate\Support\Facades\View::composer(['auth.login', 'auth.register', 'auth.recover', 'profile.show'], function (View $view): void {
             $view->with('telegramAvailable', app(BotClient::class)->isLoginAvailable());
         });

@@ -1,3 +1,4 @@
+import { initializeAppearance } from './modules/appearance.js';
 import { initializeSelectionPresence } from './modules/selection-presence.js';
 import { initializeCare } from './modules/care.js';
 import { initializeMood } from './modules/mood.js';
@@ -13,6 +14,7 @@ import { initializeRequests } from './modules/requests.js';
 import { initializeDialogs, initializeTabs } from './modules/dialogs.js';
 
 function initializeInterface(root) {
+    initializeAppearance(root);
     initializeOfflineForms(root);
     initializeMovies(root);
     initializeDialogs(root);

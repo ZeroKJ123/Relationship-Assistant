@@ -1,0 +1,1 @@
+    @if($dashboard->isAgreementPending && $dashboard->partner)<x-card class="section-space form-stack"><h2>{{ __('Осталось согласовать недельный лимит') }}</h2><p>{{ __('Обычные просьбы уже доступны. Для «Очень хочу» нужно общее решение.') }}</p><a href="{{ route('agreements.show',$dashboard->couple) }}">{{ __('Согласовать лимит') }}</a></x-card>@endif

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html style="{{ $appearance->css() }}" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#eee6ff">
+    <meta name="theme-color" content="{{ $appearance->theme()['background'] }}">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="apple-touch-icon" href="/icons/heart-v1-180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
     <title>@yield('title', __('Наша пара'))</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body data-user-id="{{ auth()->id() }}" data-authenticated="{{ auth()->check() ? 'true' : 'false' }}">
+<body data-decoration="{{ $appearance->theme()['decoration'] }}" data-user-id="{{ auth()->id() }}" data-authenticated="{{ auth()->check() ? 'true' : 'false' }}">
     <a class="skip-link" href="#main-content">{{ __('Перейти к содержимому') }}</a>
     <div class="app-shell">
         <header class="app-header">

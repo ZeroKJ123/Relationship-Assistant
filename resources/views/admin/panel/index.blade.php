@@ -1,7 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', __('Админ-панель'))
-@section('content')
-<h1>{{ __('Админ-панель') }}</h1><x-form-feedback />
+@section('admin-content')
+<h1 class="screen-title">{{ __('Админ-панель') }}</h1><x-form-feedback />
 @can('manage-system-settings')<a class="button button--quiet" href="{{ route('admin.economy.index') }}">{{ __('Настройки экономики') }}</a>@endcan
 <div class="admin-statistics">@foreach($statistics as $label=>$count)<x-card><strong>{{ $label }}</strong><p class="wallet-total">{{ $count }}</p></x-card>@endforeach</div>
 <x-card class="section-space form-stack"><h2>{{ __('Тест фич') }}</h2><p>{{ __('Выберите пользователя и проверяйте просьбы, выполнение, настроение, колесо, свайпы, кухню и другие функции в обычном интерфейсе. Затем вернитесь сюда и выберите второго партнёра.') }}</p><p>{{ __('Действия настоящие: меняют данные, сердечки и отправляют Telegram. Для безопасных экспериментов используйте отдельную тестовую пару. Для одновременной рулетки откройте две отдельные сессии браузера.') }}</p>

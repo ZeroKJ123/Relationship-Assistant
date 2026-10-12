@@ -1,6 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 @section('title', __('Экономика сердечек'))
-@section('content')
+@section('admin-content')
 <x-card class="settings-card">
     <x-status>{{ __('Только для администратора · Версия :version', ['version' => $current->version]) }}</x-status>
     <h1 class="form-title">{{ __('Экономика сердечек') }}</h1>
