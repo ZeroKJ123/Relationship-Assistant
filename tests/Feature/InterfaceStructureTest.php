@@ -157,3 +157,17 @@ it('opens the duty page from the request list once a request has duties', functi
         ->assertDontSee(sprintf('href="%s"', route('requests.show', [$scenario->pair->couple, $scenario->request])), false)
         ->assertSee(sprintf('href="%s"', route('requests.show', [$scenario->pair->couple, $pending])), false);
 });
+
+it('shows a request page in the duty layout with the viewer role and current step', function (): void {
+    $pair = AgreementScenario::create();
+    $request = PartnerRequest::factory()->create(['couple_id' => $pair->couple->id, 'author_id' => $pair->second->id, 'recipient_id' => $pair->first->id, 'description' => 'Принеси плед', 'status' => RequestStatus::Pending]);
+    $page = route('requests.show', [$pair->couple, $request]);
+
+    $this->asUser($pair->first)->get($page)->assertOk()
+        ->assertSee(sprintf('Вас просит %s. Ответ за вами.', $pair->second->name))
+        ->assertSeeInOrder(['data-state="done"', 'Создано', 'data-state="current"', 'Ответ', 'Выполнение'], false)
+        ->assertSee('Кто и кого просит')->assertSee('Согласиться');
+    $this->asUser($pair->second)->get($page)->assertOk()->assertSee(sprintf('Это ваша просьба. Отвечает %s.', $pair->first->name))->assertDontSee('Подтверждаю выбранный ответ');
+    $request->forceFill(['status' => RequestStatus::Declined])->save();
+    $this->get($page)->assertOk()->assertDontSee('data-state="current"', false)->assertDontSee('data-state="done"', false);
+});

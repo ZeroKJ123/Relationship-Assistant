@@ -93,12 +93,12 @@ final class PartnerRequestController extends Controller
         return redirect()->route('requests.show', [$couple, $created])->with('status', __('Просьба отправлена партнёру.'));
     }
 
-    public function show(Couple $couple, PartnerRequest $partnerRequest): View
+    public function show(Request $request, Couple $couple, PartnerRequest $partnerRequest): View
     {
         abort_unless($partnerRequest->couple_id === $couple->id, Response::HTTP_NOT_FOUND);
         Gate::authorize('view', $partnerRequest);
         $partnerRequest->load(['author:id,name', 'recipient:id,name', 'moneyRequest', 'guestVisit', 'dateInvitation', 'duties.executor:id,name', 'duties.reviewer:id,name', 'duties.couple']);
 
-        return view('requests.show', ['progress' => new RequestProgress, 'wishes' => WishlistItem::query()->where('user_id', auth()->id())->whereNull('archived_at')->whereNull('claimed_condition_id')->latest('id')->paginate(self::PAGE_SIZE, ['*'], 'wishes_page')->withQueryString(), 'currencies' => Currency::cases(), 'conditionTypes' => ConditionType::cases(), 'methods' => SettlementMethod::query()->whereIn('kind', ['action', 'kisses', 'sushi', 'custom', 'money', 'wishlist', 'fuel'])->where(fn (Builder $query) => $query->whereNull('user_id')->orWhere('user_id', auth()->id()))->orderBy('sort_order')->get(), 'couple' => $couple, 'partnerRequest' => $partnerRequest, 'conditions' => $partnerRequest->conditions()->latest('version')->paginate(self::PAGE_SIZE), 'currentCondition' => $partnerRequest->conditions()->latest('version')->first()]);
+        return view('requests.show', ['isAuthor' => $request->user()?->id === $partnerRequest->author_id, 'isRecipient' => $request->user()?->id === $partnerRequest->recipient_id, 'progress' => new RequestProgress, 'wishes' => WishlistItem::query()->where('user_id', auth()->id())->whereNull('archived_at')->whereNull('claimed_condition_id')->latest('id')->paginate(self::PAGE_SIZE, ['*'], 'wishes_page')->withQueryString(), 'currencies' => Currency::cases(), 'conditionTypes' => ConditionType::cases(), 'methods' => SettlementMethod::query()->whereIn('kind', ['action', 'kisses', 'sushi', 'custom', 'money', 'wishlist', 'fuel'])->where(fn (Builder $query) => $query->whereNull('user_id')->orWhere('user_id', auth()->id()))->orderBy('sort_order')->get(), 'couple' => $couple, 'partnerRequest' => $partnerRequest, 'conditions' => $partnerRequest->conditions()->latest('version')->paginate(self::PAGE_SIZE), 'currentCondition' => $partnerRequest->conditions()->latest('version')->first()]);
     }
 }

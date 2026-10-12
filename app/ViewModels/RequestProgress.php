@@ -59,6 +59,17 @@ final class RequestProgress
         return $awaiting ?? $request->duties->first();
     }
 
+    /** Номер текущего шага на шкале «создано → ответ → выполнение»; 0 — просьба отклонена или отменена. */
+    public function getStep(PartnerRequest $request): int
+    {
+        return match (true) {
+            in_array($request->status, [RequestStatus::Pending, RequestStatus::Conditional], true) => 2,
+            $request->status !== RequestStatus::Accepted => 0,
+            $this->getTone($request) === 'success' => 4,
+            default => 3,
+        };
+    }
+
     public function getLabel(PartnerRequest $request): string
     {
         if ($request->status !== RequestStatus::Accepted) {

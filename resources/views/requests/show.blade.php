@@ -1,36 +1,45 @@
 @extends('layouts.app')
 @section('title', __('Просьба партнёру'))
+@section('back', route('requests.index',$couple))
+@section('back-label', __('Просьбы'))
 @section('content')
-<x-card class="request-overview form-stack">
-@if($partnerRequest->heart_price > 0)<p>{{ __('Цена: :amount сердечек', ['amount'=>$partnerRequest->heart_price]) }}</p>@endif
-<h1 class="screen-title">{{ __($partnerRequest->type->label()) }}</h1>
-@if($partnerRequest->created_by_admin_id)<x-status tone="warning">{{ __('Системная тестовая просьба') }}</x-status><p>{{ __('Проверяется по обычным правилам пары. Уведомления и изменения сердечек настоящие.') }}</p>@endif
-<p class="request-description request-description--primary">{{ $partnerRequest->description }}</p>
-<div class="request-person"><x-avatar :name="$partnerRequest->author->name" /><p><strong>{{ $partnerRequest->author->name }}</strong> → {{ $partnerRequest->recipient->name }}</p></div>
-<x-status :tone="$progress->getTone($partnerRequest)">{{ $progress->getLabel($partnerRequest) }}</x-status>
+<div class="page-head"><p class="eyebrow">{{ __($partnerRequest->type->label()) }}</p><x-status :tone="$progress->getTone($partnerRequest)">{{ $progress->getLabel($partnerRequest) }}</x-status></div>
+<h1 class="screen-title request-description request-description--primary">{{ $partnerRequest->description }}</h1>
+@if($isAuthor)<p class="lead">{{ __('Это ваша просьба. Отвечает :name.', ['name'=>$partnerRequest->recipient->name]) }}</p>@endif
+@if($isRecipient)<p class="lead">{{ __('Вас просит :name. Ответ за вами.', ['name'=>$partnerRequest->author->name]) }}</p>@endif
+<ol class="steps" aria-label="{{ __('Этапы просьбы') }}">
+    @foreach([__('Создано'), __('Ответ'), __('Выполнение')] as $index => $step)
+    <li @if($progress->getStep($partnerRequest) > $index + 1) data-state="done" @elseif($progress->getStep($partnerRequest) === $index + 1) data-state="current" aria-current="step" @endif>{{ $step }}</li>
+    @endforeach
+</ol>
+<dl class="facts">
+    <div><dt>{{ __('Кто и кого просит') }}</dt><dd><strong>{{ $partnerRequest->author->name }}</strong> → {{ $partnerRequest->recipient->name }}</dd></div>
+    <div><dt>{{ __('Срок') }}</dt><dd>{{ __('Выполнить до :date', ['date'=>$partnerRequest->due_at->setTimezone($couple->timezone)->format('d.m.Y H:i')]) }}</dd></div>
+    @if($partnerRequest->heart_price > 0)<div><dt>{{ __('Стоимость') }}</dt><dd>{{ __('Цена: :amount сердечек', ['amount'=>$partnerRequest->heart_price]) }}</dd></div>@endif
+    @if($partnerRequest->moneyRequest)<div><dt>{{ __('Сумма') }}</dt><dd>{{ $partnerRequest->moneyRequest->amount }} {{ $partnerRequest->moneyRequest->currency->value }}</dd></div>@endif
+    @if($partnerRequest->is_very_wanted)<div><dt>{{ __('Важность') }}</dt><dd>{{ __('Очень хочу') }}</dd></div>@endif
+    @if($partnerRequest->decline_reason)<div><dt>{{ __('Причина отказа') }}</dt><dd>{{ __($partnerRequest->decline_reason->label()) }}</dd></div>@endif
+    @if($partnerRequest->decline_reason && $partnerRequest->decline_penalty === 0)<div><dt>{{ __('Штраф') }}</dt><dd>{{ __('Штраф за отказ: 0 сердечек.') }}</dd></div>@endif
+</dl>
+<div class="form-stack">
+@if($partnerRequest->created_by_admin_id)<p class="hint"><x-icon name="info" /><span><strong>{{ __('Системная тестовая просьба') }}</strong> · {{ __('Проверяется по обычным правилам пары. Уведомления и изменения сердечек настоящие.') }}</span></p>@endif
 @if($partnerRequest->rating)<x-card tone="pink"><h2>{{ __('Оценка поступка: :score из 5', ['score'=>$partnerRequest->rating]) }}</h2>@if($partnerRequest->rating_comment)<p class="request-description">{{ $partnerRequest->rating_comment }}</p>@endif</x-card>@endif
 <x-social-invitation :request="$partnerRequest" :timezone="$couple->timezone" />
 @if($partnerRequest->dish_snapshot)<x-product-photo :src="!empty($partnerRequest->dish_snapshot['photo_path']) ? route('photos.requests',$partnerRequest) : null" :alt="$partnerRequest->dish_snapshot['title'] ?? ''" symbol="♨" /><p>{{ $partnerRequest->dish_snapshot['title'] }} · {{ $partnerRequest->dish_kind->label() }}</p><p>{{ $partnerRequest->dish_snapshot['ingredients'] }}</p><p>{{ __('Продукты ≈ :amount :currency · порций: :portions',['amount'=>$partnerRequest->dish_snapshot['estimate'],'currency'=>$partnerRequest->dish_snapshot['currency'],'portions'=>$partnerRequest->dish_snapshot['portions']]) }}</p>@endif
-@if($partnerRequest->moneyRequest)<p class="price-chip">{{ $partnerRequest->moneyRequest->amount }} {{ $partnerRequest->moneyRequest->currency->value }}</p><p>{{ __('Оплата отмечается плательщиком; поступление отдельно подтверждает получатель. Денежные переводы не дают награду.') }}</p>@if($partnerRequest->status === \App\Enums\RequestStatus::Accepted)<h2>{{ __('Реквизиты получателя') }}</h2><p class="request-description">{{ $partnerRequest->moneyRequest->payment_details_snapshot }}</p>@endif @endif
-<p>{{ __('Выполнить до :date', ['date'=>$partnerRequest->due_at->setTimezone($couple->timezone)->format('d.m.Y H:i')]) }}</p>
+@if($partnerRequest->moneyRequest)<p class="hint"><x-icon name="coin" /><span>{{ __('Оплата отмечается плательщиком; поступление отдельно подтверждает получатель. Денежные переводы не дают награду.') }}</span></p>@if($partnerRequest->status === \App\Enums\RequestStatus::Accepted)<h2 class="group-label"><span>{{ __('Реквизиты получателя') }}</span></h2><p class="row request-description">{{ $partnerRequest->moneyRequest->payment_details_snapshot }}</p>@endif @endif
 @if(session('status'))<p role="status">{{ session('status') }}</p>
 @endif
 @if($errors->any())<div role="alert">
 @foreach($errors->all() as $error)<p class="field-error">{{ $error }}</p>
 @endforeach</div>
 @endif
-@if(in_array($partnerRequest->status,[\App\Enums\RequestStatus::Pending,\App\Enums\RequestStatus::Conditional],true) && !$partnerRequest->due_at->isFuture())<p>{{ __('Срок просьбы истёк. Отправьте новую просьбу с актуальным сроком.') }}</p>@endif
-@if($partnerRequest->is_very_wanted)<x-status>{{ __('Очень хочу') }}</x-status>@endif
-@if($partnerRequest->decline_reason)<p>{{ __($partnerRequest->decline_reason->label()) }}</p>
-@if($partnerRequest->decline_penalty === 0)<p>{{ __('Штраф за отказ: 0 сердечек.') }}</p>
-@endif
-@endif
+@if(in_array($partnerRequest->status,[\App\Enums\RequestStatus::Pending,\App\Enums\RequestStatus::Conditional],true) && !$partnerRequest->due_at->isFuture())<p class="hint"><x-icon name="info" /><span>{{ __('Срок просьбы истёк. Отправьте новую просьбу с актуальным сроком.') }}</span></p>@endif
 
 @foreach($partnerRequest->duties as $duty)
 <x-request-duty :duty="$duty" :couple="$couple" :partner-request="$partnerRequest" />
 @endforeach
+</div>
 <x-request-cancellation :couple="$couple" :partner-request="$partnerRequest" />
-</x-card>
 @if($currentCondition)<x-card class="section-space form-stack">
 <h2>{{ __('Условие партнёра') }}</h2>
 <p class="request-description">{{ $currentCondition->description }}</p>
@@ -92,10 +101,10 @@
 </details>
 @endif
 @endcan
-@if($conditions->total() > 1)<x-card class="section-space">
-<details><summary>{{ __('История условий') }}</summary>
+@if($conditions->total() > 1)<div class="section-space">
+<details class="settings-section"><summary><span class="row__body"><span class="row__title">{{ __('История условий') }}</span></span></summary>
 @foreach($conditions as $condition)<p>{{ __('Вариант :version', ['version'=>$condition->version]) }}: {{ $condition->description }}</p>
-@endforeach</details></x-card>
+@endforeach</details></div>
 @endif
 
 @endsection
