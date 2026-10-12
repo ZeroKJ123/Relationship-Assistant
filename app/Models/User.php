@@ -16,6 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
+ * @property ?string $bio
  * @property int $id
  * @property ?list<string> $compliments
  * @property ?string $login
@@ -29,7 +30,7 @@ use Illuminate\Notifications\Notifiable;
  * @property ?string $payment_details
  * @property ?list<string> $recovery_codes
  */
-#[Fillable(['name', 'login', 'password', 'gender', 'locale', 'currency', 'payment_details'])]
+#[Fillable(['name', 'login', 'password', 'gender', 'locale', 'currency', 'payment_details', 'bio'])]
 #[Hidden(['email', 'password', 'remember_token', 'payment_details', 'recovery_codes', 'is_admin', 'avatar_path', 'compliments'])]
 final class User extends Authenticatable
 {
@@ -58,6 +59,7 @@ final class User extends Authenticatable
             'currency' => Currency::class,
             'is_admin' => 'boolean',
             'payment_details' => 'encrypted',
+            'bio' => 'encrypted',
             'recovery_codes' => 'encrypted:array',
             'compliments' => 'encrypted:array',
         ];

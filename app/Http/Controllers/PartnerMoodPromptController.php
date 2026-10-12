@@ -20,7 +20,7 @@ final class PartnerMoodPromptController extends Controller
     {
         $actor = $request->user();
         abort_unless($actor instanceof User, Response::HTTP_UNAUTHORIZED);
-        $prompt = $this->requestPartnerMood->execute($actor, $couple);
+        $prompt = $this->requestPartnerMood->execute($actor, $couple, $request->routeIs('mood.self.store'));
 
         $message = $prompt->wasRecentlyCreated ? __('Запрос отправлен') : __('Запрос уже отправлен. Повторить можно через минуту.');
         if ($request->expectsJson()) {

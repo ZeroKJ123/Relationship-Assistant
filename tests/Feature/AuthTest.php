@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Profiles\UpdateProfile;
+use App\Data\Profiles\UpdateProfileData;
 use App\Enums\Gender;
 use App\Models\TelegramAccount;
 use App\Models\User;
@@ -82,7 +83,7 @@ it('encrypts payment details and excludes private account fields from serializat
 it('rejects changes to another user profile even when the action is called directly', function (): void {
     $actor = User::factory()->create();
     $target = User::factory()->create();
-    expect(fn (): null => app(UpdateProfile::class)->execute($actor, $target, 'Changed', Gender::Male, null))->toThrow(AuthorizationException::class);
+    expect(fn (): null => app(UpdateProfile::class)->execute($actor, $target, new UpdateProfileData('Changed', Gender::Male)))->toThrow(AuthorizationException::class);
     expect($target->fresh()->name)->toBe($target->name);
 });
 

@@ -16,6 +16,7 @@ final class MovieChoiceFactory extends Factory
     /** @return array<string,mixed> */
     public function definition(): array
     {
-        return ['couple_id' => Couple::factory(), 'first_user_id' => User::factory(), 'second_user_id' => User::factory(), 'operation_key' => fake()->uuid(), 'mode' => 'swipe', 'status' => SelectionStatus::Waiting, 'first_ready' => false, 'second_ready' => false, 'pool' => [], 'votes' => [], 'selected_movie_id' => null];
+        return [
+            'spin_started_at' => null, 'couple_id' => Couple::factory(), 'first_user_id' => User::factory(), 'second_user_id' => User::factory(), 'operation_key' => fake()->uuid(), 'mode' => 'swipe', 'status' => SelectionStatus::Waiting, 'first_ready' => false, 'second_ready' => false, 'pool' => [], 'votes' => [], 'selected_movie_id' => null];
     }
 }

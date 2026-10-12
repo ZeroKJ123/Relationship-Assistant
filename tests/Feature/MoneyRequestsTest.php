@@ -10,6 +10,7 @@ use App\Actions\Requests\CreatePartnerRequest;
 use App\Actions\Requests\ResolveCondition;
 use App\Actions\Requests\RespondToRequest;
 use App\Data\Money\MoneyRequestData;
+use App\Data\Profiles\UpdateProfileData;
 use App\Data\Requests\NewRequestData;
 use App\Data\Requests\RequestResponseData;
 use App\Enums\ConditionType;
@@ -56,7 +57,7 @@ it('shares encrypted payment details only after acceptance and separates paying 
     $this->get(route('requests.show', [$pair->couple, $request]))->assertOk()->assertSee('TEST recipient account');
     expect(DB::table('money_requests')->where('id', $money->id)->value('payment_details_snapshot'))->not->toBe('TEST recipient account');
     expect($money->refresh()->toArray())->not->toHaveKey('payment_details_snapshot');
-    app(UpdateProfile::class)->execute($pair->first, $pair->first, $pair->first->name, Gender::Unspecified, 'TEST changed account');
+    app(UpdateProfile::class)->execute($pair->first, $pair->first, new UpdateProfileData($pair->first->name, Gender::Unspecified, 'TEST changed account'));
     expect($money->refresh()->payment_details_snapshot)->toBe('TEST recipient account');
     $duty = $request->duties()->sole();
     expect($duty->is_reward_eligible)->toBeFalse();

@@ -9,7 +9,7 @@ use Illuminate\Database\Events\QueryExecuted;
 
 final class ApplicationChanges
 {
-    private const TECHNICAL_TABLES = ['sessions', 'jobs', 'job_batches', 'failed_jobs', 'cache', 'cache_locks', 'migrations', 'telegram_update_receipts', 'telegram_callback_actions', 'telegram_login_attempts', 'telegram_link_codes', 'recovery_codes'];
+    private const TECHNICAL_TABLES = ['sessions', 'jobs', 'job_batches', 'failed_jobs', 'cache', 'cache_locks', 'migrations', 'telegram_update_receipts', 'telegram_callback_actions', 'telegram_login_attempts', 'telegram_link_codes', 'recovery_codes', 'admin_audits'];
 
     public function handle(QueryExecuted $query): void
     {

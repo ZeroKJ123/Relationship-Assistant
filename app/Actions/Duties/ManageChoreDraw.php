@@ -16,6 +16,7 @@ use App\Models\ChoreDraw;
 use App\Models\Couple;
 use App\Models\User;
 use App\Services\Notifications\NotificationOutbox;
+use App\Services\Realtime\SelectionPresence;
 use App\Services\Requests\RequestContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,7 @@ use Illuminate\Support\Facades\Validator;
 
 final class ManageChoreDraw
 {
-    public function __construct(private readonly RequestContext $context, private readonly NotificationOutbox $outbox, private readonly CreatePartnerRequest $requests, private readonly RespondToRequest $responses) {}
+    public function __construct(private readonly RequestContext $context, private readonly NotificationOutbox $outbox, private readonly CreatePartnerRequest $requests, private readonly RespondToRequest $responses, private readonly SelectionPresence $presence) {}
 
     public function create(User $actor, Couple $couple, string $description, CarbonImmutable $dueAt, string $operationKey): ChoreDraw
     {
@@ -69,11 +70,26 @@ final class ManageChoreDraw
                 $this->context->deny('expired_deadline');
             }
             $current->setAttribute($actor->id === $current->first_user_id ? 'first_ready' : 'second_ready', true);
-            if ($current->first_ready && $current->second_ready) {
-                $this->finish($currentCouple, $current);
-            }
             $current->save();
             DB::afterCommit(fn () => Log::info('chore.draw_answered', ['draw_id' => $current->id, 'actor_id' => $actor->id, 'status' => $current->status->value, 'executor_id' => $current->executor_id]));
+        }, attempts: 3);
+    }
+
+    public function start(User $actor, Couple $couple, ChoreDraw $draw): void
+    {
+        DB::transaction(function () use ($actor, $couple, $draw): void {
+            $currentCouple = $this->context->lockCouple($actor, $couple);
+            $current = ChoreDraw::query()->whereKey($draw->id)->where('couple_id', $currentCouple->id)->lockForUpdate()->firstOrFail();
+            if ($current->status !== SelectionStatus::Waiting || ! $current->first_ready || ! $current->second_ready || ! $this->presence->areBothPresent($current)) {
+                return;
+            }
+            if (! $current->due_at->isFuture()) {
+                $this->context->deny('expired_deadline');
+            }
+            $this->finish($currentCouple, $current);
+            $current->spin_started_at = CarbonImmutable::now()->addSeconds(SelectionPresence::START_DELAY_SECONDS);
+            $current->save();
+            DB::afterCommit(fn () => Log::info('chore.draw_started', ['draw_id' => $current->id, 'executor_id' => $current->executor_id]));
         }, attempts: 3);
     }
 

@@ -23,7 +23,8 @@ final class PartnerRequestFactory extends Factory
     /** @return array<string,mixed> */
     public function definition(): array
     {
-        return ['request_template_id' => null, 'expense_category_id' => null, 'template_name' => null, 'category_name' => null, 'heart_price' => 0, 'couple_id' => Couple::factory()->state(['status' => CoupleStatus::Active]), 'author_id' => User::factory(), 'recipient_id' => User::factory(), 'type' => RequestType::Service, 'description' => fake()->sentence(), 'due_at' => now()->addDays(3), 'is_very_wanted' => false, 'operation_key' => fake()->uuid(), 'refusal_tariff_version' => app(EconomyRules::class)->get('version'), 'refusal_tariff' => 0, 'status' => RequestStatus::Pending, 'version' => 0];
+        return [
+            'created_by_admin_id' => null, 'request_template_id' => null, 'expense_category_id' => null, 'template_name' => null, 'category_name' => null, 'heart_price' => 0, 'couple_id' => Couple::factory()->state(['status' => CoupleStatus::Active]), 'author_id' => User::factory(), 'recipient_id' => User::factory(), 'type' => RequestType::Service, 'description' => fake()->sentence(), 'due_at' => now()->addDays(3), 'is_very_wanted' => false, 'operation_key' => fake()->uuid(), 'refusal_tariff_version' => app(EconomyRules::class)->get('version'), 'refusal_tariff' => 0, 'status' => RequestStatus::Pending, 'version' => 0];
     }
 
     public function configure(): static

@@ -24,6 +24,7 @@
             @guest<span class="pill">{{ __('Начало истории') }}</span>@endguest
         </header>
         <p class="connection-status" role="status" tabindex="-1" data-connection-status hidden>{{ __('Нет соединения. Действия требуют интернета. Если связь пропала после отправки, проверьте результат после подключения.') }}</p>
+        @if(request()->attributes->has('admin_actor_id'))<aside class="connection-status" role="status">{{ __('Проверка от имени :name. Действия меняют реальные данные и отправляют уведомления.', ['name'=>auth()->user()->name]) }}<form method="post" action="{{ route('admin.panel.stop') }}">@csrf<x-button type="submit" variant="quiet">{{ __('Вернуться в админ-панель') }}</x-button></form></aside>@endif
         <main id="main-content" tabindex="-1">@yield('content')</main>
         @yield('navigation')
     </div>

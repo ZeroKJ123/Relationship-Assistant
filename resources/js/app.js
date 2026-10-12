@@ -1,3 +1,4 @@
+import { initializeSelectionPresence } from './modules/selection-presence.js';
 import { initializeCare } from './modules/care.js';
 import { initializeMood } from './modules/mood.js';
 import { initializeRealtime } from './modules/realtime.js';
@@ -24,6 +25,7 @@ function initializeInterface(root) {
     initializeProductPhotos(root);
     initializeMood(root);
     initializeCare(root);
+    initializeSelectionPresence(root, initializeInterface);
     lockForms(root);
 }
 initializePwa(document);

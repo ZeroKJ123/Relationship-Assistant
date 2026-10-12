@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /** @property int $id
+ * @property ?CarbonImmutable $spin_started_at
  * @property int $couple_id
  * @property int $first_user_id
  * @property int $second_user_id
@@ -31,6 +32,6 @@ final class ChoreDraw extends Model
     /** @return array<string,string> */
     protected function casts(): array
     {
-        return ['couple_id' => 'integer', 'first_user_id' => 'integer', 'second_user_id' => 'integer', 'description' => 'encrypted', 'due_at' => 'immutable_datetime', 'first_ready' => 'boolean', 'second_ready' => 'boolean', 'executor_id' => 'integer', 'partner_request_id' => 'integer', 'status' => SelectionStatus::class];
+        return ['spin_started_at' => 'immutable_datetime', 'couple_id' => 'integer', 'first_user_id' => 'integer', 'second_user_id' => 'integer', 'description' => 'encrypted', 'due_at' => 'immutable_datetime', 'first_ready' => 'boolean', 'second_ready' => 'boolean', 'executor_id' => 'integer', 'partner_request_id' => 'integer', 'status' => SelectionStatus::class];
     }
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\TelegramLinkController;
 use App\Http\Controllers\Auth\TelegramLoginController;
 use App\Http\Controllers\ComplimentController;
 use App\Http\Controllers\PartnerAvatarController;
+use App\Http\Controllers\PartnerProfileController;
 use App\Http\Controllers\ProfileAvatarController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileTimezoneController;
@@ -39,5 +40,6 @@ Route::middleware(['auth.session', 'throttle:login'])->prefix('telegram/login-at
     Route::patch('{attempt}', [TelegramLoginController::class, 'update'])->whereNumber('attempt')->name('update');
     Route::delete('{attempt}', [TelegramLoginController::class, 'destroy'])->whereNumber('attempt')->name('destroy');
 });
+Route::get('profiles/{user}', [PartnerProfileController::class, 'show'])->whereNumber('user')->middleware(['auth', 'auth.session'])->name('profiles.show');
 Route::get('profiles/{user}/avatar', PartnerAvatarController::class)->whereNumber('user')->middleware(['auth', 'auth.session'])->name('profiles.avatar');
 Route::get('profile/avatar', AvatarController::class)->middleware(['auth', 'auth.session'])->name('profile.avatar');

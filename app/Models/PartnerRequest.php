@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property ?string $category_name
  * @property int $heart_price
  * @property ?int $cancellation_proposed_by_id
+ * @property ?int $created_by_admin_id
  * @property int $id
  * @property int $couple_id
  * @property int $author_id
@@ -114,6 +115,6 @@ final class PartnerRequest extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['rating' => 'integer', 'rating_comment' => 'encrypted', 'dish_id' => 'integer', 'dish_version' => 'integer', 'dish_kind' => DishKind::class, 'dish_snapshot' => 'array', 'request_template_id' => 'integer', 'expense_category_id' => 'integer', 'heart_price' => 'integer', 'cancellation_proposed_by_id' => 'integer', 'couple_id' => 'integer', 'author_id' => 'integer', 'recipient_id' => 'integer', 'type' => RequestType::class, 'due_at' => 'immutable_datetime', 'is_very_wanted' => 'boolean', 'refusal_tariff_version' => 'integer', 'refusal_tariff' => 'integer', 'decline_penalty' => 'integer', 'decline_reason' => DeclineReason::class, 'status' => RequestStatus::class, 'version' => 'integer', 'accepted_at' => 'immutable_datetime'];
+        return ['created_by_admin_id' => 'integer', 'rating' => 'integer', 'rating_comment' => 'encrypted', 'dish_id' => 'integer', 'dish_version' => 'integer', 'dish_kind' => DishKind::class, 'dish_snapshot' => 'array', 'request_template_id' => 'integer', 'expense_category_id' => 'integer', 'heart_price' => 'integer', 'cancellation_proposed_by_id' => 'integer', 'couple_id' => 'integer', 'author_id' => 'integer', 'recipient_id' => 'integer', 'type' => RequestType::class, 'due_at' => 'immutable_datetime', 'is_very_wanted' => 'boolean', 'refusal_tariff_version' => 'integer', 'refusal_tariff' => 'integer', 'decline_penalty' => 'integer', 'decline_reason' => DeclineReason::class, 'status' => RequestStatus::class, 'version' => 'integer', 'accepted_at' => 'immutable_datetime'];
     }
 }

@@ -10,9 +10,9 @@
 </x-card>
 @forelse($requests as $item)
 <x-card class="section-space form-stack">
-<x-status>{{ __($item->status->label()) }}</x-status>
 <h2>{{ __($item->type->label()) }}</h2>
 <p class="request-description request-description--primary">{{ $item->description }}</p><p>{{ $item->author->name }} → {{ $item->recipient->name }}</p>
+<x-status :tone="$progress->getTone($item)">{{ $progress->getLabel($item) }}</x-status>
 <p>{{ __('Срок: :date', ['date'=>$item->due_at->setTimezone($couple->timezone)->format('d.m.Y H:i')]) }}</p>
 <a class="button button--quiet" href="{{ route('requests.show',[$couple,$item]) }}">{{ __('Открыть просьбу') }}</a>
 </x-card>

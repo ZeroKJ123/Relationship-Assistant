@@ -74,6 +74,7 @@ use App\Models\User;
 use App\Services\Hearts\EconomySettingsStore;
 use App\Services\Hearts\Ledger;
 use App\Services\Notifications\DeliveryLifecycle;
+use App\Services\Realtime\SelectionPresence;
 use App\Services\Scheduling\DueCare;
 use App\Services\Telegram\WebhookHandler;
 use Carbon\CarbonImmutable;
@@ -102,6 +103,12 @@ if ($operation === 'care_process') {
 if (str_ends_with($operation, '_late')) {
     Date::setTestNow(CarbonImmutable::now()->addDays(5));
 }
+if (in_array($operation, ['selection_draw', 'chore_start'], true)) {
+    $selection = $operation === 'selection_draw' ? MovieChoice::query()->findOrFail($value) : ChoreDraw::query()->findOrFail($value);
+    foreach ([$selection->first_user_id, $selection->second_user_id] as $participantId) {
+        $app->make(SelectionPresence::class)->touch(User::query()->findOrFail($participantId), $selection);
+    }
+}
 fwrite(STDOUT, "ready\n");
 $deadline = microtime(true) + 10; // Bound the wait if the parent exits.
 while (! file_exists($barrier)) {
@@ -118,6 +125,7 @@ try {
         'selection_answer' => $app->make(ManageMovieChoice::class)->answer($actor, $couple, MovieChoice::query()->findOrFail($value), $limit === 1),
         'selection_vote' => $app->make(ManageMovieChoice::class)->vote($actor, $couple, MovieChoice::query()->findOrFail($value), Movie::query()->findOrFail($limit), true),
         'selection_draw' => $app->make(ManageMovieChoice::class)->draw($actor, $couple, MovieChoice::query()->findOrFail($value)),
+        'chore_start' => $app->make(ManageChoreDraw::class)->start($actor, $couple, ChoreDraw::query()->findOrFail($value)),
         'chore_answer' => $app->make(ManageChoreDraw::class)->answer($actor, $couple, ChoreDraw::query()->findOrFail($value), $limit === 1),
         'movie_vote' => $app->make(VoteForMovie::class)->execute($actor, $couple, Movie::query()->findOrFail($value), $limit === 1),
         'car_create' => $app->make(CreateCar::class)->execute($actor, new CarData('Race car', 'petrol', sprintf('00000000-0000-4000-8000-%012d', $value))),

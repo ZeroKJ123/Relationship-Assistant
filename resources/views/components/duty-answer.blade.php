@@ -1,5 +1,6 @@
-@props(['action','duty','isReview'=>false,'positiveLabel'])
+@props(['action','duty','isReview'=>false,'positiveLabel','returnRequest'=>false])
 <form method="post" action="{{ $action }}" class="form-stack" data-submit-lock data-duty-confirmation data-question-yes="{{ $isReview ? __('Результат проверен и соответствует договорённости?') : __('Всё выполнено согласно договорённости?') }}" data-question-no="{{ $isReview ? __('Оспорить отметку? Исполнитель потеряет :amount сердечек.', ['amount'=>$duty->false_report_penalty]) : __('Сохранить ответ «Пока не сделано»? Это не продлевает срок.') }}">
+    @if($returnRequest)<input type="hidden" name="return_request" value="1">@endif
     @csrf<input type="hidden" name="expected_version" value="{{ $duty->version }}">
     <div data-duty-confirmation-content>
         <div class="form-stack">

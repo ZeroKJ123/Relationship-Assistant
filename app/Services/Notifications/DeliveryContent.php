@@ -65,6 +65,9 @@ final class DeliveryContent
             'rated' => __('Партнёр оценил ваш поступок:'),
             default => __($event->status->label()),
         };
+        if ($event->type === 'created' && $request->created_by_admin_id !== null) {
+            $label = __('Системная тестовая просьба:');
+        }
         $details = [sprintf("%s\n%s", $label, Str::limit($request->description, 2000)), sprintf('%s: %s', __('Вид просьбы'), __($request->type->label())), sprintf('%s: %s', __('Ответить или выполнить до'), $request->due_at->setTimezone($request->couple->timezone)->format('d.m.Y H:i'))];
         if ($request->heart_price > 0) {
             $details[] = __('Цена: :amount сердечек', ['amount' => $request->heart_price]);
@@ -139,6 +142,9 @@ final class DeliveryContent
             return null;
         }
 
+        if ($prompt->is_self_requested) {
+            return __('Укажите своё настроение. Партнёр получит вашу оценку; затем можно добавить эмоджи или стикер.');
+        }
         if ($prompt->is_manual) {
             return __('Партнёр хочет узнать ваше настроение. Как вы сейчас? Выберите оценку кнопкой ниже или отметьте её в приложении.');
         }

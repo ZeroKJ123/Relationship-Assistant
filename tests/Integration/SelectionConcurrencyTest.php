@@ -46,6 +46,8 @@ it('draws a shared movie once despite concurrent spins', function (): void {
     $pair = AgreementScenario::create();
     Movie::factory()->count(3)->create(['user_id' => $pair->first->id]);
     $choice = app(ManageMovieChoice::class)->create($pair->first, $pair->couple, 'roulette', Str::uuid()->toString());
+    app(ManageMovieChoice::class)->answer($pair->first, $pair->couple, $choice, true);
+    app(ManageMovieChoice::class)->answer($pair->second, $pair->couple, $choice, true);
     (new ConcurrentOperations)->run('agreement-worker.php', [[(string) $pair->first->id, (string) $pair->couple->id, 'selection_draw', (string) $choice->id, '0'], [(string) $pair->second->id, (string) $pair->couple->id, 'selection_draw', (string) $choice->id, '0']]);
     $chosen = $choice->refresh()->selected_movie_id;
     expect($choice->status)->toBe(SelectionStatus::Matched)->and($chosen)->toBeIn($choice->pool);
@@ -57,7 +59,9 @@ it('creates one duty when two partners agree to a chore draw concurrently', func
     $pair = AgreementScenario::create();
     $draw = app(ManageChoreDraw::class)->create($pair->first, $pair->couple, 'Совместное дело', CarbonImmutable::now()->addDay(), Str::uuid()->toString());
     $results = (new ConcurrentOperations)->run('agreement-worker.php', [[(string) $pair->first->id, (string) $pair->couple->id, 'chore_answer', (string) $draw->id, '1'], [(string) $pair->second->id, (string) $pair->couple->id, 'chore_answer', (string) $draw->id, '1']]);
-    expect($results)->toBe(['accepted', 'accepted'])->and($draw->refresh()->status)->toBe(SelectionStatus::Matched)->and(Duty::query()->count())->toBe(1)->and(Duty::query()->sole()->executor_id)->toBe($draw->executor_id);
+    expect($results)->toBe(['accepted', 'accepted'])->and($draw->refresh()->status)->toBe(SelectionStatus::Waiting)->and(Duty::query()->count())->toBe(0);
+    (new ConcurrentOperations)->run('agreement-worker.php', [[(string) $pair->first->id, (string) $pair->couple->id, 'chore_start', (string) $draw->id, '0'], [(string) $pair->second->id, (string) $pair->couple->id, 'chore_start', (string) $draw->id, '0']]);
+    expect($draw->refresh()->status)->toBe(SelectionStatus::Matched)->and(Duty::query()->count())->toBe(1)->and(Duty::query()->sole()->executor_id)->toBe($draw->executor_id);
 });
 
 it('creates one unfinished duty reminder per slot despite concurrent scheduler ticks', function (): void {

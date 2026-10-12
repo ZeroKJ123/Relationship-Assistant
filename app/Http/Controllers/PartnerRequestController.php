@@ -17,6 +17,7 @@ use App\Models\RequestTemplate;
 use App\Models\SettlementMethod;
 use App\Models\User;
 use App\Models\WishlistItem;
+use App\ViewModels\RequestProgress;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -34,7 +35,7 @@ final class PartnerRequestController extends Controller
 
     public function index(Couple $couple): View
     {
-        return view('requests.index', ['couple' => $couple, 'requests' => PartnerRequest::query()->where('couple_id', $couple->id)->with(['author:id,name', 'recipient:id,name'])->latest('id')->paginate(self::PAGE_SIZE)]);
+        return view('requests.index', ['progress' => new RequestProgress, 'couple' => $couple, 'requests' => PartnerRequest::query()->where('couple_id', $couple->id)->with(['author:id,name', 'recipient:id,name', 'duties'])->latest('id')->paginate(self::PAGE_SIZE)]);
     }
 
     public function create(Request $request, Couple $couple): View|RedirectResponse
@@ -73,8 +74,8 @@ final class PartnerRequestController extends Controller
     {
         abort_unless($partnerRequest->couple_id === $couple->id, Response::HTTP_NOT_FOUND);
         Gate::authorize('view', $partnerRequest);
-        $partnerRequest->load(['author:id,name', 'recipient:id,name', 'moneyRequest', 'guestVisit', 'dateInvitation']);
+        $partnerRequest->load(['author:id,name', 'recipient:id,name', 'moneyRequest', 'guestVisit', 'dateInvitation', 'duties.executor:id,name', 'duties.reviewer:id,name', 'duties.couple']);
 
-        return view('requests.show', ['wishes' => WishlistItem::query()->where('user_id', auth()->id())->whereNull('archived_at')->whereNull('claimed_condition_id')->latest('id')->paginate(self::PAGE_SIZE, ['*'], 'wishes_page')->withQueryString(), 'currencies' => Currency::cases(), 'conditionTypes' => ConditionType::cases(), 'methods' => SettlementMethod::query()->whereIn('kind', ['action', 'kisses', 'sushi', 'custom', 'money', 'wishlist', 'fuel'])->where(fn (Builder $query) => $query->whereNull('user_id')->orWhere('user_id', auth()->id()))->orderBy('sort_order')->get(), 'couple' => $couple, 'partnerRequest' => $partnerRequest, 'conditions' => $partnerRequest->conditions()->latest('version')->paginate(self::PAGE_SIZE), 'currentCondition' => $partnerRequest->conditions()->latest('version')->first()]);
+        return view('requests.show', ['progress' => new RequestProgress, 'wishes' => WishlistItem::query()->where('user_id', auth()->id())->whereNull('archived_at')->whereNull('claimed_condition_id')->latest('id')->paginate(self::PAGE_SIZE, ['*'], 'wishes_page')->withQueryString(), 'currencies' => Currency::cases(), 'conditionTypes' => ConditionType::cases(), 'methods' => SettlementMethod::query()->whereIn('kind', ['action', 'kisses', 'sushi', 'custom', 'money', 'wishlist', 'fuel'])->where(fn (Builder $query) => $query->whereNull('user_id')->orWhere('user_id', auth()->id()))->orderBy('sort_order')->get(), 'couple' => $couple, 'partnerRequest' => $partnerRequest, 'conditions' => $partnerRequest->conditions()->latest('version')->paginate(self::PAGE_SIZE), 'currentCondition' => $partnerRequest->conditions()->latest('version')->first()]);
     }
 }

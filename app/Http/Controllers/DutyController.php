@@ -61,7 +61,7 @@ final class DutyController extends Controller
         $data = $request->getData();
         $this->report->execute($actor, $couple, $duty, version: $data->expectedVersion, isDone: $data->answer);
 
-        return redirect()->route('duties.show', [$couple, $duty])->with('status', __('Ваш ответ о выполнении сохранён.'));
+        return redirect()->route($request->boolean('return_request') ? 'requests.show' : 'duties.show', [$couple, $request->boolean('return_request') ? $duty->partner_request_id : $duty])->with('status', __('Ваш ответ о выполнении сохранён.'));
     }
 
     public function verify(ConfirmDutyRequest $request, Couple $couple, Duty $duty): RedirectResponse
@@ -71,6 +71,6 @@ final class DutyController extends Controller
         $data = $request->getData();
         $this->verify->execute($actor, $couple, $duty, version: $data->expectedVersion, isConfirmed: $data->answer);
 
-        return redirect()->route('duties.show', [$couple, $duty])->with('status', __('Результат проверки сохранён.'));
+        return redirect()->route($request->boolean('return_request') ? 'requests.show' : 'duties.show', [$couple, $request->boolean('return_request') ? $duty->partner_request_id : $duty])->with('status', __('Результат проверки сохранён.'));
     }
 }

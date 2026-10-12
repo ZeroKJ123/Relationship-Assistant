@@ -22,11 +22,11 @@ final class RequestPartnerMood
 
     public function __construct(private readonly RequestContext $context, private readonly NotificationOutbox $outbox) {}
 
-    public function execute(User $actor, Couple $couple): MoodPrompt
+    public function execute(User $actor, Couple $couple, bool $selfRequested = false): MoodPrompt
     {
-        return DB::transaction(function () use ($actor, $couple): MoodPrompt {
+        return DB::transaction(function () use ($actor, $couple, $selfRequested): MoodPrompt {
             $current = $this->context->lockCouple($actor, $couple);
-            $recipientId = $current->members()->where('user_id', '!=', $actor->id)->sole()->user_id;
+            $recipientId = $selfRequested ? $actor->id : $current->members()->where('user_id', '!=', $actor->id)->sole()->user_id;
             $latestMoodAt = MoodEntry::query()->where('couple_id', $current->id)->where('user_id', $recipientId)->latest('recorded_at')->value('recorded_at');
             $pending = MoodPrompt::query()->where('couple_id', $current->id)->where('user_id', $recipientId)->where('is_manual', true)->whereNull('answered_at')->where('expires_at', '>', now());
             if ($latestMoodAt !== null) {
@@ -47,7 +47,7 @@ final class RequestPartnerMood
                 $existing->forceFill(['expires_at' => $scheduledAt])->save();
             }
             $prompt = new MoodPrompt;
-            $prompt->forceFill(['couple_id' => $current->id, 'user_id' => $recipientId, 'is_manual' => true, 'scheduled_at' => $scheduledAt, 'expires_at' => $expiresAt])->save();
+            $prompt->forceFill(['couple_id' => $current->id, 'user_id' => $recipientId, 'is_manual' => true, 'is_self_requested' => $selfRequested, 'scheduled_at' => $scheduledAt, 'expires_at' => $expiresAt])->save();
             $this->outbox->record($current->id, $recipientId, NotificationKind::MoodPrompt, $prompt->id, expiresAt: $expiresAt);
             DB::afterCommit(fn () => Log::info('mood.partner_prompt_created', ['prompt_id' => $prompt->id, 'actor_id' => $actor->id, 'couple_id' => $current->id]));
 

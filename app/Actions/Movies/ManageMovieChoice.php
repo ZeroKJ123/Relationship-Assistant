@@ -12,7 +12,9 @@ use App\Models\MovieChoice;
 use App\Models\User;
 use App\Services\Movies\MovieSelection;
 use App\Services\Notifications\NotificationOutbox;
+use App\Services\Realtime\SelectionPresence;
 use App\Services\Requests\RequestContext;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +23,7 @@ final class ManageMovieChoice
 {
     public const MAXIMUM_FILMS = 100;
 
-    public function __construct(private readonly RequestContext $context, private readonly MovieSelection $selection, private readonly NotificationOutbox $outbox) {}
+    public function __construct(private readonly RequestContext $context, private readonly MovieSelection $selection, private readonly NotificationOutbox $outbox, private readonly SelectionPresence $presence) {}
 
     public function create(User $actor, Couple $couple, string $mode, string $operationKey): MovieChoice
     {
@@ -46,10 +48,8 @@ final class ManageMovieChoice
             }
             $partner = $current->members()->where('user_id', '!=', $actor->id)->sole();
             $choice = new MovieChoice;
-            $choice->forceFill(['couple_id' => $current->id, 'first_user_id' => $actor->id, 'second_user_id' => $partner->user_id, 'operation_key' => $operationKey, 'mode' => $mode, 'status' => $mode === 'swipe' ? SelectionStatus::Waiting : SelectionStatus::Active, 'first_ready' => false, 'second_ready' => false, 'pool' => $pool, 'votes' => []])->save();
-            if ($mode === 'swipe') {
-                $this->outbox->record($current->id, $partner->user_id, NotificationKind::MovieChoice, $choice->id);
-            }
+            $choice->forceFill(['couple_id' => $current->id, 'first_user_id' => $actor->id, 'second_user_id' => $partner->user_id, 'operation_key' => $operationKey, 'mode' => $mode, 'status' => SelectionStatus::Waiting, 'first_ready' => false, 'second_ready' => false, 'pool' => $pool, 'votes' => []])->save();
+            $this->outbox->record($current->id, $partner->user_id, NotificationKind::MovieChoice, $choice->id);
             DB::afterCommit(fn () => Log::info('movies.selection_created', ['selection_id' => $choice->id, 'actor_id' => $actor->id, 'mode' => $mode]));
 
             return $choice;
@@ -60,7 +60,8 @@ final class ManageMovieChoice
     {
         DB::transaction(function () use ($actor, $couple, $choice, $accepted): void {
             $current = $this->lock($actor, $couple, $choice);
-            if ($current->status !== SelectionStatus::Waiting) {
+            $canAnswer = $current->status === SelectionStatus::Waiting || ($current->mode === 'roulette' && $current->status === SelectionStatus::Active);
+            if (! $canAnswer) {
                 return;
             }
             if (! $accepted) {
@@ -120,6 +121,10 @@ final class ManageMovieChoice
             if ($current->mode !== 'roulette' || $current->status !== SelectionStatus::Active) {
                 $this->context->deny('selection_not_active');
             }
+            if (! $current->first_ready || ! $current->second_ready || ! $this->presence->areBothPresent($current)) {
+                return;
+            }
+            $current->spin_started_at = CarbonImmutable::now()->addSeconds(SelectionPresence::START_DELAY_SECONDS);
             $index = random_int(0, count($current->pool) - 1);
             $current->forceFill(['selected_movie_id' => $current->pool[$index], 'status' => SelectionStatus::Matched])->save();
             DB::afterCommit(fn () => Log::info('movies.selection_drawn', ['selection_id' => $current->id, 'movie_id' => $current->selected_movie_id]));

@@ -2,17 +2,17 @@
 @section('title', __('Мой профиль · Наша пара'))
 @section('content')
 <x-card class="auth-card">
-    <x-avatar :name="$user->name" :src="$user->avatar_path !== null ? route('profile.avatar', ['v'=>$user->updated_at?->getTimestamp()]) : null" />
-    <form method="post" enctype="multipart/form-data" action="{{ route('profile.avatar.store') }}" class="form-stack" data-submit-lock>
+    <form method="post" enctype="multipart/form-data" action="{{ route('profile.avatar.store') }}" data-submit-lock data-avatar-upload>
         @csrf
-        <label for="profile-photo">{{ __('Фото профиля') }}</label>
-        <input id="profile-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required aria-describedby="profile-photo-hint">
-        <p id="profile-photo-hint" class="field-hint">{{ __('Выберите фото из галереи: JPEG, PNG или WebP до 4 МБ.') }}</p>
+        <button type="button" class="profile-avatar-button" data-avatar-choose hidden aria-label="{{ __('Изменить фото профиля') }}"><x-avatar :name="$user->name" :src="$user->avatar_path !== null ? route('profile.avatar', ['v'=>$user->updated_at?->getTimestamp()]) : null" /><span>{{ __('Изменить фото') }}</span></button>
+        <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" required data-avatar-file aria-label="{{ __('Фото профиля') }}">
+        <p class="field-hint">{{ __('Нажмите на фото и выберите изображение до 4 МБ. Оно сохранится сразу.') }}</p>
         @error('photo')<p class="field-error" role="alert">{{ $message }}</p>@enderror
-        <x-button type="submit" variant="quiet">{{ __('Сохранить фото') }}</x-button>
+        <x-button type="submit" data-avatar-submit>{{ __('Загрузить фото') }}</x-button>
     </form>
-    <h1 class="form-title">{{ __('Привет, :name', ['name' => $user->name]) }}</h1>
-    <p>{{ __('Личные данные, реквизиты и связь с Telegram — всё в одном месте.') }}</p>
+    <h1 class="form-title">{{ $user->name }}</h1>
+    <p class="request-description">{{ $user->bio ?: __('Расскажите немного о себе') }}</p>
+    <p>{{ __('Рецептов: :count', ['count'=>$recipeCount]) }}</p>
     <x-form-feedback />
     @if($recoveryCodes !== [])
         <x-card tone="yellow" class="recovery-card">
@@ -21,12 +21,22 @@
             <ul class="recovery-codes">@foreach($recoveryCodes as $code)<li><code>{{ $code }}</code></li>@endforeach</ul>
         </x-card>
     @endif
-    <form method="post" action="{{ route('profile.update') }}" class="form-stack" data-submit-lock>
+    <details class="settings-history"><summary>{{ __('Редактировать профиль') }}</summary><form method="post" action="{{ route('profile.update') }}" class="form-stack" data-submit-lock>
         @csrf @method('patch')
         <fieldset class="settings-group">
             <legend>{{ __('Обо мне') }}</legend>
             <x-field name="name" :label="__('Имя')" :value="old('name', $user->name)" :error="$errors->first('name')" required maxlength="80" autocomplete="name" />
+            <x-textarea-field name="bio" :label="__('О себе')" :value="old('bio', $user->bio)" :error="$errors->first('bio')" maxlength="500" />
             <x-gender-field :value="old('gender', $user->gender?->value ?? 'unspecified')" :error="$errors->first('gender')" />
+        </fieldset>
+        <x-button type="submit">{{ __('Сохранить профиль') }}</x-button>
+    </form></details>
+</x-card>
+<x-card class="auth-card form-stack"><h2>{{ __('Дополнительные настройки') }}</h2>
+<details class="settings-history"><summary>{{ __('Валюта и реквизиты') }}</summary>
+<form method="post" action="{{ route('profile.update') }}" class="form-stack" data-submit-lock>@csrf @method('patch')
+<input type="hidden" name="settings_only" value="1">
+<fieldset class="settings-group"><legend>{{ __('Валюта') }}</legend>
             <x-currency-field :currencies="$currencies" :value="old('currency', $user->currency?->value ?? 'BYN')" :label="__('Моя валюта по умолчанию')" :error="$errors->first('currency')" />
             <p class="field-hint">{{ __('Это личная настройка. Старые суммы сохраняют свою валюту; приложение не пересчитывает деньги по курсу.') }}</p>
             @if($couple)<p class="field-hint">{{ __('В формах вашей пары используется валюта пары: :currency. Личная настройка её не меняет.', ['currency' => $couple->currency->value]) }}</p>@endif
@@ -36,9 +46,8 @@
             <x-textarea-field name="payment_details" :label="__('Реквизиты для переводов')" :value="old('payment_details', $user->payment_details)" :error="$errors->first('payment_details')" :hint="__('Укажите только данные для получения перевода. Не сохраняйте пароли, PIN или код с обратной стороны карты.')" maxlength="1000" />
             <p class="field-hint">{{ __('При принятии денежной договорённости сохраняется копия реквизитов. Изменение профиля не заменяет данные в уже принятой просьбе.') }}</p>
         </fieldset>
-        <x-button type="submit">{{ __('Сохранить профиль') }}</x-button>
-    </form>
-    <section class="form-stack" aria-labelledby="telegram-heading">
+<x-button type="submit">{{ __('Сохранить настройки') }}</x-button></form></details>
+    <details class="settings-history"><summary>{{ __('Связь с Telegram') }}</summary><section class="form-stack" aria-labelledby="telegram-heading">
         <h2 id="telegram-heading">{{ __('Связь с Telegram') }}</h2>
         @if($hasTelegram)
             <x-status tone="success">{{ __('Telegram привязан') }}</x-status>
@@ -62,7 +71,7 @@
             <x-status>{{ __('Подключение временно недоступно') }}</x-status>
             <p>{{ __('Вы можете пользоваться приложением. Привязка появится, когда подключение к боту будет настроено.') }}</p>
         @endif
-    </section>
+    </section></details>
     @if($pendingInvitationUrl)<p class="form-footer"><a href="{{ $pendingInvitationUrl }}">{{ __('Продолжить принятие приглашения') }}</a></p>@endif
 </x-card>
 <x-card class="auth-card">
