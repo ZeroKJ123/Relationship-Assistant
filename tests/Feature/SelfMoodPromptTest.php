@@ -21,8 +21,8 @@ beforeEach(function (): void {
 
 it('sends a self question to the actor and sends the mood answer to the partner without duplicates', function (): void {
     $pair = AgreementScenario::create();
-    $this->asUser($pair->first)->postJson(route('mood.self.store', $pair->couple))->assertOk();
-    $this->postJson(route('mood.self.store', $pair->couple))->assertOk();
+    $this->asUser($pair->first)->postJson(route('mood.self.store', $pair->couple))->assertOk()->assertExactJson(['message' => 'Вопрос о настроении отправлен вам в Telegram']);
+    $this->postJson(route('mood.self.store', $pair->couple))->assertOk()->assertExactJson(['message' => 'Запрос уже отправлен. Повторить можно через минуту.']);
     $prompt = MoodPrompt::query()->sole();
     expect($prompt->user_id)->toBe($pair->first->id)->and($prompt->is_self_requested)->toBeTrue();
     $question = NotificationDelivery::query()->sole();

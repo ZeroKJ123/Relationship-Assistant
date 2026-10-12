@@ -8,9 +8,46 @@ export function initializeProductPhotos(root) {
         const image = container.querySelector('img');
         const fallback = container.querySelector('[data-photo-fallback]');
         if (!image || !fallback) return;
-        const showFallback = () => { image.hidden = true; fallback.hidden = false; };
+        const showFallback = () => { image.hidden = true; fallback.hidden = false; const link = image.closest('[data-photo-open]'); if (link) link.hidden = true; };
         image.addEventListener('error', showFallback);
         if (image.complete && image.naturalWidth === 0) showFallback();
+    });
+}
+
+let viewer;
+
+/** Одно окно просмотра на страницу: создаётся при первом открытии фото. */
+function getPhotoViewer(closeLabel) {
+    if (viewer?.isConnected) return viewer;
+    viewer = document.createElement('dialog');
+    viewer.className = 'photo-viewer';
+    const image = document.createElement('img');
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'photo-viewer__close';
+    close.textContent = '×';
+    close.setAttribute('aria-label', closeLabel);
+    viewer.append(image, close);
+    viewer.addEventListener('click', (event) => { if (event.target !== image) viewer.close(); });
+    document.body.append(viewer);
+
+    return viewer;
+}
+
+export function initializePhotoViewer(root) {
+    if (typeof HTMLDialogElement === 'undefined') return;
+    root.querySelectorAll('[data-photo-open]').forEach((link) => {
+        if (link.dataset.photosInit3) return;
+        link.dataset.photosInit3 = 'true';
+        link.addEventListener('click', (event) => {
+            if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+            event.preventDefault();
+            const dialog = getPhotoViewer(link.dataset.photoCloseLabel ?? '');
+            const image = dialog.querySelector('img');
+            image.src = link.href;
+            image.alt = link.querySelector('img')?.alt ?? '';
+            dialog.showModal();
+        });
     });
 }
 

@@ -1,7 +1,7 @@
 @props(['item','isOwn','couple'])
 <x-card class="wishlist-card">
-    <div class="wishlist-card-main"><x-product-photo :src="$item->photo_path ? route('photos.wishlist',$item) : null" :alt="$item->title" />
-        <div class="form-stack"><h2>{{ $item->title }}</h2><span class="price-chip">{{ $item->price }} {{ $item->currency->value }}</span>@if($item->description)<p class="request-description">{{ $item->description }}</p>@endif
+    <div class="wishlist-card-main"><x-product-photo :src="$item->photo_path ? route('photos.wishlist',$item) : null" :alt="$item->title" :is-zoomable="true" />
+        <div class="form-stack"><h2>{{ $item->title }}</h2><span class="price-chip">{{ $item->price }} {{ $item->currency->value }}</span>@if($item->getProductUrl())<a class="button button--quiet button--small" href="{{ $item->getProductUrl() }}" target="_blank" rel="noopener noreferrer">{{ __('Ссылка на товар') }}</a>@elseif($item->description)<p class="request-description">{{ $item->description }}</p>@endif
         @if($item->received_at)<x-status tone="success">{{ __('Подарок получен') }}</x-status>@elseif($item->claimed_condition_id)<x-status>{{ __('Подарок обещан') }}</x-status>@elseif($item->archived_at)<x-status>{{ __('В архиве') }}</x-status>@else<x-status>{{ __('Хочу в подарок') }}</x-status>@endif
         @if($isOwn && !$item->archived_at)<a class="button button--quiet" href="{{ route('wishlist.edit',$item) }}">{{ __('Редактировать') }}</a>@endif</div>
     </div>

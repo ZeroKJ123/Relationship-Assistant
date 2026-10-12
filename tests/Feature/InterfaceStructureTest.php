@@ -13,6 +13,7 @@ use App\Models\MoodEntry;
 use App\Models\MoodPrompt;
 use App\Models\PartnerRequest;
 use App\Models\User;
+use App\Models\WishlistItem;
 use App\Services\Appearance\AppearanceCatalog;
 use App\Services\Appearance\AppearanceStore;
 use App\Services\Mood\MoodCalendar;
@@ -150,7 +151,8 @@ it('shows the partner mood month with the chosen day and offers a self question 
         ->assertSee(route('mood.day', [$pair->couple, 'date' => '2026-10-01']))->assertDontSee('Указать своё настроение')
         ->assertViewHas('calendar', fn (array $calendar): bool => $calendar['days'][19]['isSelected'] && $calendar['days'][19]['level'] === MoodLevel::Low && $calendar['days'][20]['level'] === null && $calendar['marked'] === 1 && $calendar['next'] === '2026-10-01');
     $this->get(route('mood.day', $pair->couple))->assertOk()->assertViewHas('calendar', fn (array $calendar): bool => $calendar['next'] === null && $calendar['days'][13]['isSelected']);
-    $this->get('/')->assertOk()->assertSee(sprintf('data-mood-self="%s"', route('mood.self.store', $pair->couple)), false);
+    $this->get('/')->assertOk()->assertDontSee('data-mood-self', false);
+    $this->get(route('mood.index', $pair->couple))->assertOk()->assertSee(sprintf('action="%s"', route('mood.self.store', $pair->couple)), false)->assertSee('Отправить запрос на моё настроение')->assertDontSee('Сохранить настроение')->assertDontSee('name="level"', false);
 });
 
 it('opens the duty page from the request list once a request has duties', function (): void {
@@ -268,4 +270,28 @@ it('shows the partner compliment in the greeting instead of a separate dashboard
         ->assertSeeInOrder(['id="greeting-title"', 'data-compliment', 'Ты мой уют', 'class="partner-summary"'], false)
         ->assertDontSee('Забота начинается с маленьких вещей')->assertDontSee('partner-compliment', false)->assertDontSee('Комплимент от партнёра');
     $this->asUser($pair->second)->get('/')->assertOk()->assertSeeInOrder(['data-compliment', 'Забота начинается с маленьких вещей', 'class="partner-summary"'], false);
+});
+
+it('lets a wishlist photo be opened while items without a photo stay plain', function (): void {
+    $pair = AgreementScenario::create();
+    $withPhoto = WishlistItem::factory()->create(['user_id' => $pair->first->id, 'title' => 'Плед', 'photo_path' => 'wishlist/plaid.jpg']);
+    WishlistItem::factory()->create(['user_id' => $pair->first->id, 'title' => 'Книга', 'photo_path' => null]);
+
+    $page = $this->asUser($pair->second)->get(route('wishlist.index', ['owner_id' => $pair->first->id]))->assertOk()
+        ->assertSee(sprintf('href="%s" target="_blank" rel="noopener" data-photo-open', route('photos.wishlist', $withPhoto)), false)->assertSee('Открыть фото: Плед');
+    expect(substr_count($page->getContent(), 'data-photo-open'))->toBe(1);
+});
+
+it('shows a saved product address as a safe link and keeps older text descriptions as text', function (): void {
+    $pair = AgreementScenario::create();
+    $item = fn (string $title, ?string $description): WishlistItem => WishlistItem::factory()->create(['user_id' => $pair->first->id, 'title' => $title, 'description' => $description]);
+    $item('Наушники', 'https://shop.example/item?id=5');
+    $item('Плед', 'Тёплый, серый');
+    $item('Ловушка', 'javascript:alert(1)');
+
+    $page = $this->asUser($pair->first)->get(route('wishlist.index'))->assertOk()
+        ->assertSee('href="https://shop.example/item?id=5" target="_blank" rel="noopener noreferrer"', false)->assertSee('Ссылка на товар')->assertSee('Тёплый, серый')
+        ->assertDontSee('href="javascript:', false);
+    expect(substr_count($page->getContent(), 'rel="noopener noreferrer"'))->toBe(1);
+    $this->get(route('wishlist.create'))->assertOk()->assertSee('Ссылка на товар — если есть')->assertDontSee('Описание — если нужно');
 });

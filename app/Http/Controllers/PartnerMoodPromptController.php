@@ -20,9 +20,13 @@ final class PartnerMoodPromptController extends Controller
     {
         $actor = $request->user();
         abort_unless($actor instanceof User, Response::HTTP_UNAUTHORIZED);
-        $prompt = $this->requestPartnerMood->execute($actor, $couple, $request->routeIs('mood.self.store'));
-
-        $message = $prompt->wasRecentlyCreated ? __('Запрос отправлен') : __('Запрос уже отправлен. Повторить можно через минуту.');
+        $isSelfRequested = $request->routeIs('mood.self.store');
+        $prompt = $this->requestPartnerMood->execute($actor, $couple, $isSelfRequested);
+        $message = match (true) {
+            ! $prompt->wasRecentlyCreated => __('Запрос уже отправлен. Повторить можно через минуту.'),
+            $isSelfRequested => __('Вопрос о настроении отправлен вам в Telegram'),
+            default => __('Запрос отправлен'),
+        };
         if ($request->expectsJson()) {
             return response()->json(['message' => $message]);
         }

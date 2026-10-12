@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="{{ $appearance->theme()['background'] }}">
     <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/love-v2-192.png">
-    <link rel="apple-touch-icon" href="/icons/love-v2-180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/love-v3-192.png">
+    <link rel="apple-touch-icon" href="/icons/love-v3-180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="{{ __('Любимость') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">

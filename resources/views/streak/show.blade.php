@@ -11,7 +11,7 @@
     <div><dt>{{ __('Партнёр') }}</dt><dd>{{ $streak->hasPartnerMarked ? __('настроение отмечено') : __('ещё не отметил(а)') }}</dd></div>
     <div><dt>{{ __('Восстановлений в этом месяце') }}</dt><dd>{{ __(':left из :total', ['left'=>$streak->restoresLeft,'total'=>$restoresPerMonth]) }}</dd></div>
 </dl>
-@unless($streak->hasActorMarked)<a class="button button--primary button--wide section-space" href="{{ route('mood.index',$couple) }}">{{ __('Отметить настроение') }}</a>@endunless
+@unless($streak->hasActorMarked)<a class="button button--primary button--wide section-space" href="{{ route('mood.index',$couple) }}">{{ __('Открыть настроение') }}</a>@endunless
 @if($canEdit && $streak->canRestore())
 <x-card tone="yellow" class="section-space form-stack"><h2>{{ __('Серия прервалась') }}</h2>
 <p>{{ __('Пропущено дней: :missed. Восстановление вернёт серию из :days дн. и потратит столько же восстановлений.', ['missed'=>count($streak->missedDays),'days'=>$streak->restoredDays]) }}</p>

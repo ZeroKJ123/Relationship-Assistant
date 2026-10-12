@@ -117,7 +117,7 @@ it('installation caches only versioned public files and takes control without re
     assert.equal(app.skipped, true);
     assert.equal(app.requests.length, 4);
     assert.ok(app.requests.every((request) => request.credentials === 'omit'));
-    assert.ok(app.requests.every((request) => /-v2/.test(request.url)));
+    assert.ok(app.requests.every((request) => /-v[23]/.test(request.url)));
     await app.caches.open('other-app-cache');
     await app.caches.open('our-couple-public-old');
     await app.lifecycle('activate');

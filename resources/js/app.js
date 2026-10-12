@@ -7,7 +7,7 @@ import { initializeMovies } from './modules/movies.js';
 import { initializePwa, initializeOfflineForms } from './modules/pwa.js';
 import { initializeDuties } from './modules/duties.js';
 import { initializeWishlist } from './modules/wishlist.js';
-import { initializeProductPhotos } from './modules/photos.js';
+import { initializePhotoViewer, initializeProductPhotos } from './modules/photos.js';
 import { initializeDashboard } from './modules/dashboard.js';
 import { initializeDishes } from './modules/dishes.js';
 import { initializeRequests } from './modules/requests.js';
@@ -25,6 +25,7 @@ function initializeInterface(root) {
     initializeDuties(root);
     initializeWishlist(root);
     initializeProductPhotos(root);
+    initializePhotoViewer(root);
     initializeMood(root);
     initializeCare(root);
     initializeSelectionPresence(root, initializeInterface);

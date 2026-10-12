@@ -8,7 +8,7 @@
 @csrf @if($item) @method('put') @endif
 <input type="hidden" name="operation_key" value="{{ old('operation_key',$operationKey) }}"><input type="hidden" name="expected_version" value="{{ old('expected_version',$item?->version ?? 0) }}">
 <x-field name="title" :label="__('Название')" :value="old('title',$item?->title ?? '')" maxlength="120" required />
-<div class="field"><label for="description">{{ __('Описание — если нужно') }}</label><textarea name="description" id="description" rows="3" maxlength="2000" >{{ old('description',$item?->description ?? '') }}</textarea></div>
+<x-field name="description" :label="__('Ссылка на товар — если есть')" :value="old('description',$item?->description ?? '')" :error="$errors->first('description')" maxlength="2000" inputmode="url" autocapitalize="off" placeholder="https://" />
 <x-field name="price" :label="__('Ориентир цены')" :value="old('price',$item?->price ?? '0.00')" inputmode="decimal" required />
 <div class="field"><label for="currency">{{ __('Валюта') }}</label><select id="currency" name="currency">@foreach($currencies as $currency)<option value="{{ $currency->value }}" @selected(old('currency',$item?->currency->value ?? $defaultCurrency->value) === $currency->value)>{{ $currency->value }}</option>@endforeach</select></div>
 

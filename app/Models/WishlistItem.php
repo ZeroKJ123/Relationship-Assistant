@@ -35,6 +35,14 @@ final class WishlistItem extends Model
     /** @use HasFactory<WishlistItemFactory> */
     use HasFactory;
 
+    /** Ссылка на товар, если в поле сохранён адрес сайта; прежние текстовые описания ссылкой не считаются. */
+    public function getProductUrl(): ?string
+    {
+        $value = trim((string) $this->description);
+
+        return preg_match('#^https?://#i', $value) === 1 && filter_var($value, FILTER_VALIDATE_URL) !== false ? $value : null;
+    }
+
     /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
