@@ -13,6 +13,7 @@
     @auth @if(config('realtime.enabled'))
     <meta name="realtime-key" content="{{ config('broadcasting.connections.reverb.key') }}">
     <meta name="realtime-port" content="{{ config('realtime.public_port') }}">
+    <meta name="realtime-secure-port" content="{{ config('realtime.secure_public_port') }}">
     @endif @endauth
     <title>@yield('title', __('Любимость'))</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])

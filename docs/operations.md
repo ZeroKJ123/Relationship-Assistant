@@ -102,7 +102,9 @@ docker compose exec -T laravel.test php artisan hearts:check-balances --no-inter
 
 Laravel Reverb работает отдельным сервисом `realtime` из `compose.workers.yaml`. HTTP приложения остаётся на прежнем порту; WebSocket использует `REVERB_PUBLIC_PORT` (по умолчанию 8089). Телефон подключается к тому же имени/IP ноутбука автоматически. Не используйте `localhost` в адресе телефона.
 
-В закрытом `.env` включите `REALTIME_ENABLED=true`, `BROADCAST_CONNECTION=reverb`, задайте независимые случайные `REVERB_APP_ID`, `REVERB_APP_KEY`, `REVERB_APP_SECRET`. Для Compose: `REVERB_HOST=realtime`, `REVERB_PORT=8080`, `REVERB_SCHEME=http`, `REVERB_PUBLIC_PORT=8089`. Публикуется только ключ приложения Reverb; секрет остаётся на сервере. Для внешнего HTTPS нужен соответствующий защищённый WebSocket-прокси. `.env.example` сохраняет транспорт выключенным.
+В закрытом `.env` включите `REALTIME_ENABLED=true`, `BROADCAST_CONNECTION=reverb`, задайте независимые случайные `REVERB_APP_ID`, `REVERB_APP_KEY`, `REVERB_APP_SECRET`. Для Compose: `REVERB_HOST=realtime`, `REVERB_PORT=8080`, `REVERB_SCHEME=http`, `REVERB_PUBLIC_PORT=8089`. Публикуется только ключ приложения Reverb; секрет остаётся на сервере. `.env.example` сохраняет транспорт выключенным.
+
+Для внешнего HTTPS (например, Cloudflare Tunnel) прокси завершает TLS и передаёт запросы приложению по HTTP. В `.env` задайте `APP_URL=https://ДОМЕН` и `TRUSTED_PROXIES` — адрес, с которого прокси приходит в контейнер (шлюз сети Docker), иначе приложение формирует ссылки `http://`. На HTTPS-странице WebSocket подключается к тому же домену на `REVERB_SECURE_PUBLIC_PORT` (по умолчанию 443), поэтому прокси должен направлять путь `/app/*` на сервис `realtime` (`http://localhost:8089`), а остальное — на приложение. Перенаправление HTTP → HTTPS включается на стороне прокси. `SESSION_SECURE_COOKIE=true` допустим, только если вход по HTTP из локальной сети больше не нужен.
 
 ```sh
 docker compose -f compose.yaml -f compose.workers.yaml --profile telegram-polling up -d realtime

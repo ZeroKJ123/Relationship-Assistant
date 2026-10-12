@@ -39,7 +39,7 @@ export function initializeRealtime(root, initialize) {
         clearTimeout(retryTimer);
         timer = setTimeout(refresh, 250);
     }
-    const echo = new Echo({ broadcaster: 'reverb', key, client: undefined, Pusher, wsHost: window.location.hostname, wsPort: Number(root.querySelector('meta[name="realtime-port"]')?.content ?? 8089), wssPort: Number(root.querySelector('meta[name="realtime-port"]')?.content ?? 8089), forceTLS: window.location.protocol === 'https:', enabledTransports: ['ws', 'wss'], disableStats: true, authEndpoint: '/broadcasting/auth', auth: { headers: { 'X-CSRF-TOKEN': root.querySelector('meta[name="csrf-token"]')?.content ?? '' } } });
+    const echo = new Echo({ broadcaster: 'reverb', key, client: undefined, Pusher, wsHost: window.location.hostname, wsPort: Number(root.querySelector('meta[name="realtime-port"]')?.content ?? 8089), wssPort: Number(root.querySelector('meta[name="realtime-secure-port"]')?.content ?? 443), forceTLS: window.location.protocol === 'https:', enabledTransports: ['ws', 'wss'], disableStats: true, authEndpoint: '/broadcasting/auth', auth: { headers: { 'X-CSRF-TOKEN': root.querySelector('meta[name="csrf-token"]')?.content ?? '' } } });
     echo.private('application.updates').listen('.application.updated', schedule).subscribed(schedule);
     echo.connector.pusher.connection.bind('connected', schedule);
     root.addEventListener('input', (event) => { const form = event.target.closest('form'); if (form) form.dataset.liveDirty = 'true'; });
