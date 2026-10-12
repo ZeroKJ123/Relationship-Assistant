@@ -1,6 +1,6 @@
 <x-card class="auth-card" data-pwa-help data-live-preserve="pwa-help">
     <h2>{{ __('Приложение на телефоне') }}</h2>
-    <p>{{ __('Добавьте «Нашу пару» на главный экран, чтобы открывать её как приложение.') }}</p>
+    <p>{{ __('Добавьте «Любимость» на главный экран, чтобы открывать её как приложение.') }}</p>
     <x-button type="button" class="section-space" data-pwa-install hidden>{{ __('Установить приложение') }}</x-button>
     <p role="status" class="field-hint" data-pwa-status data-accepted="{{ __('Установка запрошена. Проверьте главный экран телефона.') }}" data-dismissed="{{ __('Установить можно позже через меню браузера.') }}" data-failed="{{ __('Не удалось открыть установку. Используйте меню браузера.') }}"></p>
     <details class="settings-history section-space">

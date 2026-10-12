@@ -1,7 +1,7 @@
 const CACHE_PREFIX = 'our-couple-public-';
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
-const OFFLINE_PATH = '/offline-v1.html';
-const STATIC_PATHS = [OFFLINE_PATH, '/icons/heart-v1-192.png', '/icons/heart-v1-512.png', '/icons/heart-v1-180.png'];
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
+const OFFLINE_PATH = '/offline-v2.html';
+const STATIC_PATHS = [OFFLINE_PATH, '/icons/love-v2-192.png', '/icons/love-v2-512.png', '/icons/love-v2-180.png'];
 const MAXIMUM_ASSETS = 50;
 
 function warn(code) {

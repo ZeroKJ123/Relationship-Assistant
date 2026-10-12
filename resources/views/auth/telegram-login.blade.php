@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', __('Подтверждение Telegram · Наша пара'))
+@section('title', __('Подтверждение Telegram · Любимость'))
 @section('content')
 <x-card class="auth-card">
     <h1 class="form-title">{{ $attempt->user_id === null ? __('Войти через Telegram') : __('Привязать Telegram') }}</h1>

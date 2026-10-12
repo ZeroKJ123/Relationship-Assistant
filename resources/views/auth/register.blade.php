@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', __('Создать аккаунт · Наша пара'))
+@section('title', __('Создать аккаунт · Любимость'))
 @section('content')
 <x-card class="auth-card">
     <p class="eyebrow">{{ __('Ваша история начинается здесь') }}</p>

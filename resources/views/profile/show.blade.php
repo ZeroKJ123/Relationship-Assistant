@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', __('Мой профиль · Наша пара'))
+@section('title', __('Мой профиль · Любимость'))
 @section('content')
 <div class="profile-summary">
     <form method="post" enctype="multipart/form-data" action="{{ route('profile.avatar.store') }}" data-submit-lock data-avatar-upload>

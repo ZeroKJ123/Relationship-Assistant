@@ -23,7 +23,7 @@ it('provides correctly sized installation icons and a public launch URL without 
     assert(is_string($source));
     /** @var array{name: string, start_url: string, scope: string, display: string, icons: list<array{src: string, sizes: string, type: string, purpose: string}>} $manifest */
     $manifest = json_decode($source, associative: true, flags: JSON_THROW_ON_ERROR);
-    expect($manifest['name'])->toBe('Наша пара')->and($manifest['start_url'])->toBe('/')
+    expect($manifest['name'])->toBe('Любимость')->and($manifest['start_url'])->toBe('/')
         ->and($manifest['scope'])->toBe('/')->and($manifest['display'])->toBe('standalone');
     foreach ($manifest['icons'] as $icon) {
         $size = getimagesize(public_path(ltrim($icon['src'], '/')));

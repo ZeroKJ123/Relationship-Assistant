@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', __('Наши договорённости · Наша пара'))
+@section('title', __('Наши договорённости · Любимость'))
 @section('content')
 <x-card tone="yellow" class="start-card">
     <p class="eyebrow">{{ __('Договоримся вместе') }}</p>

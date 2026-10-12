@@ -5,15 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="{{ $appearance->theme()['background'] }}">
     <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="apple-touch-icon" href="/icons/heart-v1-180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/love-v2-192.png">
+    <link rel="apple-touch-icon" href="/icons/love-v2-180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="{{ __('Наша пара') }}">
+    <meta name="apple-mobile-web-app-title" content="{{ __('Любимость') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @auth @if(config('realtime.enabled'))
     <meta name="realtime-key" content="{{ config('broadcasting.connections.reverb.key') }}">
     <meta name="realtime-port" content="{{ config('realtime.public_port') }}">
     @endif @endauth
-    <title>@yield('title', __('Наша пара'))</title>
+    <title>@yield('title', __('Любимость'))</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body data-decoration="{{ $appearance->theme()['decoration'] }}" data-user-id="{{ auth()->id() }}" data-authenticated="{{ auth()->check() ? 'true' : 'false' }}">
@@ -21,7 +22,7 @@
     <div class="app-shell">
         <header class="app-header">
             @if(auth()->check() && ! request()->routeIs('home'))<a class="app-back" href="@yield('back', route('home'))"><x-icon name="back" />@yield('back-label', __('Главная'))</a>@endif
-            <a class="brand" href="{{ route('home') }}"><x-icon name="heart" /> {{ __('Наша пара') }}</a>
+            <a class="brand" href="{{ route('home') }}"><x-icon name="heart" /> {{ __('Любимость') }}</a>
             @guest<span class="pill">{{ __('Начало истории') }}</span>@endguest
         </header>
         <p class="connection-status" role="status" tabindex="-1" data-connection-status hidden>{{ __('Нет соединения. Действия требуют интернета. Если связь пропала после отправки, проверьте результат после подключения.') }}</p>

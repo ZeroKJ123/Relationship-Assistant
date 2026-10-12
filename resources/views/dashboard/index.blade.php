@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', __('Наша пара'))
+@section('title', __('Любимость'))
 @section('content')
 @include('dashboard.content')
 @endsection

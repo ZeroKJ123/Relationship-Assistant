@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', __('Завершить пару · Наша пара'))
+@section('title', __('Завершить пару · Любимость'))
 @section('content')
 <x-card class="auth-card">
     <h1 class="form-title">{{ __('Завершить пару?') }}</h1>
