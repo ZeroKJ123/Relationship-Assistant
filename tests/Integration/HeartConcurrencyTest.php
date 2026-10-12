@@ -6,6 +6,7 @@ use App\Actions\Couples\Agreements\AcceptProposal;
 use App\Actions\Hearts\AdjustPartnerHearts;
 use App\Data\Hearts\AdjustmentData;
 use App\Enums\HeartOperationType;
+use App\Models\AdminAudit;
 use App\Models\PartnerRequest;
 use App\Services\Hearts\Ledger;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -77,4 +78,17 @@ it('spends one remaining very wanted slot only once', function (): void {
     sort($results);
     expect($results)->toBe(['accepted', 'rejected']);
     expect(PartnerRequest::query()->where('is_very_wanted', true)->count())->toBe(1);
+});
+
+it('records a manual test balance once when two reconciliation requests arrive concurrently', function (): void {
+    $pair = AgreementScenario::create();
+    $ledger = app(Ledger::class);
+    $ledger->apply($pair->first, -10, HeartOperationType::ManualDeduction, 'test:before-reconciliation');
+    $wallet = $ledger->getWallet($pair->first);
+    $wallet->forceFill(['balance' => 50])->save();
+    $arguments = [(string) $pair->first->id, (string) $pair->couple->id, 'wallet_reconciliation', (string) $pair->first->id, '50'];
+    expect((new ConcurrentOperations)->run('agreement-worker.php', [$arguments, $arguments]))->toBe(['accepted', 'accepted']);
+    expect($wallet->refresh()->balance)->toBe(50)->and((int) $wallet->transactions()->sum('amount'))->toBe(50)->and($wallet->transactions()->where('type', HeartOperationType::BalanceReconciliation)->count())->toBe(1);
+    expect(AdminAudit::query()->where('operation', 'hearts.reconcile_recorded_balance')->count())->toBe(1);
+    $ledger->reconcile($pair->first);
 });

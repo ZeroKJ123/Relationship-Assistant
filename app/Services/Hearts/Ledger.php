@@ -52,6 +52,9 @@ final class Ledger
         if ($type === HeartOperationType::StartingBonus) {
             throw new LogicException('Starting bonus is managed by wallet initialization.');
         }
+        if ($type === HeartOperationType::BalanceReconciliation) {
+            throw new LogicException('Balance reconciliation must use its dedicated action.');
+        }
         $isCredit = in_array($type, [HeartOperationType::Reward, HeartOperationType::ManualThanks], true);
         if (($isCredit && $amount < 0) || (! $isCredit && $amount > 0)) {
             throw new LogicException('Operation amount has the wrong sign.');

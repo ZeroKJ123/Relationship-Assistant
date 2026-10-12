@@ -19,6 +19,7 @@ use App\Actions\Duties\VerifyDuty;
 use App\Actions\Friends\ArchiveFriend;
 use App\Actions\Friends\SaveFriend;
 use App\Actions\Hearts\AdjustPartnerHearts;
+use App\Actions\Hearts\ReconcileRecordedBalance;
 use App\Actions\Money\CreateMoneyRequest;
 use App\Actions\Mood\RecordMood;
 use App\Actions\Mood\RequestPartnerMood;
@@ -41,6 +42,7 @@ use App\Data\Dates\DateInvitationData;
 use App\Data\Dishes\DishData;
 use App\Data\Friends\FriendData;
 use App\Data\Hearts\AdjustmentData;
+use App\Data\Hearts\BalanceReconciliationData;
 use App\Data\Money\MoneyRequestData;
 use App\Data\Mood\MoodData;
 use App\Data\Reminders\ReminderData;
@@ -109,6 +111,9 @@ if (in_array($operation, ['selection_draw', 'chore_start'], true)) {
         $app->make(SelectionPresence::class)->touch(User::query()->findOrFail($participantId), $selection);
     }
 }
+if ($operation === 'wallet_reconciliation') {
+    config(['admin_panel.login' => $actor->login, 'admin_panel.password_hash' => 'test-reconciliation-owner']);
+}
 fwrite(STDOUT, "ready\n");
 $deadline = microtime(true) + 10; // Bound the wait if the parent exits.
 while (! file_exists($barrier)) {
@@ -119,6 +124,7 @@ while (! file_exists($barrier)) {
 }
 try {
     match ($operation) {
+        'wallet_reconciliation' => $app->make(ReconcileRecordedBalance::class)->execute($actor, User::query()->findOrFail($value), new BalanceReconciliationData($limit, 10, sprintf('00000000-0000-4000-8000-%012d', $value), 'Concurrent reconciliation')),
         'act_rate' => $app->make(RatePartnerAct::class)->execute($actor, $couple, PartnerRequest::query()->findOrFail($value), new ActRatingData(0, $limit, null)),
         'selection_create' => $app->make(ManageMovieChoice::class)->create($actor, $couple, 'swipe', sprintf('00000000-0000-4000-8000-%012d', $value)),
         'chore_create' => $app->make(ManageChoreDraw::class)->create($actor, $couple, 'Concurrent chore', CarbonImmutable::createFromTimestampUTC($limit), sprintf('00000000-0000-4000-8000-%012d', $value)),
