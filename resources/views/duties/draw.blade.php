@@ -1,0 +1,11 @@
+@extends('layouts.app')
+@section('title', __('Жеребьёвка дела'))
+@section('content')
+<h1>{{ __('Жеребьёвка дела') }}</h1><x-form-feedback /><x-card class="form-stack"><strong class="request-description--primary">{{ $draw->description }}</strong><p>{{ __('Выполнить до') }}: {{ $draw->due_at->setTimezone($couple->timezone)->format('d.m.Y H:i') }}</p>
+@if($draw->status === \App\Enums\SelectionStatus::Matched)<div class="wheel-pointer" aria-hidden="true">▼</div><div class="movie-wheel movie-wheel--films movie-wheel--result" data-wheel-result="chore-{{ $draw->id }}" style="--film-count:2;--result-rotation:{{ $executor->id === $participants->first()->id ? 1350 : 1170 }}deg" aria-label="{{ __('Колесо исполнителей') }}">@foreach($participants as $participant)<span class="wheel-label" style="--index:{{ $loop->index }}">{{ \Illuminate\Support\Str::limit($participant->name,18) }}</span>@endforeach</div><div class="chore-result" role="status">🎯 <strong>{{ __('Выполняет :name',['name'=>$executor->name]) }}</strong></div><a class="button button--primary" href="{{ route('requests.show',[$couple,$draw->partner_request_id]) }}">{{ __('Открыть дело') }}</a>
+@elseif($draw->status === \App\Enums\SelectionStatus::Declined)<p>{{ __('Жеребьёвка отменена. Исполнитель не назначен.') }}</p>
+@else<p>{{ __('Согласились: :count из 2',['count'=>(int)$draw->first_ready+(int)$draw->second_ready]) }}</p>
+@if(($actor->id === $draw->first_user_id && !$draw->first_ready) || ($actor->id === $draw->second_user_id && !$draw->second_ready))<form method="post" action="{{ route('chores.update',[$couple,$draw]) }}" class="form-stack" data-submit-lock>@csrf @method('patch')<label class="confirmation-check"><input type="checkbox" name="confirmation" value="1" required>{{ __('Согласен на случайный выбор и выполню дело, если выпадет мне') }}</label><x-button type="submit" name="answer" value="accept">{{ __('Согласиться') }}</x-button></form>@endif
+<form method="post" action="{{ route('chores.update',[$couple,$draw]) }}" data-submit-lock>@csrf @method('patch')<x-button type="submit" name="answer" value="decline" variant="quiet">{{ __('Отказаться от жеребьёвки') }}</x-button></form>@endif
+</x-card><a class="button button--quiet section-space" href="{{ route('chores.index',$couple) }}">{{ __('Все жеребьёвки') }}</a>
+@endsection

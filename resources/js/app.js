@@ -1,3 +1,4 @@
+import { initializeCare } from './modules/care.js';
 import { initializeMood } from './modules/mood.js';
 import { initializeRealtime } from './modules/realtime.js';
 import { initializeMovies } from './modules/movies.js';
@@ -22,6 +23,7 @@ function initializeInterface(root) {
     initializeWishlist(root);
     initializeProductPhotos(root);
     initializeMood(root);
+    initializeCare(root);
     lockForms(root);
 }
 initializePwa(document);

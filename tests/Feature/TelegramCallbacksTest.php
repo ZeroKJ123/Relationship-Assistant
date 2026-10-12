@@ -195,7 +195,7 @@ it('records Telegram mood immediately and offers an optional emoji without confi
     emojiResponse($this, 82, $account, '😎');
     callbackResponse($this, 83, $account, $button['callback_data']);
     expect(MoodEntry::query()->sole()->emoji)->toBe('🫠');
-    expect(NotificationDelivery::query()->where('kind', NotificationKind::MoodEmoji)->count())->toBe(1);
+    expect(NotificationDelivery::query()->where('kind', NotificationKind::MoodEmoji)->count())->toBe(0);
     expect(MoodEntry::query()->sole()->source)->toBe(MoodSource::Telegram)->and($prompt->refresh()->answered_at)->not->toBeNull();
 });
 

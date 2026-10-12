@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\ViewModels;
 
 use App\Data\Hearts\BalanceSnapshot;
+use App\Models\ChoreDraw;
 use App\Models\Couple;
 use App\Models\Duty;
 use App\Models\MoodEntry;
 use App\Models\MoodPrompt;
+use App\Models\MovieChoice;
 use App\Models\PartnerRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
@@ -32,5 +34,8 @@ final readonly class DashboardViewModel
         public ?string $togetherDuration = null,
         public ?MoodPrompt $pendingMoodPrompt = null,
         public bool $hasCar = false,
+        public string $compliment = '',
+        public ?MovieChoice $movieChoice = null,
+        public ?ChoreDraw $choreDraw = null,
     ) {}
 }

@@ -19,13 +19,13 @@ final class SaveMovie
         $year = $data->year;
         $description = $data->description;
         $isFavorite = $data->isFavorite;
-        Validator::make(['title' => $title, 'year' => $year, 'description' => $description], ['title' => ['required', 'string', 'max:150'], 'year' => ['nullable', 'integer', 'between:1888,2200'], 'description' => ['nullable', 'string', 'max:1000']])->validate();
+        Validator::make(['title' => $title, 'year' => $year, 'description' => $description, 'link' => $data->link], ['title' => ['required', 'string', 'max:150'], 'year' => ['nullable', 'integer', 'between:1888,2200'], 'description' => ['nullable', 'string', 'max:1000'], 'link' => ['nullable', 'url:http,https', 'max:1000']])->validate();
         $identity = hash('sha256', sprintf('%s|%s', mb_strtolower(preg_replace('/\s+/u', ' ', $title) ?? $title), $year ?? ''));
 
-        return DB::transaction(function () use ($actor, $title, $year, $description, $isFavorite, $identity): Movie {
+        return DB::transaction(function () use ($actor, $title, $year, $description, $isFavorite, $identity, $data): Movie {
             User::query()->whereKey($actor->id)->lockForUpdate()->firstOrFail();
             $movie = Movie::query()->where('user_id', $actor->id)->where('identity_hash', $identity)->lockForUpdate()->first() ?? new Movie;
-            $movie->forceFill(['user_id' => $actor->id, 'identity_hash' => $identity, 'title' => $title, 'year' => $year, 'description' => $description, 'is_favorite' => $isFavorite, 'archived_at' => null])->save();
+            $movie->forceFill(['user_id' => $actor->id, 'identity_hash' => $identity, 'title' => $title, 'year' => $year, 'description' => $description, 'link' => $data->link, 'is_favorite' => $isFavorite, 'archived_at' => null])->save();
             DB::afterCommit(fn () => Log::info('movie.saved', ['movie_id' => $movie->id, 'actor_id' => $actor->id]));
 
             return $movie;

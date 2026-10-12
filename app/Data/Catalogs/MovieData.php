@@ -6,5 +6,5 @@ namespace App\Data\Catalogs;
 
 final readonly class MovieData
 {
-    public function __construct(public string $title, public ?int $year, public ?string $description, public bool $isFavorite) {}
+    public function __construct(public string $title, public ?int $year, public ?string $description, public bool $isFavorite, public ?string $link = null) {}
 }

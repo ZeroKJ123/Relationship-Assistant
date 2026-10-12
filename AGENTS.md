@@ -234,3 +234,8 @@ Before relying on a package's API, confirm its installed version:
 - `app/Services/Realtime/ApplicationChanges.php`, `app/Events/ApplicationUpdated.php`, `routes/channels.php`, `resources/js/modules/realtime.js`: Reverb, закрытый сигнал без личных данных, обновление страниц с сохранением черновиков; отдельный сервис `realtime` в Compose.
 - `app/Services/Telegram/MoodStickers.php`, `app/Jobs/DownloadMoodStickerJob.php`, `app/Http/Controllers/MoodStickerController.php`: приватные WEBP/TGS/WEBM для настроения, загрузка вне транзакций.
 - `profile.timezone`, `app/Actions/Couples/UpdateTimezone.php`: общий часовой пояс только в подробных настройках профиля.
+
+- `mood.day`, `app/Services/Mood/MoodDay.php`: постоянная история партнёра по локальным суткам со средним и деталями.
+- `profiles.avatar`, `profile.compliments.store`: фото текущему партнёру и зашифрованные личные комплименты.
+- `app/Actions/Movies/ManageMovieChoice.php`, `movies.selections.*`: совместные сессии, два согласия, первый match и сохранённая рулетка.
+- `app/Actions/Duties/CreateDutyReminders.php`, `ManageChoreDraw.php`: дневные напоминания и согласованная жеребьёвка через общие просьбы/обязанности.

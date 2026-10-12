@@ -6,7 +6,7 @@
 <x-status>{{ __($partnerRequest->status->label()) }}</x-status>
 <h1 class="screen-title">{{ __($partnerRequest->type->label()) }}</h1>
 <div class="request-person"><x-avatar :name="$partnerRequest->author->name" /><p><strong>{{ $partnerRequest->author->name }}</strong> → {{ $partnerRequest->recipient->name }}</p></div>
-<p class="request-description">{{ $partnerRequest->description }}</p>
+<p class="request-description request-description--primary">{{ $partnerRequest->description }}</p>
 @if($partnerRequest->rating)<x-card tone="pink"><h2>{{ __('Оценка поступка: :score из 5', ['score'=>$partnerRequest->rating]) }}</h2>@if($partnerRequest->rating_comment)<p class="request-description">{{ $partnerRequest->rating_comment }}</p>@endif</x-card>@endif
 <x-social-invitation :request="$partnerRequest" :timezone="$couple->timezone" />
 @if($partnerRequest->dish_snapshot)<x-product-photo :src="!empty($partnerRequest->dish_snapshot['photo_path']) ? route('photos.requests',$partnerRequest) : null" :alt="$partnerRequest->dish_snapshot['title'] ?? ''" symbol="♨" /><p>{{ $partnerRequest->dish_snapshot['title'] }} · {{ $partnerRequest->dish_kind->label() }}</p><p>{{ $partnerRequest->dish_snapshot['ingredients'] }}</p><p>{{ __('Продукты ≈ :amount :currency · порций: :portions',['amount'=>$partnerRequest->dish_snapshot['estimate'],'currency'=>$partnerRequest->dish_snapshot['currency'],'portions'=>$partnerRequest->dish_snapshot['portions']]) }}</p>@endif

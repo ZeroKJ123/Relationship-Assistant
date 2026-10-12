@@ -3,13 +3,18 @@
 declare(strict_types=1);
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\MovieChoiceController;
 use App\Http\Controllers\MovieController;
+use App\Http\Controllers\MoviePhotoController;
 use App\Http\Middleware\EnsureCoupleAccess;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'auth.session'])->group(function (): void {
     Route::get('cars', [CarController::class, 'index'])->name('cars.index');
     Route::post('cars', [CarController::class, 'store'])->middleware('throttle:couple-actions')->name('cars.store');
+    Route::get('movies/{movie}/photo', MoviePhotoController::class)->whereNumber('movie')->name('movies.photo');
+    Route::post('couples/{couple}/movie-choices', [MovieChoiceController::class, 'store'])->whereNumber('couple')->middleware([EnsureCoupleAccess::class, 'throttle:couple-actions'])->name('movies.selections.store');
+    Route::patch('couples/{couple}/movie-choices/{movieChoice}', [MovieChoiceController::class, 'update'])->whereNumber(['couple', 'movieChoice'])->middleware([EnsureCoupleAccess::class, 'throttle:couple-actions'])->name('movies.selections.update');
     Route::get('movies', [MovieController::class, 'index'])->name('movies.index');
     Route::post('movies', [MovieController::class, 'store'])->middleware('throttle:couple-actions')->name('movies.store');
     Route::delete('movies/{movie}', [MovieController::class, 'destroy'])->whereNumber('movie')->middleware('throttle:couple-actions')->name('movies.destroy');

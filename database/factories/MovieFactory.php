@@ -16,6 +16,6 @@ final class MovieFactory extends Factory
     {
         $title = fake()->unique()->sentence(3);
 
-        return ['user_id' => User::factory(), 'title' => $title, 'identity_hash' => hash('sha256', sprintf('%s|', mb_strtolower($title))), 'year' => null, 'description' => null, 'is_favorite' => false];
+        return ['user_id' => User::factory(), 'title' => $title, 'identity_hash' => hash('sha256', sprintf('%s|', mb_strtolower($title))), 'year' => null, 'description' => null, 'link' => null, 'photo_path' => null, 'is_favorite' => false];
     }
 }

@@ -24,6 +24,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            'compliments' => null,
             'name' => fake()->name(),
             'login' => fake()->unique()->regexify('[a-z][a-z0-9_]{9}'),
             'gender' => Gender::Unspecified,

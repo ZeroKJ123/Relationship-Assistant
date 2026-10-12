@@ -85,8 +85,8 @@ it('offers an optional emoji after mood and shows only the partner mood on home'
     $this->put(route('mood.emoji', [$pair->couple, $entry]), ['emoji' => '🥰'])->assertRedirect();
     $this->put(route('mood.emoji', [$pair->couple, $entry]), ['emoji' => '🥰'])->assertRedirect();
     $this->asUser($pair->first)->get('/')->assertOk()->assertSee('Настроение партнёра')->assertSee('🥰')->assertDontSee('🤒')->assertDontSee('@else')->assertDontSee('Пригласите партнёра в ваше пространство')->assertViewHas('dashboard', fn ($dashboard): bool => $dashboard->latestMoods->count() === 1 && $dashboard->latestMoods->sole()->user_id === $pair->second->id);
-    expect(NotificationDelivery::query()->where('kind', NotificationKind::MoodEmoji)->count())->toBe(1);
-    expect(NotificationDelivery::query()->where('kind', NotificationKind::MoodEntry)->where('source_id', $entry->id)->sole()->status)->toBe(DeliveryStatus::Cancelled);
+    expect(NotificationDelivery::query()->where('kind', NotificationKind::MoodEmoji)->count())->toBe(0);
+    expect(NotificationDelivery::query()->where('kind', NotificationKind::MoodEntry)->where('source_id', $entry->id)->sole()->status)->toBe(DeliveryStatus::Pending);
     $this->put(route('mood.emoji', [$pair->couple, $entry]), ['emoji' => '😢'])->assertNotFound();
 });
 

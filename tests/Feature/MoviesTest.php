@@ -41,7 +41,7 @@ it('shows a match only after both partners like the same film and makes votes id
     expect(app(VoteForMovie::class)->execute($pair->second, $pair->couple, $same, true))->toBeTrue();
     app(VoteForMovie::class)->execute($pair->second, $pair->couple, $same, true);
     expect(MovieVote::query()->count())->toBe(2)->and(app(MovieSelection::class)->getMatches($pair->first, $pair->couple)->count())->toBe(1);
-    $this->asUser($pair->first)->get(route('movies.choice', $pair->couple))->assertOk()->assertSee('Наши совпадения')->assertSee('Вы оба хотите посмотреть');
+    $this->asUser($pair->first)->get(route('movies.choice', $pair->couple))->assertOk()->assertSee('Пригласить к свайпам')->assertDontSee('data-movie-swipe', false);
     expect(app(MovieSelection::class)->getNext($pair->first, $pair->couple))->toBeNull();
     expect(fn () => app(VoteForMovie::class)->execute($pair->first, $pair->couple, $movie, false))->toThrow(ValidationException::class);
 });
@@ -52,9 +52,7 @@ it('does not match a skipped film and roulette draws from the chosen pool only',
     app(VoteForMovie::class)->execute($pair->first, $pair->couple, $movie, false);
     app(VoteForMovie::class)->execute($pair->second, $pair->couple, $movie, true);
     expect(app(VoteForMovie::class)->draw($pair->first, $pair->couple, true))->toBeNull()->and(app(VoteForMovie::class)->draw($pair->first, $pair->couple, false)?->id)->toBe($movie->id);
-    $this->asUser($pair->first)->post(route('movies.draw', $pair->couple), ['pool' => 'all'])->assertRedirect()->assertSessionHas('movie_draw', $movie->id);
-    $this->get(route('movies.choice', $pair->couple))->assertOk()->assertSee('Смотрим: Один фильм');
-    $this->post(route('movies.draw', $pair->couple), ['pool' => 'matches'])->assertRedirect()->assertSessionHas('status', 'В выбранном списке пока нет фильмов. Добавьте фильмы или найдите совпадение.');
+    $this->asUser($pair->first)->post(route('movies.draw', $pair->couple), ['pool' => 'all'])->assertGone();
 });
 
 it('prevents foreign movies votes and access and removes archived titles from roulette', function (): void {

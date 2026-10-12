@@ -13,6 +13,7 @@ use App\Actions\Couples\UpdateRelationshipDates;
 use App\Actions\Dates\CreateDateInvitation;
 use App\Actions\Dishes\SaveDish;
 use App\Actions\Duties\CheckOverdueDuty;
+use App\Actions\Duties\ManageChoreDraw;
 use App\Actions\Duties\ReportDuty;
 use App\Actions\Duties\VerifyDuty;
 use App\Actions\Friends\ArchiveFriend;
@@ -21,6 +22,7 @@ use App\Actions\Hearts\AdjustPartnerHearts;
 use App\Actions\Money\CreateMoneyRequest;
 use App\Actions\Mood\RecordMood;
 use App\Actions\Mood\RequestPartnerMood;
+use App\Actions\Movies\ManageMovieChoice;
 use App\Actions\Movies\VoteForMovie;
 use App\Actions\Reminders\CancelReminder;
 use App\Actions\Reminders\CreateReminder;
@@ -57,11 +59,13 @@ use App\Enums\MoodLevel;
 use App\Enums\RequestResponse;
 use App\Enums\RequestType;
 use App\Models\AgreementProposal;
+use App\Models\ChoreDraw;
 use App\Models\Couple;
 use App\Models\Dish;
 use App\Models\Duty;
 use App\Models\Friend;
 use App\Models\Movie;
+use App\Models\MovieChoice;
 use App\Models\NotificationDelivery;
 use App\Models\PartnerReminder;
 use App\Models\PartnerRequest;
@@ -109,6 +113,12 @@ while (! file_exists($barrier)) {
 try {
     match ($operation) {
         'act_rate' => $app->make(RatePartnerAct::class)->execute($actor, $couple, PartnerRequest::query()->findOrFail($value), new ActRatingData(0, $limit, null)),
+        'selection_create' => $app->make(ManageMovieChoice::class)->create($actor, $couple, 'swipe', sprintf('00000000-0000-4000-8000-%012d', $value)),
+        'chore_create' => $app->make(ManageChoreDraw::class)->create($actor, $couple, 'Concurrent chore', CarbonImmutable::createFromTimestampUTC($limit), sprintf('00000000-0000-4000-8000-%012d', $value)),
+        'selection_answer' => $app->make(ManageMovieChoice::class)->answer($actor, $couple, MovieChoice::query()->findOrFail($value), $limit === 1),
+        'selection_vote' => $app->make(ManageMovieChoice::class)->vote($actor, $couple, MovieChoice::query()->findOrFail($value), Movie::query()->findOrFail($limit), true),
+        'selection_draw' => $app->make(ManageMovieChoice::class)->draw($actor, $couple, MovieChoice::query()->findOrFail($value)),
+        'chore_answer' => $app->make(ManageChoreDraw::class)->answer($actor, $couple, ChoreDraw::query()->findOrFail($value), $limit === 1),
         'movie_vote' => $app->make(VoteForMovie::class)->execute($actor, $couple, Movie::query()->findOrFail($value), $limit === 1),
         'car_create' => $app->make(CreateCar::class)->execute($actor, new CarData('Race car', 'petrol', sprintf('00000000-0000-4000-8000-%012d', $value))),
         'relationship_dates' => $app->make(UpdateRelationshipDates::class)->execute($actor, $couple, new RelationshipDatesData(sprintf('%d-01-01', $value), null, $limit)),

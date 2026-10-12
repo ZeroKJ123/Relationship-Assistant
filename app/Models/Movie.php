@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $identity_hash
  * @property string $title
  * @property ?int $year
+ * @property ?string $link
+ * @property ?string $photo_path
  * @property ?string $description
  * @property bool $is_favorite
  * @property ?CarbonImmutable $archived_at
@@ -26,6 +28,6 @@ final class Movie extends Model
     /** @return array<string,string> */
     protected function casts(): array
     {
-        return ['user_id' => 'integer', 'year' => 'integer', 'title' => 'encrypted', 'description' => 'encrypted', 'is_favorite' => 'boolean', 'archived_at' => 'immutable_datetime'];
+        return ['user_id' => 'integer', 'year' => 'integer', 'title' => 'encrypted', 'description' => 'encrypted', 'link' => 'encrypted', 'is_favorite' => 'boolean', 'archived_at' => 'immutable_datetime'];
     }
 }

@@ -17,6 +17,7 @@ use Illuminate\Notifications\Notifiable;
 
 /**
  * @property int $id
+ * @property ?list<string> $compliments
  * @property ?string $login
  * @property string $name
  * @property ?string $password
@@ -29,7 +30,7 @@ use Illuminate\Notifications\Notifiable;
  * @property ?list<string> $recovery_codes
  */
 #[Fillable(['name', 'login', 'password', 'gender', 'locale', 'currency', 'payment_details'])]
-#[Hidden(['email', 'password', 'remember_token', 'payment_details', 'recovery_codes', 'is_admin', 'avatar_path'])]
+#[Hidden(['email', 'password', 'remember_token', 'payment_details', 'recovery_codes', 'is_admin', 'avatar_path', 'compliments'])]
 final class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -58,6 +59,7 @@ final class User extends Authenticatable
             'is_admin' => 'boolean',
             'payment_details' => 'encrypted',
             'recovery_codes' => 'encrypted:array',
+            'compliments' => 'encrypted:array',
         ];
     }
 }

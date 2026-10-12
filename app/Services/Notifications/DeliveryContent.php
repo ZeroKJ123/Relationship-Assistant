@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace App\Services\Notifications;
 
+use App\Actions\Duties\CreateDutyReminders;
 use App\Enums\DeclineReason;
 use App\Enums\NotificationKind;
 use App\Enums\ReminderStatus;
 use App\Enums\RequestType;
+use App\Enums\SelectionStatus;
+use App\Models\ChoreDraw;
 use App\Models\Duty;
 use App\Models\DutyConfirmation;
+use App\Models\DutyReminderBatch;
 use App\Models\MoodEntry;
 use App\Models\MoodPrompt;
+use App\Models\MovieChoice;
 use App\Models\NotificationDelivery;
 use App\Models\PartnerReminder;
 use App\Models\PartnerRequest;
@@ -27,9 +32,13 @@ final class DeliveryContent
         return match ($delivery->kind) {
             NotificationKind::RequestEvent => $this->getRequestText($delivery),
             NotificationKind::DutyEvent => $this->getDutyText($delivery),
-            NotificationKind::MoodEntry, NotificationKind::MoodEmoji => $this->getMoodText($delivery),
+            NotificationKind::MoodEntry => $this->getMoodText($delivery),
+            NotificationKind::MoodEmoji => null,
             NotificationKind::MoodPrompt => $this->getPromptText($delivery),
             NotificationKind::Reminder => $this->getReminderText($delivery),
+            NotificationKind::DutyReminder => $this->getDutyReminderText($delivery),
+            NotificationKind::MovieChoice => $this->getSelectionText($delivery, MovieChoice::class),
+            NotificationKind::ChoreDraw => $this->getSelectionText($delivery, ChoreDraw::class),
         };
     }
 
@@ -135,6 +144,31 @@ final class DeliveryContent
         }
 
         return __('Как ваше настроение? Выберите оценку кнопкой ниже или отметьте его в приложении.');
+    }
+
+    private function getDutyReminderText(NotificationDelivery $delivery): ?string
+    {
+        $batch = DutyReminderBatch::query()->whereKey($delivery->source_id)->where('couple_id', $delivery->couple_id)->where('user_id', $delivery->recipient_id)->first();
+        if ($batch === null || $batch->scheduled_at->isFuture()) {
+            return null;
+        }
+        $duties = Duty::query()->where('couple_id', $batch->couple_id)->where('executor_id', $batch->user_id)->whereIn('status', CreateDutyReminders::STATUSES)->orderBy('due_at')->limit(10)->lockForUpdate()->get();
+        if ($duties->isEmpty()) {
+            return null;
+        }
+
+        return Str::limit(__('Ваши невыполненные дела:')."\n".$duties->map(fn (Duty $duty): string => sprintf('• %s — %s', Str::limit($duty->description, 250), $duty->due_at->setTimezone($delivery->couple->timezone)->format('d.m H:i')))->implode("\n"), self::MESSAGE_LENGTH);
+    }
+
+    /** @param class-string<MovieChoice>|class-string<ChoreDraw> $model */
+    private function getSelectionText(NotificationDelivery $delivery, string $model): ?string
+    {
+        $selection = $model::query()->whereKey($delivery->source_id)->where('couple_id', $delivery->couple_id)->first();
+        if ($selection === null || $selection->status !== SelectionStatus::Waiting || ! in_array($delivery->recipient_id, [$selection->first_user_id, $selection->second_user_id], true)) {
+            return null;
+        }
+
+        return $selection instanceof ChoreDraw ? __('Партнёр предлагает жеребьёвку:')."\n".$selection->description."\n".__('Откройте приложение и подтвердите согласие на случайный выбор исполнителя.') : __('Партнёр приглашает выбрать фильм вместе. Откройте приложение: выбор начнётся после согласия обоих.');
     }
 
     private function getReminderText(NotificationDelivery $delivery): ?string

@@ -95,6 +95,9 @@
     @endif
     @else<section class="form-stack"><a href="{{ route('couples.create') }}">{{ __('Пригласить партнёра') }}</a></section>@endif
 </details></x-card>
+<x-card class="auth-card form-stack"><h2>{{ __('Комплименты партнёру') }}</h2><p>{{ __('Эти слова будут появляться у партнёра на главной и меняться каждые пять минут.') }}</p><form method="post" action="{{ route('profile.compliments.store') }}" class="form-stack" data-submit-lock data-compliment-editor>@csrf
+<div data-compliment-fields>@foreach(old('compliments',$user->compliments ?? []) as $text)<x-field name="compliments[]" :id="'compliment-'.$loop->index" :label="__('Комплимент')" :value="$text" maxlength="300" />@endforeach<x-field name="compliments[]" id="compliment-new" :label="__('Новый комплимент')" maxlength="300" /></div>
+<x-button type="button" variant="quiet" data-add-compliment>{{ __('Добавить ещё') }}</x-button><x-button type="submit">{{ __('Сохранить комплименты') }}</x-button></form><p>{{ __('Очистите строку, чтобы удалить комплимент.') }}</p></x-card>
 <x-pwa-help />
 @endsection
 @section('navigation')<x-bottom-navigation :couple="$couple" />@endsection

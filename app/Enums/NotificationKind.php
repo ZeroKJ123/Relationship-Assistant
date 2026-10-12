@@ -12,4 +12,7 @@ enum NotificationKind: string
     case MoodEntry = 'mood_entry';
     case MoodEmoji = 'mood_emoji';
     case Reminder = 'reminder';
+    case DutyReminder = 'duty_reminder';
+    case MovieChoice = 'movie_choice';
+    case ChoreDraw = 'chore_draw';
 }

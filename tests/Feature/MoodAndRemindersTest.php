@@ -56,13 +56,13 @@ it('validates web mood choices and always uses the authenticated author and web 
     expect(MoodEntry::query()->sole()->user_id)->toBe($pair->first->id);
     expect(MoodEntry::query()->sole()->source)->toBe(MoodSource::Web);
 });
-it('limits visible mood history to thirty days and isolates couples including administrators', function (): void {
+it('keeps permanent mood history and isolates couples including administrators', function (): void {
     $pair = AgreementScenario::create();
     MoodEntry::factory()->create(['couple_id' => $pair->couple->id, 'user_id' => $pair->first->id, 'level' => MoodLevel::Bad, 'recorded_at' => CarbonImmutable::now()->subDays(31)]);
     MoodEntry::factory()->create(['couple_id' => $pair->couple->id, 'user_id' => $pair->first->id, 'level' => MoodLevel::Great]);
     $other = AgreementScenario::create();
     MoodEntry::factory()->create(['couple_id' => $other->couple->id, 'user_id' => $other->first->id, 'level' => MoodLevel::Low]);
-    $this->asUser($pair->second)->get(route('mood.index', $pair->couple))->assertOk()->assertSee('Отлично')->assertDontSee($other->first->name)->assertViewHas('entries', fn (LengthAwarePaginator $entries): bool => $entries->total() === 1);
+    $this->asUser($pair->second)->get(route('mood.index', $pair->couple))->assertOk()->assertSee('Отлично')->assertDontSee($other->first->name)->assertViewHas('entries', fn (LengthAwarePaginator $entries): bool => $entries->total() === 2);
     $this->asUser(User::factory()->create(['is_admin' => true]))->get(route('mood.index', $pair->couple))->assertForbidden();
     expect(fn () => app(RecordMood::class)->execute($other->first, $pair->couple, new MoodData(MoodLevel::Good, Str::uuid()->toString())))->toThrow(AuthorizationException::class);
 });
