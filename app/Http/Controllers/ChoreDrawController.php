@@ -21,6 +21,13 @@ use Illuminate\Validation\ValidationException;
 
 final class ChoreDrawController extends Controller
 {
+    /** Сколько раз пара имён повторяется на колесе, чтобы оно выглядело рулеткой. */
+    private const WHEEL_REPEATS = 4;
+
+    private const FULL_TURN = 360;
+
+    private const SPIN_TURNS = 4;
+
     public function __construct(private readonly ManageChoreDraw $draws) {}
 
     public function index(Request $request, Couple $couple): View
@@ -46,7 +53,13 @@ final class ChoreDrawController extends Controller
         Gate::authorize('view', $couple);
         abort_unless($choreDraw->couple_id === $couple->id, Response::HTTP_NOT_FOUND);
 
-        return view('duties.draw', ['couple' => $couple, 'draw' => $choreDraw, 'actor' => $this->getActor($request), 'participants' => User::query()->whereIn('id', [$choreDraw->first_user_id, $choreDraw->second_user_id])->orderBy('id')->get(), 'executor' => $choreDraw->executor_id === null ? null : User::query()->findOrFail($choreDraw->executor_id)]);
+        $participants = User::query()->whereIn('id', [$choreDraw->first_user_id, $choreDraw->second_user_id])->orderBy('id')->get();
+        $sectors = collect(range(1, self::WHEEL_REPEATS))->flatMap(fn (): array => $participants->all())->values();
+        $executorIndex = (int) $participants->search(fn (User $participant): bool => $participant->id === $choreDraw->executor_id);
+        $winningSector = $executorIndex + $participants->count() * ($choreDraw->id % self::WHEEL_REPEATS);
+        $rotation = self::FULL_TURN * self::SPIN_TURNS - (($winningSector + 0.5) * self::FULL_TURN / max(1, $sectors->count()));
+
+        return view('duties.draw', ['couple' => $couple, 'draw' => $choreDraw, 'actor' => $this->getActor($request), 'sectors' => $sectors, 'rotation' => $rotation, 'executor' => $choreDraw->executor_id === null ? null : $participants->firstWhere('id', $choreDraw->executor_id) ?? User::query()->findOrFail($choreDraw->executor_id)]);
     }
 
     public function update(ChoreDrawAnswerRequest $request, Couple $couple, ChoreDraw $choreDraw): RedirectResponse

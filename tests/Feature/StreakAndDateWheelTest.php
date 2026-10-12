@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Enums\SelectionStatus;
+use App\Models\ChoreDraw;
 use App\Models\DateIdea;
 use App\Models\MoodEntry;
+use App\Models\PartnerRequest;
 use App\Models\StreakRestore;
 use App\Services\Couples\CoupleStreak;
 use Carbon\CarbonImmutable;
@@ -109,4 +112,22 @@ it('limits the wheel to a readable number of ideas', function (): void {
 
     $this->asUser($pair->first)->post(route('date_ideas.store', $pair->couple), ['title' => 'Тринадцатая', 'operation_key' => Str::uuid()->toString()])->assertSessionHasErrors('title');
     expect(DateIdea::query()->count())->toBe(12);
+});
+
+it('repeats both partners around the chore wheel and stops on a sector of the executor', function (): void {
+    $pair = AgreementScenario::create();
+    $ids = [$pair->first->id, $pair->second->id];
+    sort($ids);
+    $request = PartnerRequest::factory()->create(['couple_id' => $pair->couple->id, 'author_id' => $ids[0], 'recipient_id' => $ids[1]]);
+    $draw = ChoreDraw::factory()->create(['couple_id' => $pair->couple->id, 'first_user_id' => $ids[0], 'second_user_id' => $ids[1], 'status' => SelectionStatus::Matched, 'first_ready' => true, 'second_ready' => true, 'executor_id' => $ids[1], 'partner_request_id' => $request->id, 'spin_started_at' => now()->subMinute()]);
+
+    $response = $this->asUser($pair->first)->get(route('chores.show', [$pair->couple, $draw]))->assertOk()->assertSee('--film-count:8', false);
+    $response->assertViewHas('sectors', fn ($sectors): bool => $sectors->pluck('id')->all() === [$ids[0], $ids[1], $ids[0], $ids[1], $ids[0], $ids[1], $ids[0], $ids[1]]);
+    $response->assertViewHas('rotation', function (float|int $rotation) use ($response): bool {
+        $stoppedAt = (int) floor(fmod(360 - fmod($rotation, 360), 360) / 45);
+
+        return $response->viewData('sectors')[$stoppedAt]->id === $response->viewData('executor')->id;
+    });
+    expect(substr_count($response->getContent(), 'class="wheel-label"'))->toBe(8);
+    $response->assertSeeInOrder(['data-spin-outcome', 'Выполняет', 'data-spin-announcement', 'Колесо выбрало', 'Вернуться к колесу'], false);
 });

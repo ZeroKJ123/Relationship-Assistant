@@ -22,6 +22,10 @@ export function bindMoodHistory(form, navigate = (url) => window.location.assign
     button.addEventListener('click',(event) => { if (held) { event.preventDefault(); event.stopImmediatePropagation(); held=false; } });
     button.addEventListener('keydown',(event) => { if (event.key==='h' || (event.shiftKey && event.key==='Enter')) { event.preventDefault(); navigate(form.dataset.moodHistory); } });
 }
+function showAnnouncement(node) {
+    const announcement = node.querySelector?.('[data-spin-announcement]');
+    if (typeof announcement?.showModal === 'function' && !announcement.open) announcement.showModal();
+}
 let rotation;
 const playedWheels = new Set();
 const outcomeTimers = new Map();
@@ -34,7 +38,7 @@ export function initializeCare(root) {
         const until = Number(node.dataset.spinOutcome) + 3000 - getServerTime(Number(node.dataset.serverTime));
         if (until <= 0) return;
         node.hidden = true;
-        const timer = setTimeout(() => { node.hidden = false; outcomeTimers.delete(node); }, until);
+        const timer = setTimeout(() => { node.hidden = false; outcomeTimers.delete(node); showAnnouncement(node); }, until);
         outcomeTimers.set(node, timer);
     });
     root.querySelectorAll('[data-avatar-upload]').forEach((form) => {
