@@ -34,7 +34,7 @@ final class ChoreDrawController extends Controller
     {
         Gate::authorize('view', $couple);
 
-        return view('duties.draws', ['couple' => $couple, 'draws' => ChoreDraw::query()->where('couple_id', $couple->id)->latest('id')->paginate(20), 'operationKey' => Str::uuid()->toString()]);
+        return view('duties.draws', ['couple' => $couple, 'operationKey' => Str::uuid()->toString()]);
     }
 
     public function store(StoreChoreDrawRequest $request, Couple $couple): RedirectResponse

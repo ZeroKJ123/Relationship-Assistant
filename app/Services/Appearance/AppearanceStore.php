@@ -19,6 +19,15 @@ use Illuminate\Support\Facades\Schema;
  */
 final class AppearanceStore
 {
+    /** Коэффициенты воспринимаемой яркости каналов (ITU-R BT.601) и порог тёмного фона по шкале 0–255. */
+    private const LUMA_RED = 0.299;
+
+    private const LUMA_GREEN = 0.587;
+
+    private const LUMA_BLUE = 0.114;
+
+    private const DARK_LUMA_LIMIT = 110;
+
     private ?AppearanceSetting $snapshot = null;
 
     public function __construct(private readonly AppearanceCatalog $catalog) {}
@@ -86,6 +95,18 @@ final class AppearanceStore
         $settings = $this->get();
 
         return $settings['themes'][$this->currentId()];
+    }
+
+    /** Тёмная ли текущая тема: по яркости начала фона, чтобы стили подобрали контрастные поверхности. */
+    public function isDark(): bool
+    {
+        $channels = sscanf($this->theme()['background'], '#%2x%2x%2x') ?? [];
+        if (count($channels) !== 3 || in_array(null, $channels, true)) {
+            return false;
+        }
+        [$red, $green, $blue] = $channels;
+
+        return (self::LUMA_RED * $red + self::LUMA_GREEN * $green + self::LUMA_BLUE * $blue) < self::DARK_LUMA_LIMIT;
     }
 
     /** @return array{kind:string,value:string} */

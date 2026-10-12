@@ -17,7 +17,7 @@
     <title>@yield('title', __('Любимость'))</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body data-decoration="{{ $appearance->theme()['decoration'] }}" data-user-id="{{ auth()->id() }}" data-authenticated="{{ auth()->check() ? 'true' : 'false' }}">
+<body data-scheme="{{ $appearance->isDark() ? 'dark' : 'light' }}" data-decoration="{{ $appearance->theme()['decoration'] }}" data-user-id="{{ auth()->id() }}" data-authenticated="{{ auth()->check() ? 'true' : 'false' }}">
     <a class="skip-link" href="#main-content">{{ __('Перейти к содержимому') }}</a>
     <div class="app-shell">
         <header class="app-header">

@@ -28,9 +28,9 @@ final class AppearanceCatalog
     public const DEFAULT_THEME = 'latte';
 
     /** Темы, которые участник может выбрать для себя в профиле. */
-    public const PERSONAL_THEMES = [self::DEFAULT_THEME, 'white', 'love', 'floral'];
+    public const PERSONAL_THEMES = [self::DEFAULT_THEME, 'white', 'love', 'floral', 'pixel'];
 
-    public const DECORATIONS = ['none', 'clouds', 'flowers', 'sun', 'leaves', 'snow', 'hearts'];
+    public const DECORATIONS = ['none', 'clouds', 'flowers', 'sun', 'leaves', 'snow', 'hearts', 'pixels'];
 
     private const TILE_TONES = ['kitchen' => 'yellow', 'request' => 'purple', 'date' => 'pink', 'gift' => 'yellow', 'movies' => 'purple', 'car' => 'yellow', 'chores' => 'yellow', 'rating' => 'pink', 'reminder' => 'purple', 'compliments' => 'pink', 'rewards' => 'yellow'];
 
@@ -79,6 +79,7 @@ final class AppearanceCatalog
             'white' => array_replace($base, ['name' => __('Белая'), 'primary' => '#c8324b', 'ink' => '#1c1b1f', 'muted' => '#6b6871', 'lilac' => '#f1f0f3', 'butter' => '#fdecc8', 'rose' => '#fbdde3', 'background' => '#ffffff', 'gradient' => '#fafafa', 'angle' => 180, 'decoration' => 'none']),
             'love' => array_replace($base, ['name' => __('Любовная'), 'primary' => '#c2255c', 'ink' => '#4a1230', 'muted' => '#8a4a66', 'lilac' => '#ffd9e6', 'butter' => '#ffe7c2', 'rose' => '#ffc9d9', 'background' => '#fff0f5', 'gradient' => '#ffdfea', 'angle' => 150, 'decoration' => 'hearts']),
             'floral' => array_replace($base, ['name' => __('Цветочная'), 'primary' => '#2e7550', 'ink' => '#1f3a2b', 'muted' => '#557062', 'lilac' => '#dcefe0', 'butter' => '#fff0c4', 'rose' => '#ffd9e6', 'background' => '#f4faf1', 'gradient' => '#ffeaf1', 'angle' => 150, 'decoration' => 'flowers']),
+            'pixel' => array_replace($base, ['name' => __('Пиксельная ночь'), 'primary' => '#ff5a70', 'ink' => '#f2f2f5', 'muted' => '#a3a5b3', 'lilac' => '#2a2c3a', 'butter' => '#3b2f18', 'rose' => '#3f1a24', 'background' => '#111217', 'gradient' => '#1a1b24', 'angle' => 160, 'decoration' => 'pixels']),
         ];
     }
 

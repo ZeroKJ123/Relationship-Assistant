@@ -131,3 +131,10 @@ it('repeats both partners around the chore wheel and stops on a sector of the ex
     expect(substr_count($response->getContent(), 'class="wheel-label"'))->toBe(8);
     $response->assertSeeInOrder(['data-spin-outcome', 'Выполняет', 'data-spin-announcement', 'Колесо выбрало', 'Вернуться к колесу'], false);
 });
+
+it('keeps only the new draw form on the chore draw page', function (): void {
+    $pair = AgreementScenario::create();
+    ChoreDraw::factory()->create(['couple_id' => $pair->couple->id, 'first_user_id' => $pair->first->id, 'second_user_id' => $pair->second->id, 'description' => 'Старая жеребьёвка']);
+
+    $this->asUser($pair->first)->get(route('chores.index', $pair->couple))->assertOk()->assertSee('Предложить жеребьёвку')->assertDontSee('Старая жеребьёвка');
+});

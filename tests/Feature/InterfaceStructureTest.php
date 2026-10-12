@@ -238,7 +238,7 @@ it('lets each user choose a personal theme that changes only their colours and d
     $pair = AgreementScenario::create();
     $catalog = new AppearanceCatalog;
 
-    $this->asUser($pair->first)->get(route('profile.show'))->assertOk()->assertSeeInOrder(['Тема оформления', 'Тыквенный латте', 'Белая', 'Любовная', 'Цветочная']);
+    $this->asUser($pair->first)->get(route('profile.show'))->assertOk()->assertSeeInOrder(['Тема оформления', 'Тыквенный латте', 'Белая', 'Любовная', 'Цветочная', 'Пиксельная ночь']);
     $this->patch(route('profile.theme'), ['theme' => 'classic'])->assertSessionHasErrors('theme');
     $this->patch(route('profile.theme'), ['theme' => 'love'])->assertRedirect(route('profile.show'))->assertSessionHasNoErrors();
     expect($pair->first->refresh()->theme)->toBe('love')->and($pair->second->refresh()->theme)->toBeNull();
@@ -294,4 +294,24 @@ it('shows a saved product address as a safe link and keeps older text descriptio
         ->assertDontSee('href="javascript:', false);
     expect(substr_count($page->getContent(), 'rel="noopener noreferrer"'))->toBe(1);
     $this->get(route('wishlist.create'))->assertOk()->assertSee('Ссылка на товар — если есть')->assertDontSee('Описание — если нужно');
+});
+
+it('offers the dark pixel theme and marks only dark themes for contrast styles', function (): void {
+    $pair = AgreementScenario::create();
+    $catalog = new AppearanceCatalog;
+
+    $this->asUser($pair->first)->get('/')->assertOk()->assertSee('data-scheme="light"', false);
+    $this->patch(route('profile.theme'), ['theme' => 'pixel'])->assertRedirect(route('profile.show'));
+    $this->get('/')->assertOk()->assertSee('data-scheme="dark" data-decoration="pixels"', false)->assertSee(sprintf('--color-page-start:%s', $catalog->personalThemes()['pixel']['background']), false);
+    $this->get(route('profile.show'))->assertOk()->assertSee('Пиксельная ночь');
+    $this->asUser($pair->second)->get('/')->assertOk()->assertSee('data-scheme="light"', false);
+
+    $settings = $catalog->defaults();
+    unset($settings['themes']['pixel']);
+    AppearanceSetting::query()->whereKey(AppearanceCatalog::SINGLETON_ID)->update(['settings' => $settings]);
+    $migration = require collect(glob(database_path('migrations/*add_pixel_theme_to_appearance_settings.php')))->sole();
+    $migration->up();
+    $migration->up();
+    $saved = AppearanceSetting::query()->findOrFail(AppearanceCatalog::SINGLETON_ID);
+    expect($saved->revision)->toBe(1)->and($saved->settings['themes']['pixel'])->toBe($catalog->personalThemes()['pixel']);
 });
