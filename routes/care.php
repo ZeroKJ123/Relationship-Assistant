@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\ChoreDrawController;
+use App\Http\Controllers\DateIdeaController;
 use App\Http\Controllers\MemorableDateController;
 use App\Http\Controllers\MoodController;
 use App\Http\Controllers\MoodDayController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\MoodStickerController;
 use App\Http\Controllers\PartnerMoodPromptController;
 use App\Http\Controllers\PartnerReminderController;
 use App\Http\Controllers\SelectionPresenceController;
+use App\Http\Controllers\StreakController;
 use App\Http\Middleware\EnsureCoupleAccess;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +28,12 @@ Route::middleware(['auth', 'auth.session', EnsureCoupleAccess::class])->prefix('
     Route::post('mood/prompts', PartnerMoodPromptController::class)->middleware('throttle:couple-actions')->name('mood.prompts.store');
     Route::put('mood/{moodEntry}/emoji', [MoodController::class, 'emoji'])->whereNumber('moodEntry')->middleware('throttle:couple-actions')->name('mood.emoji');
     Route::put('mood/schedule', [MoodController::class, 'schedule'])->middleware('throttle:couple-actions')->name('mood.schedule');
+    Route::get('streak', [StreakController::class, 'show'])->name('streak.show');
+    Route::post('streak/restore', [StreakController::class, 'restore'])->middleware('throttle:couple-actions')->name('streak.restore');
+    Route::get('date-ideas', [DateIdeaController::class, 'index'])->name('date_ideas.index');
+    Route::post('date-ideas', [DateIdeaController::class, 'store'])->middleware('throttle:couple-actions')->name('date_ideas.store');
+    Route::post('date-ideas/spin', [DateIdeaController::class, 'spin'])->middleware('throttle:couple-actions')->name('date_ideas.spin');
+    Route::delete('date-ideas/{dateIdea}', [DateIdeaController::class, 'destroy'])->whereNumber('dateIdea')->middleware('throttle:couple-actions')->name('date_ideas.destroy');
     Route::get('memorable-dates', [MemorableDateController::class, 'index'])->name('memorable_dates.index');
     Route::post('memorable-dates', [MemorableDateController::class, 'store'])->middleware('throttle:couple-actions')->name('memorable_dates.store');
     Route::delete('memorable-dates/{memorableDate}', [MemorableDateController::class, 'destroy'])->whereNumber('memorableDate')->middleware('throttle:couple-actions')->name('memorable_dates.destroy');

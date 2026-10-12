@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\ViewModels;
 
+use App\Data\Couples\StreakState;
 use App\Data\Couples\UpcomingDate;
 use App\Data\Hearts\BalanceSnapshot;
 use App\Models\ChoreDraw;
@@ -39,5 +40,6 @@ final readonly class DashboardViewModel
         public ?MovieChoice $movieChoice = null,
         public ?ChoreDraw $choreDraw = null,
         public ?UpcomingDate $nextDate = null,
+        public ?StreakState $streak = null,
     ) {}
 }

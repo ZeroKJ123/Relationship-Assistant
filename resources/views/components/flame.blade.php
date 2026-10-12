@@ -1,0 +1,2 @@
+@props(['level' => 0])
+<svg {{ $attributes->class(['flame']) }} data-flame="{{ $level }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="flame__outer" d="M12.3 1.8c.9 3.3-.9 5.1-2.6 7.2C8.2 10.8 6 13 6 16a6 6 0 0 0 12 0c0-2.4-1.1-4.1-2.2-5.4-.2 1.4-.9 2.3-1.9 2.8.6-3.4-.2-8.2-1.6-11.6z"/><path class="flame__inner" d="M12 12.5c.3 1.6-1.1 2.3-1.9 3.5a2.7 2.7 0 1 0 4.7.9c-.3.5-.8.8-1.3.9.3-1.8-.5-4-1.5-5.3z"/></svg>

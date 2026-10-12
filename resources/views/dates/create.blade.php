@@ -4,6 +4,7 @@
 <x-card class="auth-card">
     <x-status>{{ __('Планы вдвоём') }}</x-status>
     <h1 class="form-title">{{ __('Свидание или событие') }}</h1>
+    <p class="field-hint">{{ __('Не знаете, куда пойти?') }} <a href="{{ route('date_ideas.index',$couple) }}">{{ __('Колесо свиданий') }}</a></p>
     <p>{{ __('Обычное приглашение бесплатно и доступно при отрицательном балансе. Ответ и встречное условие согласуются отдельно.') }}</p>
     <x-form-feedback />
     <form method="post" action="{{ route('dates.store', $couple) }}" class="form-stack" data-submit-lock>
@@ -20,7 +21,7 @@
                 </select>
                 @error('kind')<p class="field-error" id="kind-error">{{ $message }}</p>@enderror
             </div>
-            <x-field name="title" :label="__('Название')" :value="old('title', $preset?->name ?? '')" :error="$errors->first('title')" maxlength="120" required />
+            <x-field name="title" :label="__('Название')" :value="old('title', $preset?->name ?? $ideaTitle ?? '')" :error="$errors->first('title')" maxlength="120" required />
             <x-textarea-field name="description" :label="__('Описание — если нужно')" :value="old('description')" :error="$errors->first('description')" maxlength="2000" />
             <x-field name="dress_code" :label="__('Дресс-код — если нужен')" :value="old('dress_code', '')" :error="$errors->first('dress_code')" maxlength="500" />
         </fieldset>

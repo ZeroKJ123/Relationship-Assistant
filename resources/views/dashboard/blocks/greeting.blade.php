@@ -15,5 +15,6 @@
             </span>
             @if($dashboard->partner)</a><span class="partner-summary__days" aria-hidden="true"><strong>{{ $dashboard->togetherDays }}</strong><span>{{ __('дней') }}</span></span>@endif
         </div>
+        @if($dashboard->streak)<a class="row" href="{{ route('streak.show',$dashboard->couple) }}"><x-flame :level="$dashboard->streak->level" /><span class="row__body"><strong class="row__title">{{ __('Серия: :days дн.', ['days'=>$dashboard->streak->days]) }}</strong><span class="row__meta">{{ $dashboard->streak->canRestore() ? __('прервалась — можно восстановить') : __('оба отмечаете настроение каждый день') }}</span></span><x-status :tone="$dashboard->streak->isTodayComplete ? 'success' : 'warning'">{{ $dashboard->streak->getStatus() }}</x-status></a>@endif
         @if($dashboard->nextDate)<a class="row" href="{{ route('memorable_dates.index',$dashboard->couple) }}"><x-icon name="date" /><span class="row__body"><strong class="row__title">{{ $dashboard->nextDate->title }}</strong><span class="row__meta">{{ $dashboard->nextDate->date->isoFormat('D MMMM') }}@if($dashboard->nextDate->years) · {{ __(':count-я годовщина', ['count'=>$dashboard->nextDate->years]) }}@endif</span></span><x-status :tone="$dashboard->nextDate->daysLeft <= 3 ? 'warning' : 'neutral'">{{ $dashboard->nextDate->getCountdown() }}</x-status></a>@endif
     </section>

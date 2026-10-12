@@ -9,6 +9,7 @@ use App\Enums\InvitationKind;
 use App\Enums\RequestType;
 use App\Http\Requests\StoreDateInvitationRequest;
 use App\Models\Couple;
+use App\Models\DateIdea;
 use App\Models\RequestTemplate;
 use App\Models\User;
 use App\Services\Requests\InvitationTime;
@@ -28,7 +29,7 @@ final class DateInvitationController extends Controller
         Gate::authorize('update', $couple);
         $preset = $request->filled('request_template_id') ? RequestTemplate::query()->where('type', RequestType::Event)->findOrFail($request->integer('request_template_id')) : null;
 
-        return view('dates.create', ['couple' => $couple, 'preset' => $preset, 'kinds' => InvitationKind::cases(), 'operationKey' => Str::uuid()->toString()]);
+        return view('dates.create', ['ideaTitle' => $request->filled('idea_id') ? DateIdea::query()->where('couple_id', $couple->id)->whereKey($request->integer('idea_id'))->value('title') : null, 'couple' => $couple, 'preset' => $preset, 'kinds' => InvitationKind::cases(), 'operationKey' => Str::uuid()->toString()]);
     }
 
     public function store(StoreDateInvitationRequest $request, Couple $couple): RedirectResponse

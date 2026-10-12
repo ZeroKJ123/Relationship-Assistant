@@ -27,7 +27,7 @@ final class DashboardData
 {
     private const DUTY_PREVIEW_LIMIT = 3;
 
-    public function __construct(private readonly WalletSnapshot $wallets, private readonly MoodHistory $moods, private readonly CoupleTimeline $timeline, private readonly MemorableDates $dates) {}
+    public function __construct(private readonly WalletSnapshot $wallets, private readonly MoodHistory $moods, private readonly CoupleTimeline $timeline, private readonly MemorableDates $dates, private readonly CoupleStreak $streak) {}
 
     public function get(User $actor): DashboardViewModel
     {
@@ -46,6 +46,6 @@ final class DashboardData
         })->with(['author:id,name', 'recipient:id,name'])->latest('id')->first();
         Log::debug('dashboard.loaded', ['user_id' => $actor->id, 'couple_id' => $couple?->id, 'duty_count' => $duties->count(), 'elapsed_ms' => (hrtime(true) - $started) / 1_000_000]);
 
-        return new DashboardViewModel($actor, $couple, $partner, $days, $wallet, $couple === null ? new Collection : $this->moods->getLatest($couple)->filter(fn (MoodEntry $entry): bool => $entry->user_id !== $actor->id)->values(), $duties, $incoming, $couple !== null && $couple->agreement?->active_version === null, $couple === null ? null : $this->timeline->getDuration($couple), $couple === null ? null : $this->moods->getPendingPrompt($actor, $couple), Car::query()->where('user_id', $actor->id)->exists(), $compliment, $couple === null ? null : MovieChoice::query()->where('couple_id', $couple->id)->whereIn('status', [SelectionStatus::Waiting, SelectionStatus::Active])->latest('id')->first(), $couple === null ? null : ChoreDraw::query()->where('couple_id', $couple->id)->where('status', SelectionStatus::Waiting)->latest('id')->first(), $couple === null || $partner === null ? null : $this->dates->getUpcoming($couple, CarbonImmutable::now())->first());
+        return new DashboardViewModel($actor, $couple, $partner, $days, $wallet, $couple === null ? new Collection : $this->moods->getLatest($couple)->filter(fn (MoodEntry $entry): bool => $entry->user_id !== $actor->id)->values(), $duties, $incoming, $couple !== null && $couple->agreement?->active_version === null, $couple === null ? null : $this->timeline->getDuration($couple), $couple === null ? null : $this->moods->getPendingPrompt($actor, $couple), Car::query()->where('user_id', $actor->id)->exists(), $compliment, $couple === null ? null : MovieChoice::query()->where('couple_id', $couple->id)->whereIn('status', [SelectionStatus::Waiting, SelectionStatus::Active])->latest('id')->first(), $couple === null ? null : ChoreDraw::query()->where('couple_id', $couple->id)->where('status', SelectionStatus::Waiting)->latest('id')->first(), $couple === null || $partner === null ? null : $this->dates->getUpcoming($couple, CarbonImmutable::now())->first(), $couple === null || $partner === null ? null : $this->streak->get($couple, $actor, CarbonImmutable::now()));
     }
 }
