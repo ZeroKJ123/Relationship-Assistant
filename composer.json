@@ -7,7 +7,7 @@
         "laravel",
         "framework"
     ],
-    "license": "MIT OR Apache-2.0",
+    "license": "AGPL-3.0-or-later",
     "require": {
         "php": "^8.3",
         "brick/math": "^1.0",

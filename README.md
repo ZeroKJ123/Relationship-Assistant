@@ -18,7 +18,7 @@
   <img alt="Vite 8" src="https://img.shields.io/badge/Vite-8-646cff?style=flat-square&logo=vite&logoColor=white">
   <img alt="Tested with Pest 4" src="https://img.shields.io/badge/tested%20with-Pest%204-f472b6?style=flat-square">
   <img alt="Version 0.31.0" src="https://img.shields.io/badge/version-0.31.0-d69e2e?style=flat-square">
-  <img alt="License: MIT OR Apache-2.0" src="https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-3a3a3a?style=flat-square">
+  <img alt="License: AGPL-3.0-or-later" src="https://img.shields.io/badge/license-AGPL--3.0--or--later-3a3a3a?style=flat-square">
   <img alt="Self-hosted" src="https://img.shields.io/badge/self--hosted-Docker-2496ed?style=flat-square&logo=docker&logoColor=white">
 </p>
 
@@ -286,7 +286,15 @@ The release history is in [`version.json`](version.json).
 
 ## License
 
-Relationship-Assistant is open source and dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
+Relationship-Assistant is free software, licensed under the [GNU Affero General Public License v3.0 or later](LICENSE.md) (AGPL-3.0-or-later).
 Copyright (c) 2026 ZeroKJ123 and the Relationship-Assistant contributors.
+
+In plain words:
+
+- **You may** use, study, change, share and even sell it.
+- **You must** keep it open: if you distribute it, or run a modified version as a service that other people use over a network, you have to give them the complete source code of your version under the same license.
+- **You may not** turn it, or anything built from it, into a closed-source product.
+
+This summary is not a substitute for the license text. The software comes with no warranty.
 
 The bundled Nunito font is licensed separately under the [SIL Open Font License](public/fonts/OFL.txt).
