@@ -45,7 +45,7 @@
     </td>
     <td width="25%" valign="top">
       <h3>📱 Phone-first</h3>
-      An installable PWA with light and dark pixel themes, plus a Telegram bot for sign-in, notifications and one-tap confirmations.
+      An installable PWA in English and Russian with light and dark themes, plus a Telegram bot for sign-in, notifications and one-tap confirmations.
     </td>
     <td width="25%" valign="top">
       <h3>🤖 Agent-ready</h3>
@@ -56,8 +56,25 @@
 
 <br>
 
+<table>
+  <tr>
+    <td width="25%"><img src="docs/images/home.png" alt="Home screen: greeting, partner, day streak, anniversary, partner's mood, heart balance and quick actions" width="100%"></td>
+    <td width="25%"><img src="docs/images/requests.png" alt="Request list grouped into awaiting an answer, in progress and completed" width="100%"></td>
+    <td width="25%"><img src="docs/images/duty.png" alt="Duty card with stages, performer, checker, deadline, reward and the completion answer" width="100%"></td>
+    <td width="25%"><img src="docs/images/kitchen.png" alt="Kitchen with regular and special dishes, grocery estimates and prices in hearts" width="100%"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Home</sub></td>
+    <td align="center"><sub>Requests</sub></td>
+    <td align="center"><sub>A duty</sub></td>
+    <td align="center"><sub>Kitchen</sub></td>
+  </tr>
+</table>
+
+<sub>Screenshots show the default "Pumpkin latte" theme with demo data.</sub>
+
 > [!NOTE]
-> The interface is in Russian, and the app introduces itself as «Любимость». The detailed guides in [`docs/`](docs/) are in Russian too.
+> The interface is available in **English and Russian**. English is the default; each person picks their own language in the profile, and Telegram notifications follow it. The guides come in both languages too: [English](docs/en/) and [Русский](docs/ru/).
 
 ## Features
 
@@ -67,13 +84,13 @@
       <h3>Requests and terms</h3>
       Text requests with deadlines, partner replies, counter-terms and a full history. Weekly agreements, "Really want" limits and versioned terms keep things fair.
       <br><br>
-      See <a href="docs/requests.md">requests</a> and <a href="docs/couples.md">couples and invitations</a>.
+      See <a href="docs/en/requests.md">requests</a> and <a href="docs/en/couples.md">couples and invitations</a>.
     </td>
     <td width="50%" valign="top">
       <h3>Duties and hearts</h3>
       Duties are grouped by status and confirmed in two steps: one partner marks it done, the other checks. Hearts, rewards and penalties are recorded in a personal ledger, and a chore roulette decides who goes first.
       <br><br>
-      See <a href="docs/hearts-and-duties.md">duties and hearts</a>.
+      See <a href="docs/en/hearts-and-duties.md">duties and hearts</a>.
     </td>
   </tr>
   <tr>
@@ -81,13 +98,13 @@
       <h3>Kitchen, wishlist and money</h3>
       A dish catalog with private photos, a wishlist with product links and gift states, and money requests with exact amounts and a separate "received" confirmation. No bank transfers are made.
       <br><br>
-      See <a href="docs/dishes-wishlist-money.md">kitchen, wishes and money</a>.
+      See <a href="docs/en/dishes-wishlist-money.md">kitchen, wishes and money</a>.
     </td>
     <td width="50%" valign="top">
       <h3>Friends, guests and dates</h3>
       Personal friend lists, guest visits, dates with a time and dress code, a date wheel and a couple streak.
       <br><br>
-      See <a href="docs/friends-guests-dates.md">friends, guests and dates</a>.
+      See <a href="docs/en/friends-guests-dates.md">friends, guests and dates</a>.
     </td>
   </tr>
   <tr>
@@ -95,13 +112,27 @@
       <h3>Mood and reminders</h3>
       Mood check-ins with emoji and a 30-day history, a button to ask your partner how they feel, and one-off reminders.
       <br><br>
-      See <a href="docs/mood-and-reminders.md">mood and reminders</a>.
+      See <a href="docs/en/mood-and-reminders.md">mood and reminders</a>.
     </td>
     <td width="50%" valign="top">
       <h3>Economy, catalogs and admin</h3>
       Versioned economy rules, service price reserves, starter catalogs, an owner-only admin panel with statistics and an audit log, and a theme builder.
       <br><br>
-      See <a href="docs/economy-and-catalogs.md">economy and catalogs</a> and <a href="docs/operations.md">operations</a>.
+      See <a href="docs/en/economy-and-catalogs.md">economy and catalogs</a> and <a href="docs/en/operations.md">operations</a>.
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td width="30%" valign="top"><img src="docs/images/language.png" alt="Profile settings with the Language section open and English selected" width="100%"></td>
+    <td width="70%" valign="top">
+      <h3>Your language, your theme</h3>
+      Under "Additional settings" in the profile each person chooses the interface language and a personal theme. The choice applies only to them: one partner can use English while the other stays in Russian, and each gets Telegram notifications in their own language.
+      <br><br>
+      Sign-in and registration pages have a language switch as well. Names and descriptions you type yourself are never translated.
+      <br><br>
+      See <a href="docs/en/accounts.md#interface-language-032">interface language</a> and <a href="docs/en/interface.md">interface</a>.
     </td>
   </tr>
 </table>
@@ -146,6 +177,7 @@ Before the first `sail up`, review `.env`:
 
 - **Password:** the example uses the database `homeassist`, the user `sail` and the password `password`. Set your own `DB_PASSWORD` for anything long-lived.
 - **Linux:** set `WWWUSER` and `WWWGROUP` to the output of `id -u` and `id -g`.
+- **Language:** `APP_LOCALE` sets the language for guests and new accounts: `en` or `ru`.
 - **Ports:** change `APP_PORT`, `APP_URL`, `FORWARD_DB_PORT` and `VITE_PORT` if the defaults are taken.
 - **Phones on your network:** ports are bound to this computer only. Set `APP_BIND_ADDRESS=0.0.0.0` and put the laptop's IP and port in `APP_URL` to open the app to a trusted local network.
 
@@ -198,16 +230,16 @@ docker compose -f compose.yaml -f compose.workers.yaml ps
 
 | Service | What it does | Setup |
 | --- | --- | --- |
-| `scheduler` | Checks overdue duties and sends reminders | [Duties and hearts](docs/hearts-and-duties.md) |
-| `telegram-worker` | Delivers bot notifications from the queue | [Telegram and scheduling](docs/telegram-and-scheduling.md) |
-| `telegram-poller` | Receives bot messages by polling, with no public address | [Telegram and scheduling](docs/telegram-and-scheduling.md) |
-| `realtime` | Live updates over WebSocket with Laravel Reverb | [Operations](docs/operations.md) |
+| `scheduler` | Checks overdue duties and sends reminders | [Duties and hearts](docs/en/hearts-and-duties.md) |
+| `telegram-worker` | Delivers bot notifications from the queue | [Telegram and scheduling](docs/en/telegram-and-scheduling.md) |
+| `telegram-poller` | Receives bot messages by polling, with no public address | [Telegram and scheduling](docs/en/telegram-and-scheduling.md) |
+| `realtime` | Live updates over WebSocket with Laravel Reverb | [Operations](docs/en/operations.md) |
 
 - **Telegram:** set `TELEGRAM_ENABLED=true`, a bot token and a bot username. Use `TELEGRAM_MODE=polling` on a laptop, or `webhook` behind a public HTTPS address. Never run both for the same bot.
 - **HTTPS and PWA install:** installing the PWA on a phone needs trusted HTTPS. Put a TLS proxy such as a Cloudflare Tunnel in front, set `APP_URL=https://your-domain` and `TRUSTED_PROXIES`, and route `/app/*` to the `realtime` service.
 - **Admin panel:** set `ADMIN_PANEL_LOGIN` and a bcrypt `ADMIN_PANEL_PASSWORD_HASH` to enable `/admin-panel`. Leave them empty to keep it off.
 
-Backups, updates and restore checks are described in [operations](docs/operations.md).
+Backups, updates and restore checks are described in [operations](docs/en/operations.md).
 
 ## Development
 
@@ -217,7 +249,7 @@ Backups, updates and restore checks are described in [operations](docs/operation
 ./vendor/bin/sail composer check   # Pint, PHPStan/Larastan and Pest
 ```
 
-Tests run on in-memory SQLite, and a guard refuses a persistent database, a connection URL or cached config. Race and constraint tests for couples use a throwaway MariaDB container; see [development](docs/development.md).
+Tests run on in-memory SQLite, and a guard refuses a persistent database, a connection URL or cached config. Race and constraint tests for couples use a throwaway MariaDB container; see [development](docs/en/development.md).
 
 Where things live:
 
@@ -231,19 +263,21 @@ Where things live:
 
 ## Documentation
 
+Every guide exists in English ([`docs/en`](docs/en/)) and in Russian ([`docs/ru`](docs/ru/)). The links below lead to the English versions.
+
 | Document | Covers |
 | --- | --- |
-| [Operations](docs/operations.md) | Local network, processes, backups, updates, HTTPS, admin panel |
-| [Development](docs/development.md) | Commands, test isolation, quality checks |
-| [Interface](docs/interface.md) | Components, accessibility, manual checks |
-| [Accounts](docs/accounts.md) | Registration, recovery codes, migrations |
-| [Couples and invitations](docs/couples.md) | Member rights, invitations, history, weekly limit |
-| [Requests and terms](docs/requests.md) | Partner replies, deadlines, term versions, history |
-| [Duties and hearts](docs/hearts-and-duties.md) | Completion checks, balance, ledger, rewards, limits |
-| [Economy and catalogs](docs/economy-and-catalogs.md) | Rule versions, price reserves, templates |
-| [Kitchen, wishes and money](docs/dishes-wishlist-money.md) | Dishes, private photos, gifts, exact money amounts |
-| [Friends, guests and dates](docs/friends-guests-dates.md) | Friends, guest snapshots, meeting time, dress code |
-| [Mood and reminders](docs/mood-and-reminders.md) | Ratings, personal schedule, one-off reminders |
-| [Telegram and scheduling](docs/telegram-and-scheduling.md) | Sign-in, linking, quick buttons, delivery, schedule |
+| [Operations](docs/en/operations.md) | Local network, processes, backups, updates, HTTPS, admin panel |
+| [Development](docs/en/development.md) | Commands, test isolation, quality checks |
+| [Interface](docs/en/interface.md) | Components, accessibility, manual checks |
+| [Accounts](docs/en/accounts.md) | Registration, recovery codes, migrations |
+| [Couples and invitations](docs/en/couples.md) | Member rights, invitations, history, weekly limit |
+| [Requests and terms](docs/en/requests.md) | Partner replies, deadlines, term versions, history |
+| [Duties and hearts](docs/en/hearts-and-duties.md) | Completion checks, balance, ledger, rewards, limits |
+| [Economy and catalogs](docs/en/economy-and-catalogs.md) | Rule versions, price reserves, templates |
+| [Kitchen, wishes and money](docs/en/dishes-wishlist-money.md) | Dishes, private photos, gifts, exact money amounts |
+| [Friends, guests and dates](docs/en/friends-guests-dates.md) | Friends, guest snapshots, meeting time, dress code |
+| [Mood and reminders](docs/en/mood-and-reminders.md) | Ratings, personal schedule, one-off reminders |
+| [Telegram and scheduling](docs/en/telegram-and-scheduling.md) | Sign-in, linking, quick buttons, delivery, schedule |
 
 The release history is in [`version.json`](version.json).
