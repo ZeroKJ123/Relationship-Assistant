@@ -10,10 +10,6 @@ This workspace is connected to https://github.com/ZeroKJ123/Relationship-Assista
 - Keep credentials, tokens, `secrets.yaml`, private keys, runtime databases, logs, and backups out of Git. Inspect staged changes before committing.
 - Report the commit and push result. If a push fails, preserve local work and explain the failure.
 
-## Home Assistant configuration
-
-The location and connection details of the running Home Assistant instance have not yet been supplied. Do not assume that this workspace is its live configuration directory. Obtain those details before changing or deploying live configuration.
-
 ## Mandatory CodeStyle
 
 - Read [CodeStyle.md](CodeStyle.md) before any application implementation, fix, or refactor; it is the mandatory project standard for human developers and AI agents.
