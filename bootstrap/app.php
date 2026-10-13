@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Middleware\ActAsPanelUser;
 use App\Http\Middleware\PreventPrivateCaching;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withBroadcasting(__DIR__.'/../routes/channels.php', ['middleware' => ['web', 'auth', 'auth.session']])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: ['telegram/webhook']);
-        $middleware->web(append: [PreventPrivateCaching::class, ActAsPanelUser::class]);
+        $middleware->web(append: [PreventPrivateCaching::class, SetLocale::class, ActAsPanelUser::class]);
         $middleware->appendToPriorityList(AuthenticateSession::class, ActAsPanelUser::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

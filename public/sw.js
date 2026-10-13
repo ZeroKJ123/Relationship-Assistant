@@ -75,7 +75,7 @@ async function navigation(request) {
         let fallback = null;
         try { fallback = await (await caches.open(CACHE_NAME)).match(OFFLINE_PATH); }
         catch { warn('offline_cache_read_failed'); }
-        const html = fallback ? await fallback.text() : '<html lang="ru"><title>Нет соединения</title><h1>Нет соединения</h1><p>Действия требуют интернета. Проверьте результат после подключения.</p><a href="/">Проверить соединение</a></html>';
+        const html = fallback ? await fallback.text() : '<html lang="en"><title>No connection · Нет соединения</title><h1>No connection</h1><p>Actions need the internet. Check the result once you are back online.</p><a href="/">Check the connection</a><div lang="ru"><h1>Нет соединения</h1><p>Действия требуют интернета. Проверьте результат после подключения.</p><a href="/">Проверить соединение</a></div></html>';
         return new Response(html, { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } });
     }
 }

@@ -1,4 +1,4 @@
-[← Экономика и каталоги](economy-and-catalogs.md) · [К README](../README.md)
+[← Экономика и каталоги](economy-and-catalogs.md) · [К README](../../README.md)
 
 # Кухня, желания и деньги
 

@@ -12,6 +12,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing" force="true" />
+        <env name="APP_LOCALE" value="ru" force="true" />
         <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" force="true" />
         <env name="LOG_CHANNEL" value="single" force="true" />
         <env name="APP_MAINTENANCE_DRIVER" value="file" />

@@ -7,7 +7,9 @@ namespace App\Services\Telegram;
 use App\Actions\Auth\Telegram\ConfirmTelegramIdentity;
 use App\Actions\Auth\Telegram\IssueTelegramLinkCode;
 use App\Data\Telegram\IncomingUpdate;
+use App\Models\TelegramAccount;
 use App\Models\TelegramUpdateReceipt;
+use App\Services\Localization\LocalePreference;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -16,10 +18,22 @@ use Illuminate\Validation\ValidationException;
 
 final class WebhookHandler
 {
-    public function __construct(private readonly ConfirmTelegramIdentity $login, private readonly CallbackRouter $callbacks, private readonly IssueTelegramLinkCode $linkCodes, private readonly MoodEmojiReplies $emojiReplies) {}
+    public function __construct(private readonly ConfirmTelegramIdentity $login, private readonly CallbackRouter $callbacks, private readonly IssueTelegramLinkCode $linkCodes, private readonly MoodEmojiReplies $emojiReplies, private readonly LocalePreference $locale) {}
+
+    /**
+     * Replies in the language of the linked account; an unknown chat gets the default language.
+     *
+     * @return array<string, mixed>
+     */
+    public function execute(IncomingUpdate $update, string $payloadHash): array
+    {
+        $account = TelegramAccount::query()->where('telegram_id', $update->telegramId)->first();
+
+        return $this->locale->runFor($account?->user, fn (): array => $this->handle($update, $payloadHash));
+    }
 
     /** @return array<string, mixed> */
-    public function execute(IncomingUpdate $update, string $payloadHash): array
+    private function handle(IncomingUpdate $update, string $payloadHash): array
     {
         return DB::transaction(function () use ($update, $payloadHash): array {
             TelegramUpdateReceipt::query()->insertOrIgnore(['update_id' => $update->updateId, 'payload_hash' => $payloadHash, 'reply' => null, 'created_at' => now(), 'updated_at' => now()]);

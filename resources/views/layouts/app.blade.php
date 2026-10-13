@@ -10,6 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="{{ __('Любимость') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="app-messages" content="{{ json_encode($scriptMessages) }}">
     @auth @if(config('realtime.enabled'))
     <meta name="realtime-key" content="{{ config('broadcasting.connections.reverb.key') }}">
     <meta name="realtime-port" content="{{ config('realtime.public_port') }}">
@@ -29,6 +30,7 @@
         <p class="connection-status" role="status" tabindex="-1" data-connection-status hidden>{{ __('Нет соединения. Действия требуют интернета. Если связь пропала после отправки, проверьте результат после подключения.') }}</p>
         @if(request()->attributes->has('admin_actor_id'))<aside class="connection-status" role="status">{{ __('Проверка от имени :name. Действия меняют реальные данные и отправляют уведомления.', ['name'=>auth()->user()->name]) }}<form method="post" action="{{ route('admin.panel.stop') }}">@csrf<x-button type="submit" variant="quiet">{{ __('Вернуться в админ-панель') }}</x-button></form></aside>@endif
         <main id="main-content" tabindex="-1">@yield('content')</main>
+        @guest<form method="post" action="{{ route('locale.update') }}" class="locale-switch" aria-label="{{ __('Язык интерфейса') }}">@csrf @method('patch')@foreach($locales as $option)<button type="submit" name="locale" value="{{ $option->value }}" lang="{{ $option->value }}" @if($option === $currentLocale) aria-current="true" @endif>{{ $option->label() }}</button>@endforeach</form>@endguest
         @yield('navigation')
     </div>
     <div class="toast" role="status" aria-live="polite" hidden data-toast @if(session('toast')) data-initial-message="{{ session('toast') }}" @endif></div>

@@ -1,5 +1,6 @@
 import lottie from 'lottie-web/build/player/lottie_light.min.js';
 
+import { message } from './messages.js';
 import { showToast } from './toast.js';
 
 const animations = new Set();
@@ -19,9 +20,9 @@ export function initializeMood(root) {
             try {
                 const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' }, credentials: 'same-origin', signal: AbortSignal.timeout(10000) });
                 const data = await response.json();
-                showToast(data.message ?? 'Не удалось отправить запрос. Попробуйте ещё раз.');
+                showToast(data.message ?? message('request_failed'));
             } catch {
-                showToast('Не удалось отправить запрос. Проверьте соединение.');
+                showToast(message('request_offline'));
             } finally {
                 delete form.dataset.sending;
                 button.disabled = false;
@@ -40,7 +41,7 @@ export function initializeMood(root) {
             const animation = lottie.loadAnimation({ container, renderer: 'svg', loop: true, autoplay: !window.matchMedia('(prefers-reduced-motion: reduce)').matches, animationData, rendererSettings: { progressiveLoad: true } });
             animations.add({ container, animation });
         } catch {
-            container.textContent = 'Стикер недоступен';
+            container.textContent = message('sticker_unavailable');
         }
     });
     root.querySelectorAll('[data-request-topic]').forEach((topics) => {

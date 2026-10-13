@@ -17,7 +17,7 @@
             <div class="field">
                 <label for="kind">{{ __('Вид приглашения') }}</label>
                 <select id="kind" name="kind" @if($errors->has('kind')) aria-invalid="true" aria-describedby="kind-error" @endif>
-                    @foreach($kinds as $kind)<option value="{{ $kind->value }}" @selected(old('kind', $preset ? 'activity' : 'date') === $kind->value)>{{ $kind->label() }}</option>@endforeach
+                    @foreach($kinds as $kind)<option value="{{ $kind->value }}" @selected(old('kind', $preset ? 'activity' : 'date') === $kind->value)>{{ __($kind->label()) }}</option>@endforeach
                 </select>
                 @error('kind')<p class="field-error" id="kind-error">{{ $message }}</p>@enderror
             </div>

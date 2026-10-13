@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\Currency;
 use App\Enums\Gender;
+use App\Enums\Locale;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -23,7 +24,7 @@ use Illuminate\Notifications\Notifiable;
  * @property string $name
  * @property ?string $password
  * @property ?Gender $gender
- * @property ?string $locale
+ * @property ?Locale $locale
  * @property ?string $theme
  * @property ?Currency $currency
  * @property bool $is_admin
@@ -57,6 +58,7 @@ final class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'gender' => Gender::class,
+            'locale' => Locale::class,
             'currency' => Currency::class,
             'is_admin' => 'boolean',
             'payment_details' => 'encrypted',

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Enums\Locale;
 use App\Jobs\SendTelegramNotificationJob;
 use App\Models\User;
 use App\Services\Admin\PanelAccess;
 use App\Services\Appearance\AppearanceStore;
 use App\Services\Telegram\BotClient;
+use App\ViewModels\ScriptMessages;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -47,6 +49,9 @@ final class AppServiceProvider extends ServiceProvider
     {
         \Illuminate\Support\Facades\View::composer(['layouts.app', 'components.illustration', 'dashboard.content'], function (View $view): void {
             $view->with('appearance', app(AppearanceStore::class));
+        });
+        \Illuminate\Support\Facades\View::composer(['layouts.app', 'profile.show'], function (View $view): void {
+            $view->with(['locales' => Locale::cases(), 'currentLocale' => Locale::current(), 'scriptMessages' => (new ScriptMessages)->toArray()]);
         });
         \Illuminate\Support\Facades\View::composer(['auth.login', 'auth.register', 'auth.recover', 'profile.show'], function (View $view): void {
             $view->with('telegramAvailable', app(BotClient::class)->isLoginAvailable());

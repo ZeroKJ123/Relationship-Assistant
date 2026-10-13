@@ -6,6 +6,7 @@ namespace App\Actions\Auth;
 
 use App\Data\Auth\RegistrationData;
 use App\Enums\Currency;
+use App\Enums\Locale;
 use App\Models\User;
 use App\Services\Auth\RecoveryCodes;
 use App\Services\Hearts\Ledger;
@@ -24,7 +25,7 @@ final class RegisterAccount
         $user = new User;
         $user->forceFill([
             'login' => $data->login, 'name' => $data->name, 'password' => $data->password,
-            'gender' => $data->gender, 'locale' => 'ru', 'currency' => Currency::Byn,
+            'gender' => $data->gender, 'locale' => Locale::current(), 'currency' => Currency::Byn,
             'is_admin' => false, 'recovery_codes' => $this->recoveryCodes->hash($codes),
         ]);
         $user = DB::transaction(function () use ($user): User {

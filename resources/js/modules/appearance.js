@@ -1,3 +1,5 @@
+import { message } from './messages.js';
+
 export function conditionMatches(condition, state) {
     if (condition === 'always') return true;
     if (condition === 'no_partner') return !state.has_partner;
@@ -114,7 +116,7 @@ function bindBuilder(form) {
         const grid = doc.querySelector('.dashboard-tiles');
         if (grid) grid.style.setProperty('--tile-columns', form.querySelector('[data-builder-columns]').value);
         frame.dataset.width = form.querySelector('[data-preview-width]').value;
-        status.textContent = 'Предпросмотр обновлён. Сохраните изменения, чтобы применить их на сайте.';
+        status.textContent = message('preview_updated');
     };
     frame.addEventListener('load', () => {
         frame.contentDocument.addEventListener('click', (event) => {
@@ -140,7 +142,7 @@ function bindBuilder(form) {
         if (remove) { remove.closest('[data-builder-item]').remove(); update(); }
         if (event.target.closest('[data-add-text]')) {
             if (form.querySelectorAll('[data-builder-list="blocks"] > *').length >= 20) {
-                status.textContent = 'Можно добавить не более 20 блоков.'; return;
+                status.textContent = message('block_limit'); return;
             }
             const fragment = form.querySelector('[data-text-template]').content.cloneNode(true);
             const item = fragment.querySelector('[data-builder-item]');

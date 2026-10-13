@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\Auth\TelegramLinkController;
 use App\Http\Controllers\Auth\TelegramLoginController;
 use App\Http\Controllers\ComplimentController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PartnerAvatarController;
 use App\Http\Controllers\PartnerProfileController;
 use App\Http\Controllers\ProfileAvatarController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\ProfileThemeController;
 use App\Http\Controllers\ProfileTimezoneController;
 use Illuminate\Support\Facades\Route;
 
+Route::patch('locale', LocaleController::class)->middleware('throttle:couple-actions')->name('locale.update');
 Route::middleware('guest')->group(function (): void {
     Route::get('register', [RegistrationController::class, 'create'])->name('register');
     Route::post('register', [RegistrationController::class, 'store'])->middleware('throttle:registration')->name('register.store');

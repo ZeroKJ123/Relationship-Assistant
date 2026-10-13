@@ -1,4 +1,4 @@
-[← Аккаунты](accounts.md) · [К README](../README.md)
+[← Аккаунты](accounts.md) · [К README](../../README.md)
 
 # Пары и приглашения
 

@@ -9,7 +9,7 @@ function presenceFixture({ hidden = false, online = true } = {}) {
     let timer;
     const node = { isConnected: true, dataset: { selectionPresence: '/presence', selectionStatus: 'waiting' } };
     const root = { hidden, querySelectorAll: () => node.isConnected ? [node] : [], querySelector: () => ({ content: 'test-csrf' }) };
-    const context = { Map, Date, AbortController, AbortSignal, navigator: { onLine: online }, setTimeout: (fn) => { timer = fn; return 1; }, clearTimeout: () => { timer = undefined; }, fetch: async () => { requests++; return { ok: true, json: async () => ({ status: 'waiting', server_time: Date.now() }) }; } };
+    const context = { Map, Date, AbortController, AbortSignal, message: (key) => key, navigator: { onLine: online }, setTimeout: (fn) => { timer = fn; return 1; }, clearTimeout: () => { timer = undefined; }, fetch: async () => { requests++; return { ok: true, json: async () => ({ status: 'waiting', server_time: Date.now() }) }; } };
     vm.createContext(context);
     vm.runInContext(fs.readFileSync('resources/js/modules/selection-presence.js', 'utf8').replace(/^import .*;\n/gm, '').replaceAll('export function', 'function'), context);
     return { root, node, context, requests: () => requests, tick: () => timer?.() };

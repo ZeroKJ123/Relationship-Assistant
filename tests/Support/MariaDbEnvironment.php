@@ -14,7 +14,7 @@ final class MariaDbEnvironment
     {
         // Dedicated disposable database only; never accepts a working database URL.
         return [
-            'APP_ENV' => 'testing', 'APP_KEY' => 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+            'APP_ENV' => 'testing', 'APP_LOCALE' => 'ru', 'APP_KEY' => 'base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
             'DB_CONNECTION' => 'mysql', 'DB_HOST' => '127.0.0.1', 'DB_PORT' => '33071',
             'DB_DATABASE' => 'homeassist_couples_testing', 'DB_USERNAME' => 'homeassist_test',
             'DB_PASSWORD' => 'test_only_password', 'DB_URL' => '', 'CACHE_STORE' => 'array',

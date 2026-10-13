@@ -45,9 +45,9 @@ final class RequestCatalog
             $this->deny();
         }
         $size = match ($data->sushiSize) {
-            'small' => 'маленький набор','medium' => 'средний набор','large' => 'большой набор',default => ''
+            'small' => __('маленький набор'),'medium' => __('средний набор'),'large' => __('большой набор'),default => ''
         };
-        $description = sprintf('%s. %s %s %s', $method->name, $method->details, $size, $data->description ?? '');
+        $description = sprintf('%s. %s %s %s', __($method->name), __($method->details), $size, $data->description ?? '');
         if (mb_strlen($description) > 2000) {
             $this->deny();
         }

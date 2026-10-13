@@ -52,7 +52,7 @@ final class MoodEmojiReplies
             return ['text' => __('Стикер принят. Он появится у партнёра после загрузки.')];
         }
         $text = trim($update->text ?? '');
-        $isSkip = in_array(mb_strtolower($text), ['/skip', 'пропустить'], true);
+        $isSkip = in_array(mb_strtolower($text), ['/skip', 'skip', 'пропустить'], true);
         if (! $isSkip && Validator::make(['emoji' => $text], ['emoji' => ['required', new SingleEmoji]])->fails()) {
             return ['text' => __('Ответьте одним эмоджи или стикером, который подробнее описывает настроение, или /skip, чтобы пропустить.'), 'reply_markup' => ['force_reply' => true, 'input_field_placeholder' => __('Эмоджи или стикер')]];
         }

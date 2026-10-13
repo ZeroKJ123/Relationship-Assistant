@@ -1,21 +1,21 @@
 @extends('layouts.admin')
 @section('title', __('Темы'))
 @section('admin-content')
-<h1 class="screen-title">{{ __('Темы') }}</h1><p>{{ __('Общее оформление сайта. Сейчас используется: :theme', ['theme'=>$settings['themes'][$activeId]['name']]) }}</p>
+<h1 class="screen-title">{{ __('Темы') }}</h1><p>{{ __('Общее оформление сайта. Сейчас используется: :theme', ['theme'=>__($settings['themes'][$activeId]['name'])]) }}</p>
 <div class="theme-grid section-space">
 @foreach($settings['themes'] as $id=>$theme)
-<a class="card theme-swatch" href="{{ route('admin.panel.themes', ['edit'=>$id]) }}" style="--swatch-start:{{ $theme['background'] }};--swatch-end:{{ $theme['gradient'] }};--swatch-accent:{{ $theme['primary'] }}"><span class="theme-swatch__sample" aria-hidden="true">♥ ✦</span><strong>{{ $theme['name'] }}</strong>@if($id === $activeId)<span>{{ __('Текущая тема') }}</span>@endif</a>
+<a class="card theme-swatch" href="{{ route('admin.panel.themes', ['edit'=>$id]) }}" style="--swatch-start:{{ $theme['background'] }};--swatch-end:{{ $theme['gradient'] }};--swatch-accent:{{ $theme['primary'] }}"><span class="theme-swatch__sample" aria-hidden="true">♥ ✦</span><strong>{{ __($theme['name']) }}</strong>@if($id === $activeId)<span>{{ __('Текущая тема') }}</span>@endif</a>
 @endforeach
 </div>
 <a class="button button--quiet section-space" href="{{ route('admin.panel.themes', ['new'=>1]) }}">+ {{ __('Добавить тему') }}</a>
 <x-card class="section-space"><h2>{{ __('Смена темы') }}</h2>
 <form method="post" action="{{ route('admin.panel.appearance.update') }}" class="form-stack" data-submit-lock>@csrf @method('put')
 <input type="hidden" name="section" value="selection"><input type="hidden" name="revision" value="{{ $revision }}">
-<x-select-field name="active" :label="__('Ручная тема')">@foreach($settings['themes'] as $id=>$theme)<option value="{{ $id }}" @selected(old('active',$settings['active']) === $id)>{{ $theme['name'] }}</option>@endforeach</x-select-field>
+<x-select-field name="active" :label="__('Ручная тема')">@foreach($settings['themes'] as $id=>$theme)<option value="{{ $id }}" @selected(old('active',$settings['active']) === $id)>{{ __($theme['name']) }}</option>@endforeach</x-select-field>
 <x-select-field name="seasonal" :label="__('Режим смены')"><option value="0" @selected(!old('seasonal',$settings['seasonal']))>{{ __('Ручной выбор') }}</option><option value="1" @selected(old('seasonal',$settings['seasonal']))>{{ __('Автоматически по сезонам') }}</option></x-select-field>
 <p>{{ __('Сезоны: март–май, июнь–август, сентябрь–ноябрь, декабрь–февраль. Переход — в полночь по Минску при открытии или обновлении страницы.') }}</p>
 @foreach(['spring'=>__('Весна'),'summer'=>__('Лето'),'autumn'=>__('Осень'),'winter'=>__('Зима')] as $season=>$label)
-<x-select-field :name="'seasons['.$season.']'" :label="$label">@foreach($settings['themes'] as $id=>$theme)<option value="{{ $id }}" @selected(old('seasons.'.$season,$settings['seasons'][$season]) === $id)>{{ $theme['name'] }}</option>@endforeach</x-select-field>
+<x-select-field :name="'seasons['.$season.']'" :label="$label">@foreach($settings['themes'] as $id=>$theme)<option value="{{ $id }}" @selected(old('seasons.'.$season,$settings['seasons'][$season]) === $id)>{{ __($theme['name']) }}</option>@endforeach</x-select-field>
 @endforeach
 <label class="confirmation-check"><input type="checkbox" name="confirmation" value="1" required>{{ __('Применить оформление для всех пользователей') }}</label><x-button type="submit">{{ __('Применить тему') }}</x-button>
 </form></x-card>

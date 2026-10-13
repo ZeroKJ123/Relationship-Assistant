@@ -80,9 +80,11 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'ru'),
+    'locale' => env('APP_LOCALE', 'en'),
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'ru'),
+    // Fixed on purpose: interface keys are Russian sentences, so only English has a complete set of
+    // framework texts, and a Russian fallback makes Carbon print Russian month names in English.
+    'fallback_locale' => 'en',
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 

@@ -1,4 +1,5 @@
 import { refreshContent } from './live-content.js';
+import { message } from './messages.js';
 
 const tasks = new Map();
 let clockOffset;
@@ -24,17 +25,17 @@ export function initializeSelectionPresence(root, initialize) {
                 if (root.hidden || !navigator.onLine) return;
                 const sentAt = Date.now();
                 const response = await fetch(node.dataset.selectionPresence, { method: 'POST', credentials: 'same-origin', cache: 'no-store', headers: { Accept: 'application/json', 'X-CSRF-TOKEN': root.querySelector('meta[name="csrf-token"]').content }, signal: AbortSignal.any([controller.signal, AbortSignal.timeout(5000)]) });
-                if (!response.ok) { node.textContent = 'Не удалось проверить присутствие. Проверьте соединение.'; return; }
+                if (!response.ok) { node.textContent = message('presence_failed'); return; }
                 const data = await response.json();
                 clockOffset = data.server_time - (sentAt + Date.now()) / 2;
-                node.textContent = 'Ожидание партнёра для прокрутки рулетки. Оба должны согласиться и открыть эту страницу.';
+                node.textContent = message('presence_waiting');
                 if (data.status === node.dataset.selectionStatus) return;
                 const page = await fetch(window.location.href, { credentials: 'same-origin', cache: 'no-store', signal: AbortSignal.any([controller.signal, AbortSignal.timeout(5000)]) });
                 if (!page.ok || page.redirected) return;
                 const incoming = new DOMParser().parseFromString(await page.text(), 'text/html');
                 refreshContent(root, incoming, initialize);
             } catch (error) {
-                if (!controller.signal.aborted) node.textContent = 'Соединение прервалось. Ожидаем восстановления.';
+                if (!controller.signal.aborted) node.textContent = message('presence_interrupted');
             } finally {
                 if (!controller.signal.aborted) timer = setTimeout(tick, 1500);
             }

@@ -6,6 +6,7 @@ namespace App\Actions\Auth\Telegram;
 
 use App\Enums\Currency;
 use App\Enums\Gender;
+use App\Enums\Locale;
 use App\Enums\TelegramLoginStatus;
 use App\Models\TelegramAccount;
 use App\Models\TelegramLoginAttempt;
@@ -73,7 +74,7 @@ final class FinishTelegramLogin
             return User::query()->whereKey($existing->user_id)->lockForUpdate()->firstOrFail();
         }
         $user = new User;
-        $user->forceFill(['login' => null, 'password' => null, 'name' => $name, 'gender' => Gender::Unspecified, 'locale' => 'ru', 'currency' => Currency::Byn, 'is_admin' => false, 'recovery_codes' => $hashes])->save();
+        $user->forceFill(['login' => null, 'password' => null, 'name' => $name, 'gender' => Gender::Unspecified, 'locale' => Locale::current(), 'currency' => Currency::Byn, 'is_admin' => false, 'recovery_codes' => $hashes])->save();
         $this->ledger->getWallet($user);
 
         return $user;
