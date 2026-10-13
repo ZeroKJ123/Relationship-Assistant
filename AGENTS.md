@@ -1,6 +1,6 @@
 # Home Assistant repository
 
-This workspace is connected to https://github.com/ZeroKJ123/Home-Assist.git.
+This workspace is connected to https://github.com/ZeroKJ123/Relationship-Assistant.git.
 
 ## User-authorized Git workflow
 
