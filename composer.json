@@ -2,12 +2,12 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/laravel",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Self-hosted web app for couples: requests, shared plans and gratitude with a hearts economy.",
     "keywords": [
         "laravel",
         "framework"
     ],
-    "license": "MIT",
+    "license": "MIT OR Apache-2.0",
     "require": {
         "php": "^8.3",
         "brick/math": "^1.0",

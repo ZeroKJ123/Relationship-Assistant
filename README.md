@@ -5,7 +5,7 @@
 <h1 align="center">Relationship-Assistant</h1>
 
 <p align="center">
-  <b>A self-hosted web app for couples: requests, shared plans and gratitude, all in one place.</b><br>
+  <b>An open-source, self-hosted web app for couples: requests, shared plans and gratitude, all in one place.</b><br>
   Ask for something, agree on terms, confirm it was done and say thanks with hearts,<br>
   on your own laptop, with your own data, from any phone on your network.
 </p>
@@ -18,6 +18,7 @@
   <img alt="Vite 8" src="https://img.shields.io/badge/Vite-8-646cff?style=flat-square&logo=vite&logoColor=white">
   <img alt="Tested with Pest 4" src="https://img.shields.io/badge/tested%20with-Pest%204-f472b6?style=flat-square">
   <img alt="Version 0.31.0" src="https://img.shields.io/badge/version-0.31.0-d69e2e?style=flat-square">
+  <img alt="License: MIT OR Apache-2.0" src="https://img.shields.io/badge/license-MIT%20%2F%20Apache--2.0-3a3a3a?style=flat-square">
   <img alt="Self-hosted" src="https://img.shields.io/badge/self--hosted-Docker-2496ed?style=flat-square&logo=docker&logoColor=white">
 </p>
 
@@ -28,7 +29,8 @@
   <a href="#deploy-with-an-ai-agent">Deploy with an agent</a> ·
   <a href="#optional-services">Optional services</a> ·
   <a href="#development">Development</a> ·
-  <a href="#documentation">Documentation</a>
+  <a href="#documentation">Documentation</a> ·
+  <a href="#license">License</a>
 </p>
 
 <br>
@@ -281,3 +283,10 @@ Every guide exists in English ([`docs/en`](docs/en/)) and in Russian ([`docs/ru`
 | [Telegram and scheduling](docs/en/telegram-and-scheduling.md) | Sign-in, linking, quick buttons, delivery, schedule |
 
 The release history is in [`version.json`](version.json).
+
+## License
+
+Relationship-Assistant is open source and dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
+Copyright (c) 2026 ZeroKJ123 and the Relationship-Assistant contributors.
+
+The bundled Nunito font is licensed separately under the [SIL Open Font License](public/fonts/OFL.txt).

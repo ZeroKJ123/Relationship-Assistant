@@ -5,343 +5,343 @@
             "version": "0.32.0",
             "date": "2026-10-13",
             "changes": [
-                "Интерфейс переведён на английский. Язык выбирается в профиле, в разделе «Язык»: русский или английский; уведомления Telegram приходят на выбранном языке.",
-                "Новые аккаунты и страницы входа по умолчанию на английском; на странице входа есть переключатель языка."
+                "The interface is now available in English. Choose the language in the profile, under \"Language\": Russian or English; Telegram notifications arrive in the chosen language.",
+                "New accounts and the sign-in pages are in English by default; the sign-in page has a language switch."
             ]
         },
         {
             "version": "0.31.0",
             "date": "2026-10-12",
             "changes": [
-                "Новая тёмная тема «Пиксельная ночь» в стиле иконки: тёмный фон, красный акцент и пиксельные сердца. Выбирается в профиле, в разделе «Тема оформления»."
+                "A new dark theme, \"Pixel night\", in the style of the icon: a dark background, a red accent and pixel hearts. Choose it in the profile, under \"Theme\"."
             ]
         },
         {
             "version": "0.30.0",
             "date": "2026-10-12",
             "changes": [
-                "Новая иконка приложения — пиксельное сердце на тёмном фоне, одинаковое для любой темы.",
-                "Вопрос о своём настроении отправляется кнопкой на вкладке «Моё»; двойное нажатие на карточке настроения убрано, карточка снова сразу спрашивает партнёра.",
-                "В виш-листе фото открывается на весь экран, а поле описания стало «Ссылкой на товар» с кнопкой перехода в магазин."
+                "A new app icon — a pixel heart on a dark background, the same for every theme.",
+                "The question about your own mood is sent with a button on the \"Mine\" tab; the double press on the mood card was removed, and the card asks the partner right away again.",
+                "In the wishlist a photo opens full-screen, and the description field became a \"Product link\" with a button that opens the shop."
             ]
         },
         {
             "version": "0.29.1",
             "date": "2026-10-12",
             "changes": [
-                "Колесо жеребьёвки дела стало рулеткой: имена партнёров чередуются по кругу четыре раза.",
-                "Результат жеребьёвки объявляется на весь экран с конфетти; под колесом остаётся строка с исполнителем и кнопкой «Открыть дело»."
+                "The chore draw wheel became a roulette: the partners' names alternate four times around.",
+                "The draw result is announced full-screen with confetti; a line with the performer and an \"Open the duty\" button stays under the wheel."
             ]
         },
         {
             "version": "0.29.0",
             "date": "2026-10-12",
             "changes": [
-                "Серия с огоньком: день засчитывается, когда оба отметили настроение; огонёк растёт вместе с серией (искра, огонёк, пламя, костёр, звёздное пламя), а прерванную серию можно восстановить — до пяти дней в месяц.",
-                "Колесо свиданий: соберите до двенадцати идей, колесо выберет одну, и её можно сразу превратить в приглашение."
+                "A streak with a flame: a day counts when both recorded their mood; the flame grows with the streak (spark, little flame, flame, bonfire, star flame), and a broken streak can be restored — up to five days a month.",
+                "Date wheel: collect up to twelve ideas, the wheel picks one, and you can turn it into an invitation right away."
             ]
         },
         {
             "version": "0.28.0",
             "date": "2026-10-12",
             "changes": [
-                "Магазин наград: каждый составляет список того, что готов сделать за сердечки, и назначает цену; партнёр покупает награду — создаётся платная просьба, сердечки резервируются после согласия и списываются после проверки.",
-                "Памятные даты: годовщины отношений и свадьбы и свои даты с обратным отсчётом, ближайшая показана на главной; бот напоминает за три дня и в сам день в 09:00.",
-                "На главной появилось быстрое действие «Награды»."
+                "Reward shop: each partner lists what they are ready to do for hearts and sets a price; the other buys a reward — a paid request is created, hearts are reserved after agreement and deducted after the check.",
+                "Memorable dates: relationship and wedding anniversaries and your own dates with a countdown, the nearest one shown on the home screen; the bot reminds you three days before and on the day itself at 09:00.",
+                "The home screen got a \"Rewards\" quick action."
             ]
         },
         {
             "version": "0.27.0",
             "date": "2026-10-12",
             "changes": [
-                "В профиле появился выбор темы оформления: «Тыквенный латте» (по умолчанию), «Белая», «Любовная» и «Цветочная». Меняются только цвета, фон и украшения; расположение остаётся прежним, а выбор виден только вам.",
-                "Комплимент партнёра показывается прямо под приветствием вместо фразы «Забота начинается с маленьких вещей»; отдельная карточка с комплиментом убрана."
+                "The profile got a theme choice: \"Pumpkin latte\" (default), \"White\", \"Love\" and \"Floral\". Only colours, the background and decorations change; the layout stays the same, and only you see your choice.",
+                "The partner's compliment is shown right under the greeting instead of the phrase \"Care starts with small things\"; the separate compliment card was removed."
             ]
         },
         {
             "version": "0.26.0",
             "date": "2026-10-12",
             "changes": [
-                "На главной появились быстрые действия «Напомнить» и «Комплименты»; комплименты партнёру вынесены из профиля на отдельную страницу.",
-                "Время вопросов о настроении можно задать самому: от одного до восьми вариантов с точностью до минуты, у каждого партнёра своё.",
-                "Двойное нажатие на карточку настроения стало надёжнее: на второе нажатие даётся полсекунды, а при отказе показывается точная причина."
+                "The home screen got \"Remind\" and \"Compliments\" quick actions; compliments for the partner moved from the profile to a separate page.",
+                "You can set the times of mood questions yourself: from one to eight options with minute precision, separately for each partner.",
+                "The double press on the mood card became more reliable: the second press gets half a second, and a refusal shows the exact reason."
             ]
         },
         {
             "version": "0.25.3",
             "date": "2026-10-12",
             "changes": [
-                "Страница просьбы оформлена так же, как карточка дела: заголовок с текстом просьбы, чья она и кто отвечает, этапы «создано → ответ → выполнение», сведения списком, отмена отдельным разделом."
+                "The request page looks like the duty card: a heading with the request text, whose it is and who answers, the stages \"created → answer → completion\", details as a list and cancellation as a separate section."
             ]
         },
         {
             "version": "0.25.2",
             "date": "2026-10-12",
             "changes": [
-                "Приложение теперь называется «Любимость»: новое название в шапке, заголовках страниц, на экране без сети и в установленном приложении.",
-                "Новая иконка — светящееся сердце на тёмном фоне с осенними листьями; у уже установленного приложения значок и название могут обновиться только после переустановки."
+                "The app is now called «Любимость»: the new name is in the header, page titles, on the offline screen and in the installed app.",
+                "A new icon — a glowing heart on a dark background with autumn leaves; an already installed app may update its icon and name only after being reinstalled."
             ]
         },
         {
             "version": "0.25.1",
             "date": "2026-10-12",
             "changes": [
-                "Карточка дела объясняет, чья это просьба, сразу показывает кнопку подтверждения (заблокирована, пока партнёр не отметил выполнение) и позволяет отменить просьбу; принятая просьба из списка открывает сразу своё дело.",
-                "Настроение партнёра показано календарём месяца с записями выбранного дня; на главной одно нажатие на карточку спрашивает партнёра, двойное — отправляет вопрос себе, удержание открывает календарь.",
-                "В профиле под фото убрана подпись: смена фото открывается нажатием на аватар."
+                "The duty card explains whose request it is, shows the confirm button right away (disabled until the partner marks it done) and lets you cancel the request; an accepted request from the list opens its duty directly.",
+                "The partner's mood is shown as a month calendar with the selected day's entries; on the home screen one press on the card asks the partner, a double press sends the question to yourself, and a hold opens the calendar.",
+                "The caption under the profile photo was removed: changing the photo opens by pressing the avatar."
             ]
         },
         {
             "version": "0.25.0",
             "date": "2026-10-12",
             "changes": [
-                "Новое оформление: тема «Тыквенный латте» с осенними листьями, линейные иконки и списки вместо карточек на главной и основных экранах.",
-                "Просьбы сгруппированы по состоянию, дела — по срочности; у просьбы, которая ждёт вашего ответа, появилась метка «Ответить».",
-                "В новой просьбе тема выбирается кнопками, срок можно поставить одним нажатием: сегодня, завтра или через неделю.",
-                "Карточка дела показывает этапы «создано → выполнение → проверка»; профиль, сердечки и страница пары собраны в списки разделов.",
-                "В настроении оценка выбирается значком, добавлен календарь месяца со сводкой.",
-                "Сообщения бота в Telegram стали короче и понятнее: заголовок с именем партнёра, сроки словами («сегодня», «завтра»), короткие кнопки в один ряд, настроение — пятью смайликами, список дел разбит на «Просрочено», «Сегодня» и «Позже»."
+                "A new look: the \"Pumpkin latte\" theme with autumn leaves, line icons and lists instead of cards on the home screen and the main screens.",
+                "Requests are grouped by state and duties by urgency; a request waiting for your answer got an \"Answer\" label.",
+                "In a new request the topic is picked with buttons, and the deadline can be set with one press: today, tomorrow or in a week.",
+                "The duty card shows the stages \"created → completion → check\"; the profile, hearts and the couple page are organized into lists of sections.",
+                "In the mood section the rating is picked with an icon, and a month calendar with a summary was added.",
+                "The bot's Telegram messages became shorter and clearer: a heading with the partner's name, deadlines in words (\"today\", \"tomorrow\"), short buttons in one row, the mood as five emoji, and the duty list split into \"Overdue\", \"Today\" and \"Later\"."
             ]
         },
         {
             "version": "0.24.0",
             "date": "2026-10-12",
             "changes": [
-                "Админ-панель разделена на обзор, баланс, темы, иконки, конструктор главной и экономику.",
-                "Можно создавать общие темы с цветами, градиентом, украшениями и своим фоном; оформление умеет меняться по сезонам.",
-                "Иконки заменяются символами или своими картинками, отдельно для темы или сразу для всего сайта.",
-                "Конструктор главной позволяет переставлять и скрывать блоки и иконки, задавать условия показа и добавлять текстовые карточки с предпросмотром.",
-                "Администратор может добавлять и отнимать сердечки с причиной и записью в историю; повторные отправки и резерв услуг защищены."
+                "The admin panel is split into an overview, balance, themes, icons, the home screen builder and the economy.",
+                "You can create shared themes with colours, a gradient, decorations and your own background; the look can change with the seasons.",
+                "Icons can be replaced with symbols or your own pictures, per theme or for the whole site at once.",
+                "The home screen builder lets you reorder and hide blocks and icons, set display conditions and add text cards, with a preview.",
+                "An administrator can add and take away hearts with a reason and a history entry; repeated submissions and the service reserve are protected."
             ]
         },
         {
             "version": "0.23.0",
             "date": "2026-10-12",
             "changes": [
-                "Профиль показывает фото, имя, описание и число рецептов; фото меняется по нажатию, а профиль партнёра открывается с главной.",
-                "В просьбе виден статус исполнения; выполнение, проверка и отмена доступны без лишних переходов.",
-                "Общее колесо дел и фильмов ждёт обоих партнёров и запускается у них одновременно.",
-                "Можно запросить у себя настроение через Telegram и поделиться ответом с партнёром.",
-                "Добавлена закрытая админ-панель со статистикой, журналом и проверкой функций от имени выбранного пользователя.",
-                "Сверка выбранных тестовых балансов записывается отдельно в историю сердечек."
+                "The profile shows the photo, name, bio and number of recipes; the photo changes on press, and the partner's profile opens from the home screen.",
+                "A request shows its completion status; completion, the check and cancellation are available without extra navigation.",
+                "The shared chore and movie wheel waits for both partners and starts for them at the same time.",
+                "You can ask yourself about your mood through Telegram and share the answer with your partner.",
+                "A private admin panel was added, with statistics, a log and feature testing as a selected user.",
+                "Reconciliation of chosen test balances is recorded separately in the hearts history."
             ]
         },
         {
             "version": "0.22.0",
             "date": "2026-10-12",
             "changes": [
-                "Историю настроения партнёра можно открыть зажатием карточки: выбрать день, увидеть среднюю оценку и записи с эмоджи и стикерами.",
-                "Фото профиля видно партнёру на главной; дополнение настроения больше не отправляет повторное уведомление.",
-                "Исправлены и выровнены иллюстрации, текст просьб выделен.",
-                "Комплименты из профиля появляются у партнёра на главной и меняются каждые пять минут.",
-                "Напоминания о невыполненных обязанностях приходят в 10:00, 15:00 и 20:00 по времени пары.",
-                "Фильмы можно добавить с фото и ссылкой, выбрать совместными свайпами до первого совпадения или общим колесом.",
-                "После согласия обоих жеребьёвка выбирает исполнителя дела и добавляет ему обязанность."
+                "The partner's mood history opens by holding the card: pick a day and see the average rating and the entries with emoji and stickers.",
+                "The profile photo is visible to the partner on the home screen; adding to a mood no longer sends a second notification.",
+                "Illustrations were fixed and aligned, and the request text is highlighted.",
+                "Compliments from the profile appear on the partner's home screen and change every five minutes.",
+                "Reminders about unfinished obligations arrive at 10:00, 15:00 and 20:00 in the couple's time.",
+                "Movies can be added with a photo and a link, and picked by swiping together until the first match or with a shared wheel.",
+                "After both agree, the draw picks who does the chore and adds the obligation to them."
             ]
         },
         {
             "version": "0.21.0",
             "date": "2026-10-11",
             "changes": [
-                "Данные обновляются на открытых страницах автоматически; введённый текст сохраняется.",
-                "В Telegram ответы выполняются одним нажатием, а настроение можно дополнить обычным, анимированным или видео-стикером.",
-                "Карточка настроения стала кнопкой запроса с коротким всплывающим уведомлением.",
-                "Просьбы и меню упрощены; машины появляются после добавления в профиле, часовой пояс перенесён в подробные настройки.",
-                "Добавлены фон с облаками и сердечками, новые иллюстрации и фото пользователя в нижнем меню."
+                "Data on open pages refreshes automatically; entered text is kept.",
+                "In Telegram answers take one press, and a mood can be supplemented with a regular, animated or video sticker.",
+                "The mood card became an ask button with a short toast.",
+                "Requests and the menu were simplified; cars appear after being added in the profile, and the time zone moved to the detailed settings.",
+                "A background with clouds and hearts, new illustrations and the user's photo in the bottom menu were added."
             ]
         },
         {
             "version": "0.20.0",
             "date": "2026-10-10",
             "changes": [
-                "В Telegram настроение можно дополнить своим эмоджи, написав его в ответ боту.",
-                "На главной выделены настроение партнёра и его эмоджи; кнопка запроса стала компактнее.",
-                "В профиле можно загрузить и заменить своё фото из галереи."
+                "In Telegram a mood can be supplemented with your own emoji by sending it in reply to the bot.",
+                "The home screen highlights the partner's mood and emoji; the ask button became more compact.",
+                "In the profile you can upload and replace your own photo from the gallery."
             ]
         },
         {
             "version": "0.19.3",
             "date": "2026-10-10",
             "changes": [
-                "Настроение в Telegram сохраняется одним нажатием; затем бот предлагает уточнить его эмоджи или пропустить дополнение."
+                "A mood in Telegram is saved with one press; then the bot offers to add an emoji or skip the addition."
             ]
         },
         {
             "version": "0.19.2",
             "date": "2026-10-10",
             "changes": [
-                "Повторный запрос настроения отправляет новое уведомление через минуту; быстрые нажатия защищены от дублей."
+                "Asking about the mood again sends a new notification after a minute; quick presses are protected from duplicates."
             ]
         },
         {
             "version": "0.19.1",
             "date": "2026-10-10",
             "changes": [
-                "В Telegram и приложении добавлено нейтральное настроение — посередине списка вариантов."
+                "A neutral mood was added in Telegram and in the app — in the middle of the list of options."
             ]
         },
         {
             "version": "0.19.0",
             "date": "2026-10-10",
             "changes": [
-                "Вход сохраняется на 30 дней бездействия и продлевается при каждом посещении.",
-                "Можно сразу запросить настроение партнёра и ответить в приложении или Telegram.",
-                "Просьбы стали проще: дополнительные настройки свёрнуты, согласие с условием доступно явно."
+                "The sign-in is kept for 30 days of inactivity and extended on every visit.",
+                "You can ask about your partner's mood right away and answer in the app or in Telegram.",
+                "Requests became simpler: extra settings are collapsed, and agreeing with a condition is available explicitly."
             ]
         },
         {
             "version": "0.18.0",
             "date": "2026-10-10",
             "changes": [
-                "Можно попросить партнёра оценить поступок и получить оценку с комментарием.",
-                "Добавлены любимые фильмы и список к просмотру, взаимные совпадения и рулетка выбора.",
-                "Можно указать дату начала отношений и свадьбы; срок вместе показан в днях, годах и месяцах.",
-                "Личная машина добавляет заправку как способ встречной оплаты.",
-                "После оценки настроения можно выбрать эмоджи; на главной видно настроение партнёра.",
-                "Уведомления Telegram содержат описание просьбы, условия и сроки без добавленных ссылок."
+                "You can ask your partner to rate an act and get a rating with a comment.",
+                "Favourite movies and a watch list, mutual matches and a pick roulette were added.",
+                "You can set the relationship start and wedding dates; the time together is shown in days, years and months.",
+                "A personal car adds a fill-up as a way of counter-payment.",
+                "After rating a mood you can pick an emoji; the home screen shows the partner's mood.",
+                "Telegram notifications contain the request description, the conditions and the deadlines, with no added links."
             ]
         },
         {
             "version": "0.17.0",
             "date": "2026-10-10",
             "changes": [
-                "Telegram можно привязать одноразовым кодом из команды /start: нажмите на кнопку с кодом, чтобы скопировать его и вставить в профиле.",
-                "Бот принимает сообщения и отправляет уведомления при запуске приложения на ноутбуке, без публичного адреса."
+                "Telegram can be linked with a one-time code from the /start command: press the button with the code to copy it and paste it in the profile.",
+                "The bot receives messages and sends notifications when the app runs on a laptop, with no public address."
             ]
         },
         {
             "version": "0.16.0",
             "date": "2026-10-10",
             "changes": [
-                "Подготовлен отдельный запуск приложения на ноутбуке для использования через локальную сеть.",
-                "Добавлены инструкции по сохранению данных, обновлению и проверке работы расписания."
+                "A separate way to run the app on a laptop for use over the local network was prepared.",
+                "Guides were added for saving data, updating and checking that the schedule works."
             ]
         },
         {
             "version": "0.15.0",
             "date": "2026-10-10",
             "changes": [
-                "Добавлены установка приложения на главный экран телефона и понятные инструкции для iPhone и Android.",
-                "При отсутствии сети показан отдельный экран; действия требуют подключения, личные страницы не сохраняются для просмотра без интернета."
+                "Installing the app on the phone's home screen and clear instructions for iPhone and Android were added.",
+                "With no network a separate screen is shown; actions need a connection, and personal pages are not saved for offline viewing."
             ]
         },
         {
             "version": "0.14.0",
             "date": "2026-10-10",
             "changes": [
-                "Профиль объединяет личные данные, валюту, реквизиты, Telegram и переходы к разделам; старые денежные договорённости сохраняются.",
-                "Обновлены формы денег, свиданий и напоминаний, журнал сердечек и редактор экономики с группами настроек, подтверждениями и общей навигацией."
+                "The profile brings together personal data, currency, payment details, Telegram and links to sections; old money agreements are kept.",
+                "The money, date and reminder forms, the hearts ledger and the economy editor were updated, with setting groups, confirmations and shared navigation."
             ]
         },
         {
             "version": "0.13.0",
             "date": "2026-10-10",
             "changes": [
-                "Дела разделены на активные, ожидающие проверки и завершённые; ответ подтверждается в отдельной панели.",
-                "Обновлён виш-лист: карточки желаний, состояния подарков, ручное добавление с предпросмотром фото и подтверждаемый архив."
+                "Duties are split into active, awaiting a check and completed; an answer is confirmed in a separate sheet.",
+                "The wishlist was updated: wish cards, gift states, manual adding with a photo preview and a confirmed archive."
             ]
         },
         {
             "version": "0.12.0",
             "date": "2026-10-10",
             "changes": [
-                "Добавлена личная главная: партнёр, длительность отношений, настроение, сердечки, ближайшие дела и быстрые переходы.",
-                "Обновлены кухня и редактор блюда: понятные цены, причины недоступности и предпросмотр фото.",
-                "Добавлена удобная панель встречного условия с выбором вида, очисткой ненужных полей и отдельным принятием автором просьбы."
+                "A personal home screen was added: the partner, the length of the relationship, mood, hearts, the nearest duties and quick links.",
+                "The kitchen and the dish editor were updated: clear prices, reasons for unavailability and a photo preview.",
+                "A convenient counter-condition sheet was added, with a choice of kind, clearing of fields that do not apply and separate acceptance by the request author."
             ]
         },
         {
             "version": "0.11.0",
             "date": "2026-10-10",
             "changes": [
-                "Добавлены вход и привязка Telegram с одноразовой ссылкой, сверкой кода и завершением в исходном браузере; доступное фото импортируется в закрытое хранилище.",
-                "Добавлены быстрые кнопки бота с отдельным подтверждением, проверкой прав и защитой повторных действий, включая отметки оплаты и настроения."
+                "Telegram sign-in and linking were added, with a one-time link, code verification and completion in the original browser; an available photo is imported into private storage.",
+                "Quick bot buttons were added, with a separate confirmation, permission checks and protection against repeated actions, including payment and mood marks."
             ]
         },
         {
             "version": "0.10.0",
             "date": "2026-10-10",
             "changes": [
-                "Добавлены уведомления в подключённый Telegram о просьбах, ответах, проверке дел, просрочках и настроении с повторной отправкой при сбоях.",
-                "Добавлены автоматические вопросы о настроении по времени пары и отправка разовых напоминаний с защитой отменённых и устаревших записей."
+                "Notifications to the linked Telegram about requests, answers, duty checks, overdue duties and mood were added, with resending on failures.",
+                "Automatic mood questions by the couple's time and sending of one-off reminders were added, with protection for cancelled and stale entries."
             ]
         },
         {
             "version": "0.9.0",
             "date": "2026-10-10",
             "changes": [
-                "Добавлены четыре оценки настроения, отображение партнёру, история за 30 дней и личная настройка расписания.",
-                "Добавлены разовые напоминания партнёру с выбором времени, просмотром состояния и отменой до доставки."
+                "Four mood ratings, showing them to the partner, a 30-day history and a personal schedule setting were added.",
+                "One-off reminders for the partner were added, with a choice of time, a status view and cancellation before delivery."
             ]
         },
         {
             "version": "0.8.0",
             "date": "2026-10-10",
             "changes": [
-                "Добавлены личные друзья и гостевые визиты: выбор гостей, время, длительность и сохранение согласованного состава.",
-                "Добавлены свидания и совместные мероприятия с описанием, дресс-кодом, ответами партнёра и встречными условиями."
+                "Personal friends and guest visits were added: choosing guests, the time, the duration and saving the agreed guest list.",
+                "Dates and shared activities were added, with a description, a dress code, the partner's answers and counter-conditions."
             ]
         },
         {
             "version": "0.7.0",
             "date": "2026-10-10",
             "changes": [
-                "Добавлена кухня: обычные и особые блюда, фото, ориентир продуктов и просьба приготовить выбранное блюдо.",
-                "Добавлен ручной виш-лист и подарки по условию: одно обещание на желание, отдельное подтверждение получения и архив.",
-                "Добавлены денежные просьбы и условия с точной суммой, валютой и приватными реквизитами; оплата и получение подтверждаются отдельно."
+                "The kitchen was added: regular and special dishes, photos, a grocery estimate and a request to cook the selected dish.",
+                "A manual wishlist and gifts as a condition were added: one promise per wish, a separate confirmation of receipt and an archive.",
+                "Money requests and conditions were added, with an exact amount, a currency and private payment details; payment and receipt are confirmed separately."
             ]
         },
         {
             "version": "0.6.0",
             "date": "2026-10-10",
             "changes": [
-                "Добавлены настройки экономики для администратора и история изменений правил.",
-                "Добавлены платные услуги: сердечки резервируются после согласия и списываются после проверки; взаимная отмена освобождает резерв.",
-                "Добавлены категории, шаблоны просьб и личные способы договорённостей, включая выбор размера суши."
+                "Economy settings for the administrator and a history of rule changes were added.",
+                "Paid services were added: hearts are reserved after agreement and deducted after the check; mutual cancellation releases the reserve.",
+                "Categories, request templates and personal agreement methods were added, including a choice of sushi size."
             ]
         },
         {
             "version": "0.5.0",
             "date": "2026-10-10",
             "changes": [
-                "Добавлены отдельные дела по просьбе и встречному условию: отметка исполнителя и проверка партнёром.",
-                "Добавлены личный баланс сердечек, история изменений, однократные стартовые сердечки и благодарность партнёру.",
-                "Подключены награды, штрафы и ограничения; «Очень хочу» учитывает недельную квоту, а отказ «Нет денег на продукты» остаётся без штрафа."
+                "Separate duties for a request and a counter-condition were added: the performer's mark and the partner's check.",
+                "A personal heart balance, a history of changes, one-time starting hearts and thanks for the partner were added.",
+                "Rewards, penalties and limits were connected; \"Really want\" respects the weekly quota, and the \"No money for groceries\" refusal stays without a penalty."
             ]
         },
         {
             "version": "0.4.0",
             "date": "2026-10-10",
             "changes": [
-                "Добавлены просьбы партнёру с обязательным сроком, согласие и отказ с подтверждением.",
-                "Добавлены встречные условия с отдельным принятием автором, история вариантов и защита повторной отправки.",
-                "Отказ «Нет денег на продукты» сохраняется без штрафа; списания сердечек будут подключены отдельно."
+                "Requests for the partner with a required deadline, and agreement and refusal with confirmation, were added.",
+                "Counter-conditions with separate acceptance by the author, a history of versions and protection against repeated submission were added.",
+                "The \"No money for groceries\" refusal is saved without a penalty; heart deductions will be connected separately."
             ]
         },
         {
             "version": "0.3.0",
             "date": "2026-10-09",
             "changes": [
-                "Добавлено согласование недельного лимита «Очень хочу»: личные ответы, предложенный компромисс и подтверждение обоими партнёрами.",
-                "Можно обсуждать новые варианты; история сохраняется, а прежнее правило действует до нового взаимного согласия."
+                "Agreeing on the weekly \"Really want\" limit was added: personal answers, a suggested compromise and confirmation by both partners.",
+                "New proposals can be discussed; the history is kept, and the previous rule stays in force until a new mutual agreement."
             ]
         },
         {
             "version": "0.2.0",
             "date": "2026-10-09",
             "changes": [
-                "Добавлены создание пары, приглашение по ссылке, принятие с подтверждением и завершение пары.",
-                "История сохраняется для прежних участников и закрыта для нового партнёра.",
-                "Добавлены проверки одновременного принятия приглашений в отдельной тестовой базе."
+                "Creating a couple, inviting by link, accepting with confirmation and ending a couple were added.",
+                "The history is kept for former members and closed to a new partner.",
+                "Checks of simultaneous invitation acceptance in a separate test database were added."
             ]
         },
         {
             "version": "0.1.0",
             "date": "2026-10-09",
             "changes": [
-                "Подготовлена основа нового проекта со стартовой страницей и отдельным окружением для разработки.",
-                "Добавлено единое оформление будущего приложения для пары: стартовая страница, карточки разделов и подсказки.",
-                "Добавлены регистрация по логину и паролю, личный профиль и восстановление доступа с помощью резервного кода."
+                "The base of a new project was prepared, with a start page and a separate development environment.",
+                "A single look for the future couple app was added: a start page, section cards and hints.",
+                "Registration with a login and password, a personal profile and access recovery with a recovery code were added."
             ]
         }
     ]
