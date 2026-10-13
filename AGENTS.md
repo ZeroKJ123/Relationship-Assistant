@@ -1,4 +1,4 @@
-# Home Assistant repository
+# Relationship-Assistant repository
 
 This workspace is connected to https://github.com/ZeroKJ123/Relationship-Assistant.git.
 
@@ -22,13 +22,13 @@ The location and connection details of the running Home Assistant instance have 
 - Preserve this section when installing or regenerating Laravel Boost guidance. Read CodeStyle again after generated instructions change.
 - Planning and documentation changes do not authorize application implementation or deployment.
 
-## Обязательная проверка CodeStyle перед push
+## Mandatory CodeStyle check before push
 
-- Перед каждым `git push` AI-агент обязан проверить все изменения в отправляемых коммитах по [CodeStyle.md](CodeStyle.md), а не только последнее изменение в рабочей папке.
-- Для изменений кода обязательны саморевью по применимым пунктам CodeStyle, успешные Pint и PHPStan/Larastan, а также применимые тесты; для интерфейса дополнительно нужна успешная сборка. После исправлений проверки повторяются для окончательной версии кода.
-- Push запрещён, если найдены нарушения CodeStyle, обязательная проверка завершилась ошибкой, не запускалась или недоступна. Нельзя обходить правило отключением проверок или выдавать пропущенную проверку за успешную; нужно сохранить локальную работу и сообщить причину.
-- Для коммитов только с документацией проверяются содержание, ссылки и форматирование изменённых документов, а также `git diff --check` для отправляемого диапазона. Проверки кода не требуются, если весь отправляемый диапазон не содержит изменений кода.
-- В итоговом сообщении указать выполненные проверки и результат push. Это правило сохраняется при обновлении инструкций и генерации Laravel Boost.
+- Before every `git push` the AI agent must check all changes in the outgoing commits against [CodeStyle.md](CodeStyle.md), not only the latest change in the working directory.
+- For code changes a self-review against the applicable CodeStyle items, successful Pint and PHPStan/Larastan runs and the applicable tests are required; for the interface a successful build is required as well. After fixes the checks are repeated for the final version of the code.
+- A push is forbidden if CodeStyle violations were found or a required check failed, was not run or is unavailable. Do not get around the rule by disabling checks or by presenting a skipped check as passed; keep the work locally and report the reason.
+- For documentation-only commits check the content, links and formatting of the changed documents, plus `git diff --check` for the outgoing range. Code checks are not required if the whole outgoing range contains no code changes.
+- In the final message state the checks that were run and the result of the push. This rule is kept when instructions are updated and when Laravel Boost guidance is generated.
 
 <laravel-boost-guidelines>
 === foundation rules ===
@@ -166,76 +166,79 @@ Before relying on a package's API, confirm its installed version:
 
 ## Documentation
 
+Every guide exists in English (`docs/en/`) and in Russian (`docs/ru/`) under the same file name. Keep both versions in sync when changing one.
+
 | Document | Path | Description |
 | --- | --- | --- |
-| README | README.md | Назначение и запуск проекта |
-| Operations | docs/operations.md | Ноутбук, локальная сеть, процессы, резервирование и обновления |
-| Development | docs/development.md | Проверки и изоляция тестов |
-| Interface | docs/interface.md | Главная, кухня, дела, желания и доступность |
-| Accounts | docs/accounts.md | Регистрация и восстановление |
-| Couples | docs/couples.md | Пары, приглашения и недельный лимит |
-| Requests | docs/requests.md | Просьбы, условия и версии |
-| Hearts and duties | docs/hearts-and-duties.md | Вкладки дел, подтверждение и журнал сердечек |
-| Economy and catalogs | docs/economy-and-catalogs.md | Правила, резерв цены и каталоги |
-| Products | docs/dishes-wishlist-money.md | Кухня, желания и денежные просьбы |
-| Friends and dates | docs/friends-guests-dates.md | Личные друзья, гости и свидания |
-| Mood and reminders | docs/mood-and-reminders.md | Настроение, расписание и напоминания |
-| Telegram and scheduling | docs/telegram-and-scheduling.md | Вход, привязка, кнопки, доставка и расписание |
+| README | README.md | Purpose of the project and how to run it |
+| Operations | docs/en/operations.md | Laptop, local network, processes, backups and updates |
+| Development | docs/en/development.md | Checks and test isolation |
+| Interface | docs/en/interface.md | Home screen, kitchen, duties, wishes, languages and accessibility |
+| Accounts | docs/en/accounts.md | Registration, recovery and the interface language |
+| Couples | docs/en/couples.md | Couples, invitations and the weekly limit |
+| Requests | docs/en/requests.md | Requests, conditions and versions |
+| Hearts and duties | docs/en/hearts-and-duties.md | Duty tabs, confirmation and the hearts ledger |
+| Economy and catalogs | docs/en/economy-and-catalogs.md | Rules, the price reserve and catalogs |
+| Products | docs/en/dishes-wishlist-money.md | Kitchen, wishes and money requests |
+| Friends and dates | docs/en/friends-guests-dates.md | Personal friends, guests and dates |
+| Mood and reminders | docs/en/mood-and-reminders.md | Mood, the schedule and reminders |
+| Telegram and scheduling | docs/en/telegram-and-scheduling.md | Sign-in, linking, buttons, delivery and the schedule |
 
 ## Project entry points
 
-- `app/Http/Controllers/DashboardController.php`, `app/Services/Couples/DashboardData.php`, `app/ViewModels/DashboardViewModel.php`: главная с данными текущего аккаунта; `resources/views/home.blade.php`: знакомство для гостя.
-- `resources/views/layouts/app.blade.php` и `resources/views/components/`: каркас интерфейса.
-- `tests/Support/TestEnvironment.php`: обязательная защита тестовой базы.
-- `.github/workflows/quality.yml`: проверки без деплоя.
+- `app/Http/Controllers/DashboardController.php`, `app/Services/Couples/DashboardData.php`, `app/ViewModels/DashboardViewModel.php`: the home screen with the current account's data; `resources/views/home.blade.php`: the introduction for a guest.
+- `resources/views/layouts/app.blade.php` and `resources/views/components/`: the interface layout.
+- `tests/Support/TestEnvironment.php`: the mandatory protection of the test database.
+- `.github/workflows/quality.yml`: checks with no deploy.
 
-- `app/Actions/Auth/`, `app/Data/Auth/`, `routes/auth.php`: аккаунты и восстановление.
-- `app/Actions/Profiles/`, `app/Policies/UserPolicy.php`: собственность профиля.
-- `lang/ru/validation.php`: русские сообщения проверки ввода.
+- `app/Actions/Auth/`, `app/Data/Auth/`, `routes/auth.php`: accounts and recovery.
+- `app/Actions/Profiles/`, `app/Policies/UserPolicy.php`: profile ownership.
+- `app/Enums/Locale.php`, `app/Services/Localization/LocalePreference.php`, `app/Http/Middleware/SetLocale.php`, `locale.update`: the interface language per user, the device cookie for guest pages and texts for another person in their language.
+- `lang/en.json`: English texts keyed by the Russian phrases from the code; `lang/en/validation.php`, `lang/ru/validation.php`: input validation messages.
 
-- `app/Actions/Couples/Agreements/`, `routes/agreements.php`: версии недельного лимита и подтверждения.
-- `tests/Support/ConcurrentOperations.php`: общий протокол гонок в изолированной MariaDB.
+- `app/Actions/Couples/Agreements/`, `routes/agreements.php`: versions of the weekly limit and confirmations.
+- `tests/Support/ConcurrentOperations.php`: the shared race protocol in an isolated MariaDB.
 
-- `app/Actions/Requests/`, `routes/requests.php`: просьбы, ответы и отдельное принятие условия.
-- `config/economy.php`: начальные правила; после первого сохранения действуют версии из `EconomySettingsStore`.
-- `app/Actions/Admin/`, `routes/admin.php`: редактор экономики и аудит версий.
-- `app/Services/Hearts/ServicePayments.php`: резерв, списание и освобождение согласованной цены.
-- `app/Services/Catalogs/`, `database/seeders/CatalogSeeder.php`, `routes/catalogs.php`: общие каталоги, снимки и личные способы.
-- `app/Actions/Duties/`, `app/Services/Duties/`, `routes/duties.php`: отдельное выполнение и проверка обязанностей.
-- `app/Services/Hearts/`, `app/Actions/Hearts/`: журнал, сверка и ручные операции только действующим партнёром.
-- `app/Console/Commands/`, `routes/console.php`: проверка просрочек и сверка балансов; scheduler нужно запускать отдельно.
+- `app/Actions/Requests/`, `routes/requests.php`: requests, answers and separate acceptance of a condition.
+- `config/economy.php`: the initial rules; after the first save the versions from `EconomySettingsStore` apply.
+- `app/Actions/Admin/`, `routes/admin.php`: the economy editor and the version audit.
+- `app/Services/Hearts/ServicePayments.php`: reserving, deducting and releasing the agreed price.
+- `app/Services/Catalogs/`, `database/seeders/CatalogSeeder.php`, `routes/catalogs.php`: shared catalogs, snapshots and personal methods.
+- `app/Actions/Duties/`, `app/Services/Duties/`, `routes/duties.php`: separate completion and checking of obligations.
+- `app/Services/Hearts/`, `app/Actions/Hearts/`: the ledger, reconciliation and manual operations by the current partner only.
+- `app/Console/Commands/`, `routes/console.php`: the overdue check and balance reconciliation; the scheduler has to be started separately.
 
-- `routes/products.php`, `app/Services/Requests/*Attachments.php`: снимки блюд и условий, обещания подарков, денежные реквизиты.
-- `app/Services/Media/PrivatePhotos.php`: проверка и закрытая выдача фото каталога.
+- `routes/products.php`, `app/Services/Requests/*Attachments.php`: snapshots of dishes and conditions, gift promises and payment details.
+- `app/Services/Media/PrivatePhotos.php`: checking and private serving of catalog photos.
 
-- `app/Actions/Friends/`, `routes/social.php`: личные друзья и архив.
-- `app/Actions/Requests/CreateGuestVisit.php`, `app/Actions/Dates/`, `app/Services/Requests/SocialInvitations.php`: гостевые визиты и свидания с неизменяемыми снимками.
-- `docs/friends-guests-dates.md`: правила приглашений, миграция и проверки.
+- `app/Actions/Friends/`, `routes/social.php`: personal friends and the archive.
+- `app/Actions/Requests/CreateGuestVisit.php`, `app/Actions/Dates/`, `app/Services/Requests/SocialInvitations.php`: guest visits and dates with immutable snapshots.
+- `docs/en/friends-guests-dates.md`: invitation rules, the migration and checks.
 
-- `app/Actions/Mood/`, `app/Services/Mood/MoodHistory.php`: оценки, запросы настроения и личное расписание.
-- `app/Actions/Reminders/`, `app/Services/Reminders/ReminderLifecycle.php`, `routes/care.php`: разовые напоминания, отмена и подготовка доставки; отправитель и scheduler запускаются отдельными процессами.
+- `app/Actions/Mood/`, `app/Services/Mood/MoodHistory.php`: ratings, mood prompts and the personal schedule.
+- `app/Actions/Reminders/`, `app/Services/Reminders/ReminderLifecycle.php`, `routes/care.php`: one-off reminders, cancellation and preparing delivery; the sender and the scheduler run as separate processes.
 
-- `app/Services/Notifications/`, `app/Actions/Notifications/`, `app/Jobs/SendTelegramNotificationJob.php`: транзакционный outbox, проверка источника/пары/привязки, lease и итоги Telegram.
-- `app/Services/Telegram/BotClient.php`, `config/services.php`: выключаемый транспорт и секрет защищённого webhook без секретов в логах.
-- `app/Services/Scheduling/DueCare.php`, `care:process-due`, `telegram:dispatch-notifications`: локальные часы пары, ограниченный catch-up и восстановление очереди; необязательный `compose.workers.yaml` и отдельные процессы описаны в `docs/telegram-and-scheduling.md`.
+- `app/Services/Notifications/`, `app/Actions/Notifications/`, `app/Jobs/SendTelegramNotificationJob.php`: the transactional outbox, checks of the source/couple/link, the lease and Telegram results.
+- `app/Services/Telegram/BotClient.php`, `config/services.php`: a transport that can be switched off and the secret of the protected webhook, with no secrets in logs.
+- `app/Services/Scheduling/DueCare.php`, `care:process-due`, `telegram:dispatch-notifications`: the couple's local clock, a limited catch-up and queue recovery; the optional `compose.workers.yaml` and the separate processes are described in `docs/en/telegram-and-scheduling.md`.
 
-- `app/Actions/Auth/Telegram/`, `app/Http/Controllers/Telegram/WebhookController.php`: одноразовая привязка к исходному браузеру и защищённый вход.
-- `app/Services/Telegram/CallbackRouter.php`, `KeyboardFactory.php`, `WebhookHandler.php`: одно нажатие с проверкой прав/версий и общие Actions, атомарный receipt без raw update.
-- `app/Services/Telegram/ProfilePhoto.php`, `app/Http/Controllers/Auth/AvatarController.php`: импорт проверенного фото и закрытая выдача собственнику.
-- `telegram:prune-controls`: ежедневная очистка технических подтверждений через семь суток.
+- `app/Actions/Auth/Telegram/`, `app/Http/Controllers/Telegram/WebhookController.php`: one-time linking to the original browser and protected sign-in.
+- `app/Services/Telegram/CallbackRouter.php`, `KeyboardFactory.php`, `WebhookHandler.php`: one press with permission/version checks and the shared Actions, an atomic receipt with no raw update.
+- `app/Services/Telegram/ProfilePhoto.php`, `app/Http/Controllers/Auth/AvatarController.php`: importing a verified photo and serving it privately to its owner.
+- `telegram:prune-controls`: the daily cleanup of technical confirmations after seven days.
 
-- `public/manifest.webmanifest`, `public/sw.js`, `public/offline-v1.html`, `public/icons/`: установка PWA и ограниченный кэш только публичных версионированных файлов; личные ответы и действия не кэшировать.
-- `resources/js/modules/pwa.js`, `resources/views/components/pwa-help.blade.php`: ручная установка, состояние сети, блокировка offline-форм и повторная проверка авторизованной страницы из browser back cache.
-- `tests/JavaScript/pwa.test.mjs`, `npm run test:pwa`: проверки политики кэша и клиентского поведения без дополнительных зависимостей; включены в Quality.
+- `public/manifest.webmanifest`, `public/sw.js`, `public/offline-v2.html`, `public/icons/`: PWA installation and a limited cache of public versioned files only; never cache personal responses and actions.
+- `resources/js/modules/pwa.js`, `resources/views/components/pwa-help.blade.php`: manual installation, the network state, blocking offline forms and re-checking a signed-in page from the browser back cache.
+- `tests/JavaScript/pwa.test.mjs`, `npm run test:pwa`: checks of the cache policy and client behaviour with no extra dependencies; part of Quality.
 
-- `app/Actions/Auth/Telegram/IssueTelegramLinkCode.php`, `ConsumeTelegramLinkCode.php`, `profile.telegram.link`: одноразовая привязка по UUID из `/start`.
-- `app/Services/Telegram/PollTelegramUpdates.php`, `telegram:poll-updates`, профиль Compose `telegram-polling`: приём сообщений без публичного webhook; токен не выводить.
+- `app/Actions/Auth/Telegram/IssueTelegramLinkCode.php`, `ConsumeTelegramLinkCode.php`, `profile.telegram.link`: one-time linking by the UUID from `/start`.
+- `app/Services/Telegram/PollTelegramUpdates.php`, `telegram:poll-updates`, the `telegram-polling` Compose profile: receiving messages with no public webhook; never print the token.
 
-- `app/Services/Realtime/ApplicationChanges.php`, `app/Events/ApplicationUpdated.php`, `routes/channels.php`, `resources/js/modules/realtime.js`: Reverb, закрытый сигнал без личных данных, обновление страниц с сохранением черновиков; отдельный сервис `realtime` в Compose.
-- `app/Services/Telegram/MoodStickers.php`, `app/Jobs/DownloadMoodStickerJob.php`, `app/Http/Controllers/MoodStickerController.php`: приватные WEBP/TGS/WEBM для настроения, загрузка вне транзакций.
-- `profile.timezone`, `app/Actions/Couples/UpdateTimezone.php`: общий часовой пояс только в подробных настройках профиля.
+- `app/Services/Realtime/ApplicationChanges.php`, `app/Events/ApplicationUpdated.php`, `routes/channels.php`, `resources/js/modules/realtime.js`: Reverb, a private signal with no personal data, refreshing pages while keeping drafts; the separate `realtime` service in Compose.
+- `app/Services/Telegram/MoodStickers.php`, `app/Jobs/DownloadMoodStickerJob.php`, `app/Http/Controllers/MoodStickerController.php`: private WEBP/TGS/WEBM for the mood, downloaded outside transactions.
+- `profile.timezone`, `app/Actions/Couples/UpdateTimezone.php`: the shared time zone, only in the detailed profile settings.
 
-- `mood.day`, `app/Services/Mood/MoodDay.php`: постоянная история партнёра по локальным суткам со средним и деталями.
-- `profiles.avatar`, `profile.compliments.store`: фото текущему партнёру и зашифрованные личные комплименты.
-- `app/Actions/Movies/ManageMovieChoice.php`, `movies.selections.*`: совместные сессии, два согласия, первый match и сохранённая рулетка.
-- `app/Actions/Duties/CreateDutyReminders.php`, `ManageChoreDraw.php`: дневные напоминания и согласованная жеребьёвка через общие просьбы/обязанности.
+- `mood.day`, `app/Services/Mood/MoodDay.php`: the partner's permanent history by local day, with the average and details.
+- `profiles.avatar`, `profile.compliments.store`: the photo for the current partner and encrypted personal compliments.
+- `app/Actions/Movies/ManageMovieChoice.php`, `movies.selections.*`: shared sessions, two consents, the first match and a saved roulette.
+- `app/Actions/Duties/CreateDutyReminders.php`, `ManageChoreDraw.php`: daily reminders and an agreed draw through the shared requests/obligations.

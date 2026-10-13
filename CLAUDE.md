@@ -6,13 +6,13 @@
 - Preserve this section when installing or regenerating Laravel Boost guidance. Read CodeStyle again after generated instructions change.
 - Planning and documentation changes do not authorize application implementation or deployment.
 
-## Обязательная проверка CodeStyle перед push
+## Mandatory CodeStyle check before push
 
-- Перед каждым `git push` AI-агент обязан проверить все изменения в отправляемых коммитах по [CodeStyle.md](CodeStyle.md), а не только последнее изменение в рабочей папке.
-- Для изменений кода обязательны саморевью по применимым пунктам CodeStyle, успешные Pint и PHPStan/Larastan, а также применимые тесты; для интерфейса дополнительно нужна успешная сборка. После исправлений проверки повторяются для окончательной версии кода.
-- Push запрещён, если найдены нарушения CodeStyle, обязательная проверка завершилась ошибкой, не запускалась или недоступна. Нельзя обходить правило отключением проверок или выдавать пропущенную проверку за успешную; нужно сохранить локальную работу и сообщить причину.
-- Для коммитов только с документацией проверяются содержание, ссылки и форматирование изменённых документов, а также `git diff --check` для отправляемого диапазона. Проверки кода не требуются, если весь отправляемый диапазон не содержит изменений кода.
-- В итоговом сообщении указать выполненные проверки и результат push. Это правило сохраняется при обновлении инструкций и генерации Laravel Boost.
+- Before every `git push` the AI agent must check all changes in the outgoing commits against [CodeStyle.md](CodeStyle.md), not only the latest change in the working directory.
+- For code changes a self-review against the applicable CodeStyle items, successful Pint and PHPStan/Larastan runs and the applicable tests are required; for the interface a successful build is required as well. After fixes the checks are repeated for the final version of the code.
+- A push is forbidden if CodeStyle violations were found or a required check failed, was not run or is unavailable. Do not get around the rule by disabling checks or by presenting a skipped check as passed; keep the work locally and report the reason.
+- For documentation-only commits check the content, links and formatting of the changed documents, plus `git diff --check` for the outgoing range. Code checks are not required if the whole outgoing range contains no code changes.
+- In the final message state the checks that were run and the result of the push. This rule is kept when instructions are updated and when Laravel Boost guidance is generated.
 
 <laravel-boost-guidelines>
 === foundation rules ===
